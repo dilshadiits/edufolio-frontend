@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE from '../../api';
 import AdminLayout from '../../components/Admin/AdminLayout';
 
 const AddProgram = () => {
@@ -33,7 +34,7 @@ const AddProgram = () => {
         isActive: true
     });
 
-    const API_BASE = "http://localhost:5000/api";
+
 
     // Options for dropdowns
     const categories = [

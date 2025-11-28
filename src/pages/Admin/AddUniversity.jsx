@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE from '../../api';
 
 const AddUniversity = () => {
     const navigate = useNavigate();
@@ -27,7 +28,7 @@ const AddUniversity = () => {
         featured: false
     });
 
-    const API_BASE = "http://localhost:5000/api";
+
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;

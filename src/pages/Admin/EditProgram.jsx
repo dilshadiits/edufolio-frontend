@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE from '../../api';
 
 const AddProgram = () => {
     const navigate = useNavigate();
@@ -27,7 +28,6 @@ const AddProgram = () => {
         featured: false
     });
 
-    const API_BASE = "http://localhost:5000/api";
 
     const categories = ['MBA', 'MCA', 'BBA', 'BCA', 'B.Tech', 'M.Tech', 'B.Com', 'M.Com', 'BA', 'MA', 'B.Sc', 'M.Sc', 'PhD', 'Diploma', 'Certificate', 'Other'];
     const levels = ['Undergraduate', 'Postgraduate', 'Doctorate', 'Diploma', 'Certificate'];

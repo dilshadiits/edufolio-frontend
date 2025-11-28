@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE from '../../api';
 
 const CourseFinder = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -16,7 +17,7 @@ const CourseFinder = () => {
     const [loading, setLoading] = useState(false);
     const [showResults, setShowResults] = useState(false);
 
-    const API_BASE = "http://localhost:5000/api";
+
 
     const questions = [
         {

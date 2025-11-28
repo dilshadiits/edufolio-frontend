@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE from '../../api';
 
 const EditUniversity = () => {
     const { id } = useParams();
@@ -29,7 +30,6 @@ const EditUniversity = () => {
         featured: false
     });
 
-    const API_BASE = "http://localhost:5000/api";
 
     useEffect(() => {
         fetchUniversity();

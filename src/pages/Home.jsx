@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE from '../api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import CourseFinder from '../components/CourseFinder';
@@ -12,8 +13,6 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
     const [showEnrollModal, setShowEnrollModal] = useState(false);
     const [selectedProgram, setSelectedProgram] = useState(null);
-
-    const API_BASE = "http://localhost:5000/api";
 
     useEffect(() => {
         fetchData();

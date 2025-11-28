@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE from '../../api';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -9,7 +10,7 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const API_BASE = "http://localhost:5000/api";
+
 
     useEffect(() => {
         // Check if already logged in

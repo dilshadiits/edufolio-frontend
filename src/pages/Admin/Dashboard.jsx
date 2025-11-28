@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE from '../../api';
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -17,7 +18,7 @@ const Dashboard = () => {
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
 
-    const API_BASE = "http://localhost:5000/api";
+
 
     useEffect(() => {
         checkAuth();

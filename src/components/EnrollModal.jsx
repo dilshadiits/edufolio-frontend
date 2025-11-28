@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import API_BASE from '../../api';
 
 const EnrollModal = ({ isOpen, onClose, program, university }) => {
     const [formData, setFormData] = useState({
@@ -14,7 +15,7 @@ const EnrollModal = ({ isOpen, onClose, program, university }) => {
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState('');
 
-    const API_BASE = "http://localhost:5000/api";
+
 
     const handleChange = (e) => {
         setFormData({

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import API_BASE from '../api';
 
 const EnquiryForm = ({ programId, universityId, source = 'Website' }) => {
     const [formData, setFormData] = useState({
@@ -12,7 +13,7 @@ const EnquiryForm = ({ programId, universityId, source = 'Website' }) => {
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState('');
 
-    const API_BASE = "http://localhost:5000/api";
+
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

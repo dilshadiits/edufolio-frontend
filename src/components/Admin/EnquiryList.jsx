@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import API_BASE from '../../api';
 
 const EnquiryList = () => {
     const [enquiries, setEnquiries] = useState([]);
@@ -7,7 +8,7 @@ const EnquiryList = () => {
     const [filter, setFilter] = useState('all');
     const [selectedEnquiry, setSelectedEnquiry] = useState(null);
 
-    const API_BASE = "http://localhost:5000/api";
+
 
     const statusColors = {
         'New': { bg: '#DBEAFE', color: '#1D4ED8' },
