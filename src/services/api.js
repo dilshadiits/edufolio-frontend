@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://edufolio-backend-w2yi.onrender.com/api';
 
 export const addProgram = async (data) => {
     return await axios.post(`${API_URL}/admin/programs`, data);
