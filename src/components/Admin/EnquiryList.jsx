@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import API_BASE from '../../api';
-
+import API_BASE from '../api';
 const EnquiryList = () => {
     const [enquiries, setEnquiries] = useState([]);
     const [loading, setLoading] = useState(true);
