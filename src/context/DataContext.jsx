@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import API_BASE from '../api';
 
 export const DataContext = createContext();
 
@@ -10,7 +11,7 @@ export const DataProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   // API Base URL - Points to your running Node server
-  const API_BASE = "http://localhost:5000/api";
+
 
   // --- 1. FETCH DATA FROM DATABASE ---
   const fetchData = async () => {
