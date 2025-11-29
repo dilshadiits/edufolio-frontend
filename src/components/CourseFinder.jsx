@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import API_BASE from '../../api';
+import API_BASE from '../api';
 
 const CourseFinder = () => {
     const [isOpen, setIsOpen] = useState(false);
