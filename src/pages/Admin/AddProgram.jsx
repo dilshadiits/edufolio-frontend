@@ -71,7 +71,7 @@ const AddProgram = () => {
 
     const fetchUniversities = async () => {
         try {
-            const token = localStorage.getItem('adminToken');
+const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
             const res = await axios.get(`${API_BASE}/admin/universities`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
