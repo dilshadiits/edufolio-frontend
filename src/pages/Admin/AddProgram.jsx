@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import API_BASE from '../../api';
-import AdminLayout from '../../components/Admin/AdminLayout';
 
 const AddProgram = () => {
     const navigate = useNavigate();
@@ -11,6 +10,8 @@ const AddProgram = () => {
     const [fetchingUni, setFetchingUni] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [user, setUser] = useState(null);
+    const [activeNav, setActiveNav] = useState('programs');
 
     const [formData, setFormData] = useState({
         universityId: '',
@@ -33,8 +34,6 @@ const AddProgram = () => {
         featured: false,
         isActive: true
     });
-
-
 
     // Options for dropdowns
     const categories = [
@@ -66,22 +65,51 @@ const AddProgram = () => {
     const feePeriods = ['Total', 'Per Year', 'Per Semester', 'Per Month'];
 
     useEffect(() => {
-        fetchUniversities();
+        checkAuth();
     }, []);
 
-    const fetchUniversities = async () => {
+    const checkAuth = () => {
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+        
+        if (!token) {
+            navigate('/admin/login');
+            return;
+        }
+
+        if (userData) {
+            try {
+                setUser(JSON.parse(userData));
+            } catch (e) {
+                setUser({ name: 'Admin' });
+            }
+        }
+
+        fetchUniversities(token);
+    };
+
+    const fetchUniversities = async (token) => {
         try {
-            const token = localStorage.getItem('adminToken');
             const res = await axios.get(`${API_BASE}/admin/universities`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUniversities(res.data);
         } catch (err) {
             console.error('Error fetching universities:', err);
-            setError('Failed to load universities. Please refresh the page.');
+            if (err.response?.status === 401) {
+                handleLogout();
+            } else {
+                setError('Failed to load universities. Please refresh the page.');
+            }
         } finally {
             setFetchingUni(false);
         }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/admin/login');
     };
 
     const handleChange = (e) => {
@@ -91,7 +119,6 @@ const AddProgram = () => {
             [name]: type === 'checkbox' ? checked : value
         }));
         
-        // Clear errors when user starts typing
         if (error) setError('');
         if (success) setSuccess('');
     };
@@ -134,7 +161,6 @@ const AddProgram = () => {
             return false;
         }
         
-        // Validate YouTube URL if provided
         if (formData.youtubeUrl && !isValidYouTubeUrl(formData.youtubeUrl)) {
             setError('Please enter a valid YouTube URL');
             return false;
@@ -158,7 +184,6 @@ const AddProgram = () => {
         e.preventDefault();
         
         if (!validateForm()) {
-            // Scroll to top to show error
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
@@ -168,9 +193,8 @@ const AddProgram = () => {
         setSuccess('');
 
         try {
-            const token = localStorage.getItem('adminToken');
+            const token = localStorage.getItem('token');
             
-            // Convert comma-separated strings to arrays
             const programData = {
                 ...formData,
                 name: formData.name.trim(),
@@ -197,14 +221,17 @@ const AddProgram = () => {
 
             setSuccess('Program created successfully! Redirecting...');
             
-            // Redirect after showing success message
             setTimeout(() => {
-                navigate('/admin/programs');
+                navigate('/admin/dashboard');
             }, 1500);
 
         } catch (err) {
             console.error('Error creating program:', err);
-            setError(err.response?.data?.message || 'Failed to create program. Please try again.');
+            if (err.response?.status === 401) {
+                handleLogout();
+            } else {
+                setError(err.response?.data?.message || 'Failed to create program. Please try again.');
+            }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } finally {
             setLoading(false);
@@ -241,552 +268,711 @@ const AddProgram = () => {
     };
 
     return (
-        <AdminLayout>
-            <div style={styles.container}>
-                {/* Header */}
-                <div style={styles.header}>
-                    <div style={styles.headerLeft}>
-                        <h1 style={styles.title}>
-                            <i className="fa-solid fa-plus-circle" style={styles.titleIcon}></i>
-                            Add New Program
-                        </h1>
-                        <p style={styles.subtitle}>Create a new educational program for students</p>
-                    </div>
-                    <button 
-                        style={styles.backBtn}
-                        onClick={() => navigate('/admin/programs')}
-                    >
-                        <i className="fa-solid fa-arrow-left"></i> Back to Programs
-                    </button>
+        <div style={styles.wrapper}>
+            {/* Sidebar - Same as Dashboard */}
+            <aside style={styles.sidebar}>
+                <div style={styles.sidebarHeader}>
+                    <i className="fa-solid fa-graduation-cap" style={styles.sidebarLogo}></i>
+                    <span style={styles.sidebarTitle}>EduFolio</span>
                 </div>
 
-                {/* Alert Messages */}
-                {error && (
-                    <div style={styles.errorAlert}>
-                        <div style={styles.alertContent}>
-                            <i className="fa-solid fa-exclamation-circle"></i>
-                            <span>{error}</span>
+                <nav style={styles.sidebarNav}>
+                    <Link
+                        to="/admin/dashboard"
+                        style={styles.navItem}
+                    >
+                        <i className="fa-solid fa-chart-pie"></i>
+                        <span>Overview</span>
+                    </Link>
+                    <Link
+                        to="/admin/universities/add"
+                        style={styles.navItem}
+                    >
+                        <i className="fa-solid fa-building-columns"></i>
+                        <span>Universities</span>
+                    </Link>
+                    <Link
+                        to="/admin/programs/add"
+                        style={styles.navItemActive}
+                    >
+                        <i className="fa-solid fa-graduation-cap"></i>
+                        <span>Programs</span>
+                    </Link>
+                    <Link
+                        to="/admin/dashboard"
+                        style={styles.navItem}
+                    >
+                        <i className="fa-solid fa-envelope"></i>
+                        <span>Enquiries</span>
+                    </Link>
+                </nav>
+
+                <div style={styles.sidebarFooter}>
+                    <a href="/" target="_blank" rel="noreferrer" style={styles.viewSiteLink}>
+                        <i className="fa-solid fa-external-link"></i>
+                        <span>View Website</span>
+                    </a>
+                    <button style={styles.logoutBtn} onClick={handleLogout}>
+                        <i className="fa-solid fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            {/* Main Content */}
+            <main style={styles.main}>
+                <div style={styles.container}>
+                    {/* Header */}
+                    <div style={styles.header}>
+                        <div style={styles.headerLeft}>
+                            <h1 style={styles.title}>
+                                <i className="fa-solid fa-plus-circle" style={styles.titleIcon}></i>
+                                Add New Program
+                            </h1>
+                            <p style={styles.subtitle}>Create a new educational program for students</p>
                         </div>
-                        <button style={styles.alertClose} onClick={() => setError('')}>
-                            <i className="fa-solid fa-times"></i>
+                        <button 
+                            style={styles.backBtn}
+                            onClick={() => navigate('/admin/dashboard')}
+                        >
+                            <i className="fa-solid fa-arrow-left"></i> Back to Dashboard
                         </button>
                     </div>
-                )}
 
-                {success && (
-                    <div style={styles.successAlert}>
-                        <div style={styles.alertContent}>
-                            <i className="fa-solid fa-check-circle"></i>
-                            <span>{success}</span>
-                        </div>
-                    </div>
-                )}
-
-                {/* Form */}
-                <form onSubmit={handleSubmit} style={styles.form}>
-                    
-                    {/* Section 1: Basic Information */}
-                    <div style={styles.section}>
-                        <div style={styles.sectionHeader}>
-                            <div style={styles.sectionIcon}>
-                                <i className="fa-solid fa-info-circle"></i>
+                    {/* Alert Messages */}
+                    {error && (
+                        <div style={styles.errorAlert}>
+                            <div style={styles.alertContent}>
+                                <i className="fa-solid fa-exclamation-circle"></i>
+                                <span>{error}</span>
                             </div>
-                            <div>
-                                <h2 style={styles.sectionTitle}>Basic Information</h2>
-                                <p style={styles.sectionDesc}>Enter the basic details of the program</p>
+                            <button style={styles.alertClose} onClick={() => setError('')}>
+                                <i className="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                    )}
+
+                    {success && (
+                        <div style={styles.successAlert}>
+                            <div style={styles.alertContent}>
+                                <i className="fa-solid fa-check-circle"></i>
+                                <span>{success}</span>
                             </div>
                         </div>
+                    )}
+
+                    {/* Form */}
+                    <form onSubmit={handleSubmit} style={styles.form}>
                         
-                        <div style={styles.grid}>
+                        {/* Section 1: Basic Information */}
+                        <div style={styles.section}>
+                            <div style={styles.sectionHeader}>
+                                <div style={styles.sectionIcon}>
+                                    <i className="fa-solid fa-info-circle"></i>
+                                </div>
+                                <div>
+                                    <h2 style={styles.sectionTitle}>Basic Information</h2>
+                                    <p style={styles.sectionDesc}>Enter the basic details of the program</p>
+                                </div>
+                            </div>
+                            
+                            <div style={styles.grid}>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>
+                                        University <span style={styles.required}>*</span>
+                                    </label>
+                                    <select
+                                        name="universityId"
+                                        value={formData.universityId}
+                                        onChange={handleChange}
+                                        style={styles.select}
+                                        disabled={fetchingUni}
+                                    >
+                                        <option value="">
+                                            {fetchingUni ? 'Loading universities...' : 'Select University'}
+                                        </option>
+                                        {universities.map((uni) => (
+                                            <option key={uni._id} value={uni._id}>
+                                                {uni.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {universities.length === 0 && !fetchingUni && (
+                                        <small style={styles.errorHint}>
+                                            No universities found. <Link to="/admin/universities/add" style={{color: '#FF6B35'}}>Add one first</Link>
+                                        </small>
+                                    )}
+                                </div>
+
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>
+                                        Program Name <span style={styles.required}>*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        placeholder="e.g., Master of Business Administration (MBA)"
+                                        style={styles.input}
+                                    />
+                                    <small style={styles.hint}>
+                                        {formData.name.length}/100 characters
+                                    </small>
+                                </div>
+
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>
+                                        Category <span style={styles.required}>*</span>
+                                    </label>
+                                    <select
+                                        name="category"
+                                        value={formData.category}
+                                        onChange={handleChange}
+                                        style={styles.select}
+                                    >
+                                        <option value="">Select Category</option>
+                                        {categories.map((cat) => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>
+                                        Level <span style={styles.required}>*</span>
+                                    </label>
+                                    <select
+                                        name="level"
+                                        value={formData.level}
+                                        onChange={handleChange}
+                                        style={styles.select}
+                                    >
+                                        <option value="">Select Level</option>
+                                        {levels.map((level) => (
+                                            <option key={level} value={level}>{level}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>
+                                        Duration <span style={styles.required}>*</span>
+                                    </label>
+                                    <select
+                                        name="duration"
+                                        value={formData.duration}
+                                        onChange={handleChange}
+                                        style={styles.select}
+                                    >
+                                        <option value="">Select Duration</option>
+                                        {durations.map((dur) => (
+                                            <option key={dur} value={dur}>{dur}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>
+                                        Mode <span style={styles.required}>*</span>
+                                    </label>
+                                    <select
+                                        name="mode"
+                                        value={formData.mode}
+                                        onChange={handleChange}
+                                        style={styles.select}
+                                    >
+                                        {modes.map((mode) => (
+                                            <option key={mode} value={mode}>{mode}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Section 2: Fee Information */}
+                        <div style={styles.section}>
+                            <div style={styles.sectionHeader}>
+                                <div style={styles.sectionIcon}>
+                                    <i className="fa-solid fa-indian-rupee-sign"></i>
+                                </div>
+                                <div>
+                                    <h2 style={styles.sectionTitle}>Fee Information</h2>
+                                    <p style={styles.sectionDesc}>Set the program fee structure</p>
+                                </div>
+                            </div>
+                            
+                            <div style={styles.grid}>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>
+                                        Fee Amount (₹) <span style={styles.required}>*</span>
+                                    </label>
+                                    <div style={styles.inputWithIcon}>
+                                        <span style={styles.inputPrefix}>₹</span>
+                                        <input
+                                            type="number"
+                                            name="fee"
+                                            value={formData.fee}
+                                            onChange={handleChange}
+                                            placeholder="150000"
+                                            style={{...styles.input, paddingLeft: '35px'}}
+                                            min="0"
+                                        />
+                                    </div>
+                                    {formData.fee && (
+                                        <small style={styles.hint}>
+                                            ₹{Number(formData.fee).toLocaleString('en-IN')}
+                                        </small>
+                                    )}
+                                </div>
+
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Fee Period</label>
+                                    <select
+                                        name="feePeriod"
+                                        value={formData.feePeriod}
+                                        onChange={handleChange}
+                                        style={styles.select}
+                                    >
+                                        {feePeriods.map((period) => (
+                                            <option key={period} value={period}>{period}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Section 3: Description & Eligibility */}
+                        <div style={styles.section}>
+                            <div style={styles.sectionHeader}>
+                                <div style={styles.sectionIcon}>
+                                    <i className="fa-solid fa-file-lines"></i>
+                                </div>
+                                <div>
+                                    <h2 style={styles.sectionTitle}>Description & Eligibility</h2>
+                                    <p style={styles.sectionDesc}>Provide detailed information about the program</p>
+                                </div>
+                            </div>
+                            
                             <div style={styles.inputGroup}>
                                 <label style={styles.label}>
-                                    University <span style={styles.required}>*</span>
+                                    Description <span style={styles.required}>*</span>
                                 </label>
-                                <select
-                                    name="universityId"
-                                    value={formData.universityId}
+                                <textarea
+                                    name="description"
+                                    value={formData.description}
                                     onChange={handleChange}
-                                    style={styles.select}
-                                    disabled={fetchingUni}
-                                >
-                                    <option value="">
-                                        {fetchingUni ? 'Loading universities...' : 'Select University'}
-                                    </option>
-                                    {universities.map((uni) => (
-                                        <option key={uni._id} value={uni._id}>
-                                            {uni.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {universities.length === 0 && !fetchingUni && (
-                                    <small style={styles.errorHint}>
-                                        No universities found. Please add universities first.
-                                    </small>
-                                )}
+                                    placeholder="Provide a detailed description of the program, including key features, learning outcomes, and benefits..."
+                                    style={styles.textarea}
+                                    rows="6"
+                                ></textarea>
+                                <small style={{
+                                    ...styles.hint,
+                                    color: formData.description.length < 50 ? '#DC2626' : '#64748B'
+                                }}>
+                                    {formData.description.length}/500 characters (minimum 50 required)
+                                </small>
+                            </div>
+
+                            <div style={styles.inputGroup}>
+                                <label style={styles.label}>Eligibility Criteria</label>
+                                <textarea
+                                    name="eligibility"
+                                    value={formData.eligibility}
+                                    onChange={handleChange}
+                                    placeholder="e.g., Bachelor's degree in any discipline from a recognized university with minimum 50% marks"
+                                    style={styles.textarea}
+                                    rows="3"
+                                ></textarea>
+                            </div>
+                        </div>
+
+                        {/* Section 4: Media */}
+                        <div style={styles.section}>
+                            <div style={styles.sectionHeader}>
+                                <div style={styles.sectionIcon}>
+                                    <i className="fa-solid fa-photo-video"></i>
+                                </div>
+                                <div>
+                                    <h2 style={styles.sectionTitle}>Media</h2>
+                                    <p style={styles.sectionDesc}>Add images, brochures, and videos</p>
+                                </div>
+                            </div>
+                            
+                            <div style={styles.grid}>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>
+                                        <i className="fa-solid fa-image" style={styles.labelIcon}></i>
+                                        Program Image URL
+                                    </label>
+                                    <input
+                                        type="url"
+                                        name="image"
+                                        value={formData.image}
+                                        onChange={handleChange}
+                                        placeholder="https://example.com/program-image.jpg"
+                                        style={styles.input}
+                                    />
+                                </div>
+
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>
+                                        <i className="fa-solid fa-file-pdf" style={styles.labelIcon}></i>
+                                        Brochure URL
+                                    </label>
+                                    <input
+                                        type="url"
+                                        name="brochureUrl"
+                                        value={formData.brochureUrl}
+                                        onChange={handleChange}
+                                        placeholder="https://example.com/brochure.pdf"
+                                        style={styles.input}
+                                    />
+                                </div>
                             </div>
 
                             <div style={styles.inputGroup}>
                                 <label style={styles.label}>
-                                    Program Name <span style={styles.required}>*</span>
+                                    <i className="fa-brands fa-youtube" style={{...styles.labelIcon, color: '#FF0000'}}></i>
+                                    YouTube Video URL
                                 </label>
                                 <input
-                                    type="text"
-                                    name="name"
-                                    value={formData.name}
+                                    type="url"
+                                    name="youtubeUrl"
+                                    value={formData.youtubeUrl}
                                     onChange={handleChange}
-                                    placeholder="e.g., Master of Business Administration (MBA)"
+                                    placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
                                     style={styles.input}
                                 />
                                 <small style={styles.hint}>
-                                    {formData.name.length}/100 characters
+                                    <i className="fa-solid fa-info-circle"></i>
+                                    This video will be displayed on the program detail page
+                                </small>
+
+                                {formData.youtubeUrl && getYouTubeVideoId(formData.youtubeUrl) && (
+                                    <div style={styles.videoPreview}>
+                                        <label style={styles.previewLabel}>Video Preview:</label>
+                                        <div style={styles.videoContainer}>
+                                            <iframe
+                                                src={`https://www.youtube.com/embed/${getYouTubeVideoId(formData.youtubeUrl)}`}
+                                                title="YouTube video preview"
+                                                frameBorder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                                style={styles.videoIframe}
+                                            ></iframe>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Section 5: Program Details */}
+                        <div style={styles.section}>
+                            <div style={styles.sectionHeader}>
+                                <div style={styles.sectionIcon}>
+                                    <i className="fa-solid fa-list-check"></i>
+                                </div>
+                                <div>
+                                    <h2 style={styles.sectionTitle}>Program Details</h2>
+                                    <p style={styles.sectionDesc}>Add syllabus, highlights, career options, and specializations</p>
+                                </div>
+                            </div>
+                            
+                            <div style={styles.inputGroup}>
+                                <label style={styles.label}>
+                                    <i className="fa-solid fa-book" style={styles.labelIcon}></i>
+                                    Syllabus / Subjects
+                                </label>
+                                <textarea
+                                    name="syllabus"
+                                    value={formData.syllabus}
+                                    onChange={handleChange}
+                                    placeholder="Enter subjects separated by commas (e.g., Management Principles, Financial Accounting, Marketing Management)"
+                                    style={styles.textarea}
+                                    rows="3"
+                                ></textarea>
+                                <small style={styles.hint}>
+                                    Separate each subject with a comma.
+                                    {formData.syllabus && ` (${formData.syllabus.split(',').filter(s => s.trim()).length} subjects)`}
                                 </small>
                             </div>
 
                             <div style={styles.inputGroup}>
                                 <label style={styles.label}>
-                                    Category <span style={styles.required}>*</span>
+                                    <i className="fa-solid fa-star" style={styles.labelIcon}></i>
+                                    Program Highlights
                                 </label>
-                                <select
-                                    name="category"
-                                    value={formData.category}
+                                <textarea
+                                    name="highlights"
+                                    value={formData.highlights}
                                     onChange={handleChange}
-                                    style={styles.select}
-                                >
-                                    <option value="">Select Category</option>
-                                    {categories.map((cat) => (
-                                        <option key={cat} value={cat}>{cat}</option>
-                                    ))}
-                                </select>
+                                    placeholder="Enter highlights separated by commas (e.g., Industry-Ready Curriculum, Placement Support, Live Projects)"
+                                    style={styles.textarea}
+                                    rows="3"
+                                ></textarea>
+                                <small style={styles.hint}>
+                                    Separate each highlight with a comma.
+                                    {formData.highlights && ` (${formData.highlights.split(',').filter(s => s.trim()).length} highlights)`}
+                                </small>
                             </div>
 
                             <div style={styles.inputGroup}>
                                 <label style={styles.label}>
-                                    Level <span style={styles.required}>*</span>
+                                    <i className="fa-solid fa-briefcase" style={styles.labelIcon}></i>
+                                    Career Options
                                 </label>
-                                <select
-                                    name="level"
-                                    value={formData.level}
+                                <textarea
+                                    name="careerOptions"
+                                    value={formData.careerOptions}
                                     onChange={handleChange}
-                                    style={styles.select}
-                                >
-                                    <option value="">Select Level</option>
-                                    {levels.map((level) => (
-                                        <option key={level} value={level}>{level}</option>
-                                    ))}
-                                </select>
+                                    placeholder="Enter career options separated by commas (e.g., Business Analyst, Marketing Manager, Entrepreneur)"
+                                    style={styles.textarea}
+                                    rows="3"
+                                ></textarea>
+                                <small style={styles.hint}>
+                                    Separate each career option with a comma.
+                                    {formData.careerOptions && ` (${formData.careerOptions.split(',').filter(s => s.trim()).length} careers)`}
+                                </small>
                             </div>
 
                             <div style={styles.inputGroup}>
                                 <label style={styles.label}>
-                                    Duration <span style={styles.required}>*</span>
+                                    <i className="fa-solid fa-layer-group" style={styles.labelIcon}></i>
+                                    Specializations Available
                                 </label>
-                                <select
-                                    name="duration"
-                                    value={formData.duration}
+                                <textarea
+                                    name="specializations"
+                                    value={formData.specializations}
                                     onChange={handleChange}
-                                    style={styles.select}
-                                >
-                                    <option value="">Select Duration</option>
-                                    {durations.map((dur) => (
-                                        <option key={dur} value={dur}>{dur}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div style={styles.inputGroup}>
-                                <label style={styles.label}>
-                                    Mode <span style={styles.required}>*</span>
-                                </label>
-                                <select
-                                    name="mode"
-                                    value={formData.mode}
-                                    onChange={handleChange}
-                                    style={styles.select}
-                                >
-                                    {modes.map((mode) => (
-                                        <option key={mode} value={mode}>{mode}</option>
-                                    ))}
-                                </select>
+                                    placeholder="Enter specializations separated by commas (e.g., Marketing, Finance, Human Resources)"
+                                    style={styles.textarea}
+                                    rows="2"
+                                ></textarea>
+                                <small style={styles.hint}>
+                                    Separate each specialization with a comma.
+                                    {formData.specializations && ` (${formData.specializations.split(',').filter(s => s.trim()).length} specializations)`}
+                                </small>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Section 2: Fee Information */}
-                    <div style={styles.section}>
-                        <div style={styles.sectionHeader}>
-                            <div style={styles.sectionIcon}>
-                                <i className="fa-solid fa-indian-rupee-sign"></i>
+                        {/* Section 6: Settings */}
+                        <div style={styles.section}>
+                            <div style={styles.sectionHeader}>
+                                <div style={styles.sectionIcon}>
+                                    <i className="fa-solid fa-cog"></i>
+                                </div>
+                                <div>
+                                    <h2 style={styles.sectionTitle}>Settings</h2>
+                                    <p style={styles.sectionDesc}>Configure visibility and featured status</p>
+                                </div>
                             </div>
-                            <div>
-                                <h2 style={styles.sectionTitle}>Fee Information</h2>
-                                <p style={styles.sectionDesc}>Set the program fee structure</p>
-                            </div>
-                        </div>
-                        
-                        <div style={styles.grid}>
-                            <div style={styles.inputGroup}>
-                                <label style={styles.label}>
-                                    Fee Amount (₹) <span style={styles.required}>*</span>
-                                </label>
-                                <div style={styles.inputWithIcon}>
-                                    <span style={styles.inputPrefix}>₹</span>
+                            
+                            <div style={styles.checkboxGroup}>
+                                <label style={{
+                                    ...styles.checkboxLabel,
+                                    ...(formData.featured ? styles.checkboxLabelActive : {})
+                                }}>
                                     <input
-                                        type="number"
-                                        name="fee"
-                                        value={formData.fee}
+                                        type="checkbox"
+                                        name="featured"
+                                        checked={formData.featured}
                                         onChange={handleChange}
-                                        placeholder="150000"
-                                        style={{...styles.input, paddingLeft: '35px'}}
-                                        min="0"
+                                        style={styles.checkbox}
                                     />
-                                </div>
-                                {formData.fee && (
-                                    <small style={styles.hint}>
-                                        ₹{Number(formData.fee).toLocaleString('en-IN')}
-                                    </small>
-                                )}
-                            </div>
-
-                            <div style={styles.inputGroup}>
-                                <label style={styles.label}>Fee Period</label>
-                                <select
-                                    name="feePeriod"
-                                    value={formData.feePeriod}
-                                    onChange={handleChange}
-                                    style={styles.select}
-                                >
-                                    {feePeriods.map((period) => (
-                                        <option key={period} value={period}>{period}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Section 3: Description & Eligibility */}
-                    <div style={styles.section}>
-                        <div style={styles.sectionHeader}>
-                            <div style={styles.sectionIcon}>
-                                <i className="fa-solid fa-file-lines"></i>
-                            </div>
-                            <div>
-                                <h2 style={styles.sectionTitle}>Description & Eligibility</h2>
-                                <p style={styles.sectionDesc}>Provide detailed information about the program</p>
-                            </div>
-                        </div>
-                        
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>
-                                Description <span style={styles.required}>*</span>
-                            </label>
-                            <textarea
-                                name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                placeholder="Provide a detailed description of the program, including key features, learning outcomes, and benefits..."
-                                style={styles.textarea}
-                                rows="6"
-                            ></textarea>
-                            <small style={{
-                                ...styles.hint,
-                                color: formData.description.length < 50 ? '#DC2626' : '#64748B'
-                            }}>
-                                {formData.description.length}/500 characters (minimum 50 required)
-                            </small>
-                        </div>
-
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>Eligibility Criteria</label>
-                            <textarea
-                                name="eligibility"
-                                value={formData.eligibility}
-                                onChange={handleChange}
-                                placeholder="e.g., Bachelor's degree in any discipline from a recognized university with minimum 50% marks"
-                                style={styles.textarea}
-                                rows="3"
-                            ></textarea>
-                        </div>
-                    </div>
-
-                    {/* Section 4: Media */}
-                    <div style={styles.section}>
-                        <div style={styles.sectionHeader}>
-                            <div style={styles.sectionIcon}>
-                                <i className="fa-solid fa-photo-video"></i>
-                            </div>
-                            <div>
-                                <h2 style={styles.sectionTitle}>Media</h2>
-                                <p style={styles.sectionDesc}>Add images, brochures, and videos</p>
-                            </div>
-                        </div>
-                        
-                        <div style={styles.grid}>
-                            <div style={styles.inputGroup}>
-                                <label style={styles.label}>
-                                    <i className="fa-solid fa-image" style={styles.labelIcon}></i>
-                                    Program Image URL
+                                    <div style={styles.checkboxContent}>
+                                        <div style={{
+                                            ...styles.checkboxIcon,
+                                            ...(formData.featured ? {background: '#FF6B35', color: '#fff'} : {})
+                                        }}>
+                                            <i className={`fa-solid ${formData.featured ? 'fa-star' : 'fa-star'}`}></i>
+                                        </div>
+                                        <div style={styles.checkboxText}>
+                                            <strong>Featured Program</strong>
+                                            <small>Display on homepage and featured sections</small>
+                                        </div>
+                                    </div>
                                 </label>
-                                <input
-                                    type="url"
-                                    name="image"
-                                    value={formData.image}
-                                    onChange={handleChange}
-                                    placeholder="https://example.com/program-image.jpg"
-                                    style={styles.input}
-                                />
-                            </div>
 
-                            <div style={styles.inputGroup}>
-                                <label style={styles.label}>
-                                    <i className="fa-solid fa-file-pdf" style={styles.labelIcon}></i>
-                                    Brochure URL
+                                <label style={{
+                                    ...styles.checkboxLabel,
+                                    ...(formData.isActive ? styles.checkboxLabelActive : {})
+                                }}>
+                                    <input
+                                        type="checkbox"
+                                        name="isActive"
+                                        checked={formData.isActive}
+                                        onChange={handleChange}
+                                        style={styles.checkbox}
+                                    />
+                                    <div style={styles.checkboxContent}>
+                                        <div style={{
+                                            ...styles.checkboxIcon,
+                                            ...(formData.isActive ? {background: '#16A34A', color: '#fff'} : {})
+                                        }}>
+                                            <i className={`fa-solid ${formData.isActive ? 'fa-eye' : 'fa-eye-slash'}`}></i>
+                                        </div>
+                                        <div style={styles.checkboxText}>
+                                            <strong>Active</strong>
+                                            <small>Program is visible to students</small>
+                                        </div>
+                                    </div>
                                 </label>
-                                <input
-                                    type="url"
-                                    name="brochureUrl"
-                                    value={formData.brochureUrl}
-                                    onChange={handleChange}
-                                    placeholder="https://example.com/brochure.pdf"
-                                    style={styles.input}
-                                />
                             </div>
                         </div>
 
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>
-                                <i className="fa-brands fa-youtube" style={{...styles.labelIcon, color: '#FF0000'}}></i>
-                                YouTube Video URL
-                            </label>
-                            <input
-                                type="url"
-                                name="youtubeUrl"
-                                value={formData.youtubeUrl}
-                                onChange={handleChange}
-                                placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
-                                style={styles.input}
-                            />
-                            <small style={styles.hint}>
-                                <i className="fa-solid fa-info-circle"></i>
-                                This video will be displayed on the program detail page
-                            </small>
-
-                            {/* YouTube Preview */}
-                            {formData.youtubeUrl && getYouTubeVideoId(formData.youtubeUrl) && (
-                                <div style={styles.videoPreview}>
-                                    <label style={styles.previewLabel}>Video Preview:</label>
-                                    <div style={styles.videoContainer}>
-                                        <iframe
-                                            src={`https://www.youtube.com/embed/${getYouTubeVideoId(formData.youtubeUrl)}`}
-                                            title="YouTube video preview"
-                                            frameBorder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowFullScreen
-                                            style={styles.videoIframe}
-                                        ></iframe>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Section 5: Program Details */}
-                    <div style={styles.section}>
-                        <div style={styles.sectionHeader}>
-                            <div style={styles.sectionIcon}>
-                                <i className="fa-solid fa-list-check"></i>
-                            </div>
-                            <div>
-                                <h2 style={styles.sectionTitle}>Program Details</h2>
-                                <p style={styles.sectionDesc}>Add syllabus, highlights, career options, and specializations</p>
-                            </div>
-                        </div>
-                        
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>
-                                <i className="fa-solid fa-book" style={styles.labelIcon}></i>
-                                Syllabus / Subjects
-                            </label>
-                            <textarea
-                                name="syllabus"
-                                value={formData.syllabus}
-                                onChange={handleChange}
-                                placeholder="Enter subjects separated by commas (e.g., Management Principles, Financial Accounting, Marketing Management, Human Resource Management)"
-                                style={styles.textarea}
-                                rows="3"
-                            ></textarea>
-                            <small style={styles.hint}>
-                                Separate each subject with a comma. 
-                                {formData.syllabus && ` (${formData.syllabus.split(',').filter(s => s.trim()).length} subjects)`}
-                            </small>
-                        </div>
-
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>
-                                <i className="fa-solid fa-star" style={styles.labelIcon}></i>
-                                Program Highlights
-                            </label>
-                            <textarea
-                                name="highlights"
-                                value={formData.highlights}
-                                onChange={handleChange}
-                                placeholder="Enter highlights separated by commas (e.g., Industry-Ready Curriculum, Placement Support, Live Projects, 24/7 Learning Access)"
-                                style={styles.textarea}
-                                rows="3"
-                            ></textarea>
-                            <small style={styles.hint}>
-                                Separate each highlight with a comma.
-                                {formData.highlights && ` (${formData.highlights.split(',').filter(s => s.trim()).length} highlights)`}
-                            </small>
-                        </div>
-
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>
-                                <i className="fa-solid fa-briefcase" style={styles.labelIcon}></i>
-                                Career Options
-                            </label>
-                            <textarea
-                                name="careerOptions"
-                                value={formData.careerOptions}
-                                onChange={handleChange}
-                                placeholder="Enter career options separated by commas (e.g., Business Analyst, Marketing Manager, Financial Analyst, Entrepreneur)"
-                                style={styles.textarea}
-                                rows="3"
-                            ></textarea>
-                            <small style={styles.hint}>
-                                Separate each career option with a comma.
-                                {formData.careerOptions && ` (${formData.careerOptions.split(',').filter(s => s.trim()).length} careers)`}
-                            </small>
-                        </div>
-
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>
-                                <i className="fa-solid fa-layer-group" style={styles.labelIcon}></i>
-                                Specializations Available
-                            </label>
-                            <textarea
-                                name="specializations"
-                                value={formData.specializations}
-                                onChange={handleChange}
-                                placeholder="Enter specializations separated by commas (e.g., Marketing, Finance, Human Resources, Operations, Business Analytics)"
-                                style={styles.textarea}
-                                rows="2"
-                            ></textarea>
-                            <small style={styles.hint}>
-                                Separate each specialization with a comma.
-                                {formData.specializations && ` (${formData.specializations.split(',').filter(s => s.trim()).length} specializations)`}
-                            </small>
-                        </div>
-                    </div>
-
-                    {/* Section 6: Settings */}
-                    <div style={styles.section}>
-                        <div style={styles.sectionHeader}>
-                            <div style={styles.sectionIcon}>
-                                <i className="fa-solid fa-cog"></i>
-                            </div>
-                            <div>
-                                <h2 style={styles.sectionTitle}>Settings</h2>
-                                <p style={styles.sectionDesc}>Configure visibility and featured status</p>
-                            </div>
-                        </div>
-                        
-                        <div style={styles.checkboxGroup}>
-                            <label style={{
-                                ...styles.checkboxLabel,
-                                ...(formData.featured ? styles.checkboxLabelActive : {})
-                            }}>
-                                <input
-                                    type="checkbox"
-                                    name="featured"
-                                    checked={formData.featured}
-                                    onChange={handleChange}
-                                    style={styles.checkbox}
-                                />
-                                <div style={styles.checkboxContent}>
-                                    <div style={styles.checkboxIcon}>
-                                        <i className={`fa-solid ${formData.featured ? 'fa-star' : 'fa-regular fa-star'}`}></i>
-                                    </div>
-                                    <div style={styles.checkboxText}>
-                                        <strong>Featured Program</strong>
-                                        <small>Display on homepage and featured sections</small>
-                                    </div>
-                                </div>
-                            </label>
-
-                            <label style={{
-                                ...styles.checkboxLabel,
-                                ...(formData.isActive ? styles.checkboxLabelActive : {})
-                            }}>
-                                <input
-                                    type="checkbox"
-                                    name="isActive"
-                                    checked={formData.isActive}
-                                    onChange={handleChange}
-                                    style={styles.checkbox}
-                                />
-                                <div style={styles.checkboxContent}>
-                                    <div style={styles.checkboxIcon}>
-                                        <i className={`fa-solid ${formData.isActive ? 'fa-eye' : 'fa-eye-slash'}`}></i>
-                                    </div>
-                                    <div style={styles.checkboxText}>
-                                        <strong>Active</strong>
-                                        <small>Program is visible to students</small>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-
-                    {/* Form Actions */}
-                    <div style={styles.actions}>
-                        <button 
-                            type="button" 
-                            style={styles.resetBtn}
-                            onClick={handleReset}
-                        >
-                            <i className="fa-solid fa-rotate-left"></i>
-                            Reset Form
-                        </button>
-                        <div style={styles.actionRight}>
+                        {/* Form Actions */}
+                        <div style={styles.actions}>
                             <button 
                                 type="button" 
-                                style={styles.cancelBtn}
-                                onClick={() => navigate('/admin/programs')}
+                                style={styles.resetBtn}
+                                onClick={handleReset}
                             >
-                                Cancel
+                                <i className="fa-solid fa-rotate-left"></i>
+                                Reset Form
                             </button>
-                            <button 
-                                type="submit" 
-                                style={{
-                                    ...styles.submitBtn,
-                                    opacity: loading ? 0.7 : 1,
-                                    cursor: loading ? 'not-allowed' : 'pointer'
-                                }}
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <>
-                                        <i className="fa-solid fa-spinner fa-spin"></i>
-                                        Creating...
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="fa-solid fa-plus"></i>
-                                        Create Program
-                                    </>
-                                )}
-                            </button>
+                            <div style={styles.actionRight}>
+                                <button 
+                                    type="button" 
+                                    style={styles.cancelBtn}
+                                    onClick={() => navigate('/admin/dashboard')}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    style={{
+                                        ...styles.submitBtn,
+                                        opacity: loading ? 0.7 : 1,
+                                        cursor: loading ? 'not-allowed' : 'pointer'
+                                    }}
+                                    disabled={loading}
+                                >
+                                    {loading ? (
+                                        <>
+                                            <i className="fa-solid fa-spinner fa-spin"></i>
+                                            Creating...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="fa-solid fa-plus"></i>
+                                            Create Program
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                </form>
-            </div>
-        </AdminLayout>
+                    </form>
+                </div>
+            </main>
+        </div>
     );
 };
 
 const styles = {
+    // Wrapper & Layout (Same as Dashboard)
+    wrapper: {
+        display: 'flex',
+        minHeight: '100vh',
+        background: '#F8FAFC'
+    },
+    sidebar: {
+        width: '260px',
+        background: '#0F172A',
+        padding: '25px 20px',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        zIndex: 100
+    },
+    sidebarHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        marginBottom: '40px',
+        paddingBottom: '20px',
+        borderBottom: '1px solid rgba(255,255,255,0.1)'
+    },
+    sidebarLogo: {
+        fontSize: '1.8rem',
+        color: '#FF6B35'
+    },
+    sidebarTitle: {
+        color: '#fff',
+        fontSize: '1.4rem',
+        fontWeight: '700'
+    },
+    sidebarNav: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        flex: 1
+    },
+    navItem: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '14px 18px',
+        background: 'transparent',
+        color: '#94A3B8',
+        fontSize: '0.95rem',
+        fontWeight: '500',
+        borderRadius: '10px',
+        textDecoration: 'none',
+        transition: 'all 0.2s ease'
+    },
+    navItemActive: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '14px 18px',
+        background: 'rgba(255, 107, 53, 0.15)',
+        color: '#FF6B35',
+        fontSize: '0.95rem',
+        fontWeight: '600',
+        borderRadius: '10px',
+        textDecoration: 'none'
+    },
+    sidebarFooter: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        paddingTop: '20px',
+        borderTop: '1px solid rgba(255,255,255,0.1)'
+    },
+    viewSiteLink: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '12px 18px',
+        color: '#94A3B8',
+        textDecoration: 'none',
+        fontSize: '0.9rem',
+        borderRadius: '10px'
+    },
+    logoutBtn: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '12px 18px',
+        background: 'rgba(220, 38, 38, 0.15)',
+        border: 'none',
+        color: '#F87171',
+        fontSize: '0.9rem',
+        borderRadius: '10px',
+        cursor: 'pointer'
+    },
+    main: {
+        flex: 1,
+        marginLeft: '260px',
+        padding: '30px'
+    },
+    
+    // Container & Form styles
     container: {
-        padding: '30px',
         maxWidth: '1000px',
         margin: '0 auto'
     },
@@ -1127,20 +1313,5 @@ const styles = {
         transition: 'all 0.2s ease'
     }
 };
-
-// Responsive styles
-if (typeof window !== 'undefined') {
-    const updateResponsiveStyles = () => {
-        if (window.innerWidth < 768) {
-            styles.grid.gridTemplateColumns = '1fr';
-            styles.checkboxGroup.gridTemplateColumns = '1fr';
-            styles.actions.flexDirection = 'column';
-            styles.actionRight.width = '100%';
-            styles.actionRight.justifyContent = 'flex-end';
-        }
-    };
-    updateResponsiveStyles();
-    window.addEventListener('resize', updateResponsiveStyles);
-}
 
 export default AddProgram;
