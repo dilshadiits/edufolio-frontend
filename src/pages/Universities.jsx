@@ -81,11 +81,18 @@ const Universities = () => {
                 }
 
                 /* ==================== BASE ==================== */
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+
                 .universities-page {
                     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                     overflow-x: hidden;
                     color: var(--text-dark);
                     line-height: 1.6;
+                    min-height: 100vh;
                 }
 
                 .container {
@@ -94,14 +101,16 @@ const Universities = () => {
                     padding: 0 20px;
                     position: relative;
                     z-index: 1;
+                    width: 100%;
                 }
 
                 /* ==================== HERO SECTION ==================== */
                 .universities-hero {
                     background: linear-gradient(135deg, var(--dark-blue) 0%, #003D7A 100%);
-                    padding: 100px 0 60px;
+                    padding: 120px 0 60px;
                     position: relative;
                     overflow: hidden;
+                    min-height: 500px;
                 }
 
                 .hero-pattern {
@@ -216,6 +225,9 @@ const Universities = () => {
                 .hero-images {
                     position: relative;
                     height: 450px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 }
 
                 .main-image-container {
@@ -223,8 +235,8 @@ const Universities = () => {
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                    width: 380px;
-                    height: 300px;
+                    width: 340px;
+                    height: 280px;
                     border-radius: var(--radius-2xl);
                     overflow: hidden;
                     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
@@ -257,16 +269,16 @@ const Universities = () => {
                 .floating-image-1 {
                     top: 10px;
                     right: 20px;
-                    width: 160px;
-                    height: 110px;
+                    width: 150px;
+                    height: 100px;
                     animation: float1 6s ease-in-out infinite;
                 }
 
                 .floating-image-2 {
                     bottom: 40px;
                     left: 10px;
-                    width: 140px;
-                    height: 100px;
+                    width: 130px;
+                    height: 90px;
                     animation: float2 6s ease-in-out infinite;
                 }
 
@@ -285,6 +297,7 @@ const Universities = () => {
                     display: flex;
                     align-items: center;
                     gap: 12px;
+                    z-index: 10;
                 }
 
                 .floating-uni-card {
@@ -307,6 +320,7 @@ const Universities = () => {
                     align-items: center;
                     justify-content: center;
                     font-size: 1.2rem;
+                    flex-shrink: 0;
                 }
 
                 .floating-card-icon.gold {
@@ -326,8 +340,9 @@ const Universities = () => {
 
                 .floating-card-number {
                     color: var(--text-dark);
-                    font-size: 1.2rem;
+                    font-size: 1.1rem;
                     font-weight: 800;
+                    white-space: nowrap;
                 }
 
                 .floating-card-label {
@@ -338,6 +353,7 @@ const Universities = () => {
                 .decor-circle {
                     position: absolute;
                     border-radius: var(--radius-full);
+                    pointer-events: none;
                 }
 
                 .decor-circle-1 {
@@ -366,17 +382,24 @@ const Universities = () => {
                     height: 60px;
                     background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 2px, transparent 2px);
                     background-size: 12px 12px;
+                    pointer-events: none;
                 }
 
                 /* ==================== FILTER SECTION ==================== */
                 .filter-section {
                     background: var(--white);
-                    padding: 25px 20px;
+                    padding: 25px 0;
                     border-bottom: 3px solid var(--light-gray);
                     position: sticky;
-                    top: 70px;
+                    top: 0;
                     z-index: 100;
                     box-shadow: var(--shadow-md);
+                }
+
+                .filter-container {
+                    max-width: var(--container-max);
+                    margin: 0 auto;
+                    padding: 0 20px;
                 }
 
                 .search-form {
@@ -400,6 +423,7 @@ const Universities = () => {
                     transform: translateY(-50%);
                     color: var(--gray);
                     font-size: 1rem;
+                    pointer-events: none;
                 }
 
                 .search-input {
@@ -459,6 +483,7 @@ const Universities = () => {
                     box-shadow: 0 4px 15px rgba(0, 82, 157, 0.3);
                     transition: all var(--transition-normal);
                     font-family: inherit;
+                    white-space: nowrap;
                 }
 
                 .search-btn:hover {
@@ -480,6 +505,7 @@ const Universities = () => {
                     color: var(--text-dark);
                     font-size: 0.9rem;
                     font-weight: 600;
+                    white-space: nowrap;
                 }
 
                 .filter-select {
@@ -516,6 +542,7 @@ const Universities = () => {
                     font-weight: 600;
                     font-family: inherit;
                     transition: all var(--transition-normal);
+                    white-space: nowrap;
                 }
 
                 .clear-filters-btn:hover {
@@ -524,9 +551,15 @@ const Universities = () => {
 
                 /* ==================== MAIN SECTION ==================== */
                 .main-section {
-                    padding: 50px 20px;
+                    padding: 50px 0;
                     background: var(--light-gray);
                     min-height: 60vh;
+                }
+
+                .main-container {
+                    max-width: var(--container-max);
+                    margin: 0 auto;
+                    padding: 0 20px;
                 }
 
                 .loading {
@@ -572,6 +605,7 @@ const Universities = () => {
                 .sort-label {
                     color: var(--gray);
                     font-size: 0.9rem;
+                    white-space: nowrap;
                 }
 
                 .sort-select {
@@ -588,7 +622,7 @@ const Universities = () => {
                 /* ==================== UNIVERSITIES GRID ==================== */
                 .universities-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
                     gap: 30px;
                 }
 
@@ -688,7 +722,7 @@ const Universities = () => {
                     margin-top: 45px;
                     margin-bottom: 5px;
                     color: var(--text-dark);
-                    font-size: 1.25rem;
+                    font-size: 1.2rem;
                     font-weight: 700;
                     line-height: 1.3;
                 }
@@ -871,8 +905,14 @@ const Universities = () => {
 
                 /* ==================== WHY SECTION ==================== */
                 .why-section {
-                    padding: 80px 20px;
+                    padding: 80px 0;
                     background: var(--white);
+                }
+
+                .why-container {
+                    max-width: var(--container-max);
+                    margin: 0 auto;
+                    padding: 0 20px;
                 }
 
                 .section-header {
@@ -964,7 +1004,7 @@ const Universities = () => {
 
                 /* ==================== CTA SECTION ==================== */
                 .cta-section {
-                    padding: 80px 20px;
+                    padding: 80px 0;
                     background: linear-gradient(135deg, var(--dark-maroon) 0%, var(--maroon) 100%);
                     position: relative;
                     overflow: hidden;
@@ -979,6 +1019,12 @@ const Universities = () => {
                     background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
                     opacity: 0.5;
                     pointer-events: none;
+                }
+
+                .cta-container {
+                    max-width: var(--container-max);
+                    margin: 0 auto;
+                    padding: 0 20px;
                 }
 
                 .cta-content {
@@ -1098,7 +1144,8 @@ const Universities = () => {
                 /* ==================== MOBILE ==================== */
                 @media screen and (max-width: 768px) {
                     .universities-hero {
-                        padding: 90px 0 50px;
+                        padding: 100px 0 50px;
+                        min-height: auto;
                     }
 
                     .hero-title {
@@ -1116,8 +1163,7 @@ const Universities = () => {
                     }
 
                     .filter-section {
-                        padding: 20px 15px;
-                        top: 60px;
+                        padding: 20px 0;
                     }
 
                     .search-form {
@@ -1137,6 +1183,7 @@ const Universities = () => {
                         overflow-x: auto;
                         padding-bottom: 10px;
                         flex-wrap: nowrap;
+                        -webkit-overflow-scrolling: touch;
                     }
 
                     .filter-select {
@@ -1145,7 +1192,7 @@ const Universities = () => {
                     }
 
                     .main-section {
-                        padding: 30px 15px;
+                        padding: 30px 0;
                     }
 
                     .universities-grid {
@@ -1160,7 +1207,7 @@ const Universities = () => {
 
                     .why-section,
                     .cta-section {
-                        padding: 50px 15px;
+                        padding: 50px 0;
                     }
 
                     .why-grid {
@@ -1200,6 +1247,10 @@ const Universities = () => {
                     .card-title {
                         margin-top: 40px;
                         font-size: 1.1rem;
+                    }
+
+                    .universities-grid {
+                        grid-template-columns: 1fr;
                     }
                 }
 
@@ -1350,7 +1401,7 @@ const Universities = () => {
 
                 {/* Filter Section */}
                 <section className="filter-section">
-                    <div className="container">
+                    <div className="filter-container">
                         <div className="search-form">
                             <div className="search-box">
                                 <i className="fa-solid fa-search search-icon"></i>
@@ -1365,12 +1416,13 @@ const Universities = () => {
                                     <button 
                                         onClick={() => setSearch('')}
                                         className="clear-search-btn"
+                                        type="button"
                                     >
                                         <i className="fa-solid fa-times"></i>
                                     </button>
                                 )}
                             </div>
-                            <button className="search-btn">
+                            <button className="search-btn" type="button">
                                 <i className="fa-solid fa-search"></i>
                                 Search
                             </button>
@@ -1404,7 +1456,7 @@ const Universities = () => {
                             </select>
 
                             {(filter.rating || filter.featured || search) && (
-                                <button onClick={clearFilters} className="clear-filters-btn">
+                                <button onClick={clearFilters} className="clear-filters-btn" type="button">
                                     <i className="fa-solid fa-times"></i> Clear All
                                 </button>
                             )}
@@ -1414,7 +1466,7 @@ const Universities = () => {
 
                 {/* Universities Grid */}
                 <section className="main-section">
-                    <div className="container">
+                    <div className="main-container">
                         {loading ? (
                             <div className="loading">
                                 <div className="spinner"></div>
@@ -1535,7 +1587,7 @@ const Universities = () => {
                                     We couldn't find any universities matching your criteria. 
                                     Try adjusting your search or filters.
                                 </p>
-                                <button onClick={clearFilters} className="empty-clear-btn">
+                                <button onClick={clearFilters} className="empty-clear-btn" type="button">
                                     <i className="fa-solid fa-refresh"></i> Clear All Filters
                                 </button>
                             </div>
@@ -1545,7 +1597,7 @@ const Universities = () => {
 
                 {/* Why Section */}
                 <section className="why-section">
-                    <div className="container">
+                    <div className="why-container">
                         <div className="section-header">
                             <span className="section-badge">
                                 <i className="fa-solid fa-star"></i> Why Choose Us
@@ -1598,7 +1650,7 @@ const Universities = () => {
                 {/* CTA Section */}
                 <section className="cta-section">
                     <div className="cta-pattern"></div>
-                    <div className="container">
+                    <div className="cta-container">
                         <div className="cta-content">
                             <div className="cta-icon">
                                 <i className="fa-solid fa-headset"></i>
