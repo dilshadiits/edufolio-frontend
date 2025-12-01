@@ -49,21 +49,116 @@ const Universities = () => {
         <>
             <Navbar />
 
-            {/* Hero Section - Blue Theme */}
+            {/* Hero Section with Images - Blue Theme */}
             <section style={styles.hero}>
                 <div style={styles.heroPattern}></div>
-                <div style={styles.heroContent}>
-                    <span style={styles.heroBadge}>
-                        <i className="fa-solid fa-building-columns"></i> Our Partners
-                    </span>
-                    <h1 style={styles.heroTitle}>Partner Universities</h1>
-                    <p style={styles.heroSubtitle}>
-                        Explore our network of accredited universities offering quality online education
-                    </p>
-                    <div style={styles.tagline}>
-                        <span>learn.</span>
-                        <span>grow.</span>
-                        <span>succeed.</span>
+                
+                <div style={styles.heroContainer}>
+                    {/* Left Content */}
+                    <div style={styles.heroContent}>
+                        <span style={styles.heroBadge}>
+                            <i className="fa-solid fa-building-columns"></i> Our Partners
+                        </span>
+                        <h1 style={styles.heroTitle}>
+                            Partner <span style={styles.highlight}>Universities</span>
+                        </h1>
+                        <p style={styles.heroSubtitle}>
+                            Explore our network of accredited universities offering quality online education. 
+                            Choose from India's top institutions for your educational journey.
+                        </p>
+                        <div style={styles.tagline}>
+                            <span>learn.</span>
+                            <span>grow.</span>
+                            <span>succeed.</span>
+                        </div>
+                        
+                        {/* Quick Stats */}
+                        <div style={styles.heroStats}>
+                            <div style={styles.heroStat}>
+                                <span style={styles.heroStatNumber}>50+</span>
+                                <span style={styles.heroStatLabel}>Universities</span>
+                            </div>
+                            <div style={styles.heroStatDivider}></div>
+                            <div style={styles.heroStat}>
+                                <span style={styles.heroStatNumber}>200+</span>
+                                <span style={styles.heroStatLabel}>Programs</span>
+                            </div>
+                            <div style={styles.heroStatDivider}></div>
+                            <div style={styles.heroStat}>
+                                <span style={styles.heroStatNumber}>100%</span>
+                                <span style={styles.heroStatLabel}>UGC Approved</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Images Section */}
+                    <div style={styles.heroImages}>
+                        {/* ============================================
+                            MAIN IMAGE (Large - Center)
+                            Recommended size: 500x400px
+                            Change the src to your own image
+                            ============================================ */}
+                        <div style={styles.mainImageContainer}>
+                            <img 
+                                src="https://images.unsplash.com/photo-1562774053-701939374585?w=500&h=400&fit=crop" 
+                                alt="University campus"
+                                style={styles.mainImage}
+                            />
+                            <div style={styles.mainImageOverlay}></div>
+                        </div>
+
+                        {/* ============================================
+                            FLOATING IMAGE 1 (Small - Top Right)
+                            Recommended size: 200x150px
+                            Change the src to your own image
+                            ============================================ */}
+                        <div style={styles.floatingImage1}>
+                            <img 
+                                src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=200&h=150&fit=crop" 
+                                alt="Graduation ceremony"
+                                style={styles.floatingImg}
+                            />
+                        </div>
+
+                        {/* ============================================
+                            FLOATING IMAGE 2 (Small - Bottom Left)
+                            Recommended size: 180x130px
+                            Change the src to your own image
+                            ============================================ */}
+                        <div style={styles.floatingImage2}>
+                            <img 
+                                src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=180&h=130&fit=crop" 
+                                alt="Students studying"
+                                style={styles.floatingImg}
+                            />
+                        </div>
+
+                        {/* Floating University Card */}
+                        <div style={styles.floatingUniCard}>
+                            <div style={styles.floatingUniIcon}>
+                                <i className="fa-solid fa-award"></i>
+                            </div>
+                            <div style={styles.floatingUniContent}>
+                                <span style={styles.floatingUniNumber}>NAAC A++</span>
+                                <span style={styles.floatingUniLabel}>Top Rated</span>
+                            </div>
+                        </div>
+
+                        {/* Floating Accreditation Card */}
+                        <div style={styles.floatingAccredCard}>
+                            <div style={styles.floatingAccredIcon}>
+                                <i className="fa-solid fa-shield-check"></i>
+                            </div>
+                            <div style={styles.floatingAccredContent}>
+                                <span style={styles.floatingAccredNumber}>UGC-DEB</span>
+                                <span style={styles.floatingAccredLabel}>Approved</span>
+                            </div>
+                        </div>
+
+                        {/* Decorative Elements */}
+                        <div style={styles.decorCircle1}></div>
+                        <div style={styles.decorCircle2}></div>
+                        <div style={styles.decorDots}></div>
                     </div>
                 </div>
             </section>
@@ -282,6 +377,58 @@ const Universities = () => {
                 </div>
             </section>
 
+            {/* Why Choose Our Universities */}
+            <section style={styles.whySection}>
+                <div style={styles.container}>
+                    <div style={styles.sectionHeader}>
+                        <span style={styles.sectionBadge}>
+                            <i className="fa-solid fa-star"></i> Why Choose Us
+                        </span>
+                        <h2 style={styles.sectionTitle}>Why Our Partner Universities?</h2>
+                        <p style={styles.sectionSubtitle}>All our partner universities meet the highest standards</p>
+                    </div>
+
+                    <div style={styles.whyGrid}>
+                        <div style={styles.whyCard}>
+                            <div style={styles.whyIconBlue}>
+                                <i className="fa-solid fa-shield-check"></i>
+                            </div>
+                            <h3 style={styles.whyCardTitle}>UGC-DEB Approved</h3>
+                            <p style={styles.whyCardDesc}>
+                                All universities are approved by UGC-DEB for distance and online education
+                            </p>
+                        </div>
+                        <div style={styles.whyCard}>
+                            <div style={styles.whyIconMaroon}>
+                                <i className="fa-solid fa-award"></i>
+                            </div>
+                            <h3 style={styles.whyCardTitle}>NAAC Accredited</h3>
+                            <p style={styles.whyCardDesc}>
+                                Top-rated institutions with excellent NAAC grades ensuring quality
+                            </p>
+                        </div>
+                        <div style={styles.whyCard}>
+                            <div style={styles.whyIconBlue}>
+                                <i className="fa-solid fa-briefcase"></i>
+                            </div>
+                            <h3 style={styles.whyCardTitle}>Placement Support</h3>
+                            <p style={styles.whyCardDesc}>
+                                Dedicated placement cells and career support for all students
+                            </p>
+                        </div>
+                        <div style={styles.whyCard}>
+                            <div style={styles.whyIconMaroon}>
+                                <i className="fa-solid fa-certificate"></i>
+                            </div>
+                            <h3 style={styles.whyCardTitle}>Recognized Degrees</h3>
+                            <p style={styles.whyCardDesc}>
+                                Degrees valid for government jobs, higher studies, and abroad
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* CTA Section - Maroon Theme */}
             <section style={styles.ctaSection}>
                 <div style={styles.ctaPattern}></div>
@@ -336,11 +483,10 @@ const colors = {
 };
 
 const styles = {
-    // Hero Section - Blue Background
+    // Hero Section - Blue Background with Images
     hero: {
         background: `linear-gradient(135deg, ${colors.darkBlue} 0%, #003D7A 100%)`,
-        padding: '120px 20px 60px',
-        textAlign: 'center',
+        padding: '100px 0 60px',
         position: 'relative',
         overflow: 'hidden'
     },
@@ -350,14 +496,22 @@ const styles = {
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         opacity: 0.5
     },
-    heroContent: {
-        maxWidth: '800px',
+    heroContainer: {
+        maxWidth: '1200px',
         margin: '0 auto',
+        padding: '0 20px',
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '60px',
+        alignItems: 'center',
         position: 'relative',
-        zIndex: 1
+        zIndex: 2
+    },
+    heroContent: {
+        maxWidth: '550px'
     },
     heroBadge: {
         display: 'inline-flex',
@@ -376,23 +530,217 @@ const styles = {
         color: colors.white,
         fontSize: '2.8rem',
         fontWeight: '800',
-        marginBottom: '15px',
-        lineHeight: 1.2
+        lineHeight: 1.2,
+        marginBottom: '20px'
+    },
+    highlight: {
+        color: colors.lightBlue
     },
     heroSubtitle: {
         color: 'rgba(255, 255, 255, 0.85)',
-        fontSize: '1.15rem',
-        margin: '0 0 20px 0',
-        lineHeight: 1.6
+        fontSize: '1.1rem',
+        lineHeight: 1.7,
+        marginBottom: '20px'
     },
     tagline: {
         display: 'flex',
-        justifyContent: 'center',
         gap: '15px',
+        marginBottom: '30px',
         color: colors.lightBlue,
         fontSize: '1.1rem',
         fontWeight: '600',
         fontStyle: 'italic'
+    },
+    heroStats: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '25px',
+        background: 'rgba(255, 255, 255, 0.1)',
+        padding: '20px 30px',
+        borderRadius: '16px',
+        backdropFilter: 'blur(10px)'
+    },
+    heroStat: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+    },
+    heroStatNumber: {
+        color: colors.white,
+        fontSize: '1.8rem',
+        fontWeight: '800'
+    },
+    heroStatLabel: {
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontSize: '0.85rem'
+    },
+    heroStatDivider: {
+        width: '1px',
+        height: '40px',
+        background: 'rgba(255, 255, 255, 0.2)'
+    },
+
+    // Hero Images Section
+    heroImages: {
+        position: 'relative',
+        height: '450px'
+    },
+    mainImageContainer: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '380px',
+        height: '300px',
+        borderRadius: '24px',
+        overflow: 'hidden',
+        boxShadow: '0 30px 60px rgba(0, 0, 0, 0.4)',
+        border: '5px solid rgba(255, 255, 255, 0.2)'
+    },
+    mainImage: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover'
+    },
+    mainImageOverlay: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '100px',
+        background: 'linear-gradient(to top, rgba(0, 82, 157, 0.6), transparent)'
+    },
+    floatingImage1: {
+        position: 'absolute',
+        top: '10px',
+        right: '20px',
+        width: '160px',
+        height: '110px',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.3)',
+        border: '4px solid rgba(255, 255, 255, 0.3)',
+        animation: 'float1 6s ease-in-out infinite'
+    },
+    floatingImage2: {
+        position: 'absolute',
+        bottom: '40px',
+        left: '10px',
+        width: '140px',
+        height: '100px',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.3)',
+        border: '4px solid rgba(255, 255, 255, 0.3)',
+        animation: 'float2 6s ease-in-out infinite'
+    },
+    floatingImg: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover'
+    },
+    floatingUniCard: {
+        position: 'absolute',
+        top: '30px',
+        left: '0',
+        background: colors.white,
+        padding: '15px 20px',
+        borderRadius: '14px',
+        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.2)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        animation: 'float1 5s ease-in-out infinite'
+    },
+    floatingUniIcon: {
+        width: '45px',
+        height: '45px',
+        borderRadius: '12px',
+        background: '#FEF3C7',
+        color: '#D97706',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.2rem'
+    },
+    floatingUniContent: {
+        display: 'flex',
+        flexDirection: 'column'
+    },
+    floatingUniNumber: {
+        color: colors.textDark,
+        fontSize: '1.2rem',
+        fontWeight: '800'
+    },
+    floatingUniLabel: {
+        color: colors.gray,
+        fontSize: '0.75rem'
+    },
+    floatingAccredCard: {
+        position: 'absolute',
+        bottom: '20px',
+        right: '0',
+        background: colors.white,
+        padding: '15px 20px',
+        borderRadius: '14px',
+        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.2)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        animation: 'float2 5s ease-in-out infinite'
+    },
+    floatingAccredIcon: {
+        width: '45px',
+        height: '45px',
+        borderRadius: '12px',
+        background: `${colors.darkBlue}15`,
+        color: colors.darkBlue,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.2rem'
+    },
+    floatingAccredContent: {
+        display: 'flex',
+        flexDirection: 'column'
+    },
+    floatingAccredNumber: {
+        color: colors.textDark,
+        fontSize: '1.2rem',
+        fontWeight: '800'
+    },
+    floatingAccredLabel: {
+        color: colors.gray,
+        fontSize: '0.75rem'
+    },
+    decorCircle1: {
+        position: 'absolute',
+        top: '15%',
+        right: '10%',
+        width: '70px',
+        height: '70px',
+        borderRadius: '50%',
+        border: `3px solid ${colors.lightBlue}40`,
+        animation: 'pulse 3s ease-in-out infinite'
+    },
+    decorCircle2: {
+        position: 'absolute',
+        bottom: '20%',
+        left: '5%',
+        width: '50px',
+        height: '50px',
+        borderRadius: '50%',
+        background: `${colors.lightBlue}20`,
+        animation: 'pulse 4s ease-in-out infinite'
+    },
+    decorDots: {
+        position: 'absolute',
+        top: '60%',
+        right: '5%',
+        width: '60px',
+        height: '60px',
+        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 2px, transparent 2px)',
+        backgroundSize: '12px 12px'
     },
 
     // Filter Section
@@ -805,6 +1153,87 @@ const styles = {
         transition: 'all 0.3s ease'
     },
 
+    // Why Section
+    whySection: {
+        padding: '80px 20px',
+        background: colors.white
+    },
+    sectionHeader: {
+        textAlign: 'center',
+        marginBottom: '50px'
+    },
+    sectionBadge: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '8px',
+        background: `${colors.maroon}15`,
+        color: colors.maroon,
+        padding: '10px 20px',
+        borderRadius: '30px',
+        fontSize: '0.9rem',
+        fontWeight: '600',
+        marginBottom: '15px'
+    },
+    sectionTitle: {
+        color: colors.textDark,
+        fontSize: '2rem',
+        fontWeight: '800',
+        marginBottom: '10px'
+    },
+    sectionSubtitle: {
+        color: colors.gray,
+        fontSize: '1.05rem'
+    },
+    whyGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '25px'
+    },
+    whyCard: {
+        textAlign: 'center',
+        padding: '30px 20px',
+        borderRadius: '16px',
+        background: colors.lightGray,
+        transition: 'all 0.3s ease',
+        border: `1px solid ${colors.lightGray}`
+    },
+    whyIconBlue: {
+        width: '70px',
+        height: '70px',
+        borderRadius: '50%',
+        background: `${colors.darkBlue}15`,
+        color: colors.darkBlue,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '0 auto 20px',
+        fontSize: '1.5rem'
+    },
+    whyIconMaroon: {
+        width: '70px',
+        height: '70px',
+        borderRadius: '50%',
+        background: `${colors.maroon}15`,
+        color: colors.maroon,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '0 auto 20px',
+        fontSize: '1.5rem'
+    },
+    whyCardTitle: {
+        color: colors.textDark,
+        fontSize: '1.1rem',
+        fontWeight: '700',
+        marginBottom: '10px'
+    },
+    whyCardDesc: {
+        color: colors.gray,
+        fontSize: '0.9rem',
+        lineHeight: 1.6,
+        margin: 0
+    },
+
     // CTA Section - Maroon Background
     ctaSection: {
         padding: '80px 20px',
@@ -888,6 +1317,21 @@ if (typeof document !== 'undefined') {
             to { transform: rotate(360deg); }
         }
         
+        @keyframes float1 {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        @keyframes float2 {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
         body {
             font-family: 'Poppins', sans-serif;
         }
@@ -903,15 +1347,58 @@ if (typeof document !== 'undefined') {
             background: ${colors.white} !important;
         }
         
-        .university-card:hover .banner-img {
-            transform: scale(1.05);
+        .why-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background: ${colors.white};
+        }
+        
+        @media (max-width: 1024px) {
+            .hero-container {
+                grid-template-columns: 1fr !important;
+                text-align: center;
+            }
+            .hero-content {
+                max-width: 100% !important;
+            }
+            .hero-images {
+                display: none !important;
+            }
+            .hero-stats {
+                justify-content: center;
+            }
+            .tagline {
+                justify-content: center;
+            }
+            .why-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
         }
         
         @media (max-width: 768px) {
-            .hero-title { font-size: 2rem !important; }
-            .grid { grid-template-columns: 1fr !important; }
-            .results-header { flex-direction: column; align-items: flex-start; }
-            .search-form { flex-direction: column; }
+            .hero-title { 
+                font-size: 2rem !important; 
+            }
+            .grid { 
+                grid-template-columns: 1fr !important; 
+            }
+            .results-header { 
+                flex-direction: column; 
+                align-items: flex-start; 
+            }
+            .search-form { 
+                flex-direction: column; 
+            }
+            .why-grid {
+                grid-template-columns: 1fr !important;
+            }
+            .hero-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .hero-stat-divider {
+                display: none;
+            }
         }
     `;
     document.head.appendChild(styleSheet);
