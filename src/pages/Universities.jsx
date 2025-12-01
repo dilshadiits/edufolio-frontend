@@ -47,1361 +47,1582 @@ const Universities = () => {
 
     return (
         <>
-            <Navbar />
+            <style>{`
+                /* ==================== UNIVERSITIES PAGE STYLES ==================== */
+                @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
-            {/* Hero Section with Images - Blue Theme */}
-            <section style={styles.hero}>
-                <div style={styles.heroPattern}></div>
-                
-                <div style={styles.heroContainer}>
-                    {/* Left Content */}
-                    <div style={styles.heroContent}>
-                        <span style={styles.heroBadge}>
-                            <i className="fa-solid fa-building-columns"></i> Our Partners
-                        </span>
-                        <h1 style={styles.heroTitle}>
-                            Partner <span style={styles.highlight}>Universities</span>
-                        </h1>
-                        <p style={styles.heroSubtitle}>
-                            Explore our network of accredited universities offering quality online education. 
-                            Choose from India's top institutions for your educational journey.
-                        </p>
-                        <div style={styles.tagline}>
-                            <span>learn.</span>
-                            <span>grow.</span>
-                            <span>succeed.</span>
-                        </div>
-                        
-                        {/* Quick Stats */}
-                        <div style={styles.heroStats}>
-                            <div style={styles.heroStat}>
-                                <span style={styles.heroStatNumber}>50+</span>
-                                <span style={styles.heroStatLabel}>Universities</span>
+                /* ==================== CSS VARIABLES ==================== */
+                :root {
+                    --light-blue: #0099D6;
+                    --dark-blue: #00529D;
+                    --maroon: #8B2346;
+                    --dark-maroon: #6B1D3A;
+                    --pink: #C4567A;
+                    --light-pink: #E8B4C4;
+                    --white: #FFFFFF;
+                    --light-gray: #F5F7FA;
+                    --gray: #64748B;
+                    --dark-gray: #1E293B;
+                    --text-dark: #2D1B4E;
+                    --text-light: #FFFFFF;
+                    --text-muted: #94A3B8;
+                    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+                    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.1);
+                    --shadow-lg: 0 15px 40px rgba(0, 0, 0, 0.15);
+                    --radius-sm: 8px;
+                    --radius-md: 12px;
+                    --radius-lg: 16px;
+                    --radius-xl: 20px;
+                    --radius-2xl: 24px;
+                    --radius-full: 50%;
+                    --transition-fast: 0.2s ease;
+                    --transition-normal: 0.3s ease;
+                    --container-max: 1200px;
+                }
+
+                /* ==================== BASE ==================== */
+                .universities-page {
+                    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    overflow-x: hidden;
+                    color: var(--text-dark);
+                    line-height: 1.6;
+                }
+
+                .container {
+                    max-width: var(--container-max);
+                    margin: 0 auto;
+                    padding: 0 20px;
+                    position: relative;
+                    z-index: 1;
+                }
+
+                /* ==================== HERO SECTION ==================== */
+                .universities-hero {
+                    background: linear-gradient(135deg, var(--dark-blue) 0%, #003D7A 100%);
+                    padding: 100px 0 60px;
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .hero-pattern {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+                    opacity: 0.5;
+                    pointer-events: none;
+                }
+
+                .hero-container {
+                    max-width: var(--container-max);
+                    margin: 0 auto;
+                    padding: 0 20px;
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 60px;
+                    align-items: center;
+                    position: relative;
+                    z-index: 2;
+                }
+
+                .hero-content {
+                    max-width: 550px;
+                }
+
+                .hero-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: rgba(0, 153, 214, 0.2);
+                    color: var(--light-blue);
+                    padding: 10px 20px;
+                    border-radius: 30px;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    margin-bottom: 20px;
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                }
+
+                .hero-title {
+                    color: var(--white);
+                    font-size: clamp(2rem, 5vw, 2.8rem);
+                    font-weight: 800;
+                    line-height: 1.2;
+                    margin-bottom: 20px;
+                }
+
+                .hero-title .highlight {
+                    color: var(--light-blue);
+                }
+
+                .hero-subtitle {
+                    color: rgba(255, 255, 255, 0.85);
+                    font-size: clamp(0.95rem, 2vw, 1.1rem);
+                    line-height: 1.7;
+                    margin-bottom: 20px;
+                }
+
+                .tagline {
+                    display: flex;
+                    gap: 15px;
+                    margin-bottom: 30px;
+                    color: var(--light-blue);
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    font-style: italic;
+                }
+
+                .hero-stats {
+                    display: flex;
+                    align-items: center;
+                    gap: 25px;
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 20px 30px;
+                    border-radius: var(--radius-lg);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    flex-wrap: wrap;
+                    justify-content: center;
+                }
+
+                .hero-stat {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    text-align: center;
+                }
+
+                .hero-stat-number {
+                    color: var(--white);
+                    font-size: clamp(1.5rem, 3vw, 1.8rem);
+                    font-weight: 800;
+                }
+
+                .hero-stat-label {
+                    color: rgba(255, 255, 255, 0.7);
+                    font-size: 0.85rem;
+                }
+
+                .hero-stat-divider {
+                    width: 1px;
+                    height: 40px;
+                    background: rgba(255, 255, 255, 0.2);
+                }
+
+                /* ==================== HERO IMAGES ==================== */
+                .hero-images {
+                    position: relative;
+                    height: 450px;
+                }
+
+                .main-image-container {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 380px;
+                    height: 300px;
+                    border-radius: var(--radius-2xl);
+                    overflow: hidden;
+                    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+                    border: 5px solid rgba(255, 255, 255, 0.2);
+                }
+
+                .main-image {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+
+                .main-image-overlay {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 100px;
+                    background: linear-gradient(to top, rgba(0, 82, 157, 0.6), transparent);
+                }
+
+                .floating-image {
+                    position: absolute;
+                    border-radius: var(--radius-lg);
+                    overflow: hidden;
+                    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+                    border: 4px solid rgba(255, 255, 255, 0.3);
+                }
+
+                .floating-image-1 {
+                    top: 10px;
+                    right: 20px;
+                    width: 160px;
+                    height: 110px;
+                    animation: float1 6s ease-in-out infinite;
+                }
+
+                .floating-image-2 {
+                    bottom: 40px;
+                    left: 10px;
+                    width: 140px;
+                    height: 100px;
+                    animation: float2 6s ease-in-out infinite;
+                }
+
+                .floating-img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+
+                .floating-card {
+                    position: absolute;
+                    background: var(--white);
+                    padding: 15px 20px;
+                    border-radius: var(--radius-md);
+                    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                .floating-uni-card {
+                    top: 30px;
+                    left: 0;
+                    animation: float1 5s ease-in-out infinite;
+                }
+
+                .floating-accred-card {
+                    bottom: 20px;
+                    right: 0;
+                    animation: float2 5s ease-in-out infinite;
+                }
+
+                .floating-card-icon {
+                    width: 45px;
+                    height: 45px;
+                    border-radius: var(--radius-md);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.2rem;
+                }
+
+                .floating-card-icon.gold {
+                    background: #FEF3C7;
+                    color: #D97706;
+                }
+
+                .floating-card-icon.blue {
+                    background: rgba(0, 82, 157, 0.1);
+                    color: var(--dark-blue);
+                }
+
+                .floating-card-content {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .floating-card-number {
+                    color: var(--text-dark);
+                    font-size: 1.2rem;
+                    font-weight: 800;
+                }
+
+                .floating-card-label {
+                    color: var(--gray);
+                    font-size: 0.75rem;
+                }
+
+                .decor-circle {
+                    position: absolute;
+                    border-radius: var(--radius-full);
+                }
+
+                .decor-circle-1 {
+                    top: 15%;
+                    right: 10%;
+                    width: 70px;
+                    height: 70px;
+                    border: 3px solid rgba(0, 153, 214, 0.25);
+                    animation: pulse 3s ease-in-out infinite;
+                }
+
+                .decor-circle-2 {
+                    bottom: 20%;
+                    left: 5%;
+                    width: 50px;
+                    height: 50px;
+                    background: rgba(0, 153, 214, 0.15);
+                    animation: pulse 4s ease-in-out infinite;
+                }
+
+                .decor-dots {
+                    position: absolute;
+                    top: 60%;
+                    right: 5%;
+                    width: 60px;
+                    height: 60px;
+                    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 2px, transparent 2px);
+                    background-size: 12px 12px;
+                }
+
+                /* ==================== FILTER SECTION ==================== */
+                .filter-section {
+                    background: var(--white);
+                    padding: 25px 20px;
+                    border-bottom: 3px solid var(--light-gray);
+                    position: sticky;
+                    top: 70px;
+                    z-index: 100;
+                    box-shadow: var(--shadow-md);
+                }
+
+                .search-form {
+                    display: flex;
+                    gap: 15px;
+                    margin-bottom: 20px;
+                    flex-wrap: wrap;
+                }
+
+                .search-box {
+                    position: relative;
+                    flex: 1;
+                    min-width: 250px;
+                    max-width: 500px;
+                }
+
+                .search-icon {
+                    position: absolute;
+                    left: 18px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: var(--gray);
+                    font-size: 1rem;
+                }
+
+                .search-input {
+                    width: 100%;
+                    padding: 16px 50px;
+                    border-radius: var(--radius-md);
+                    border: 2px solid var(--light-gray);
+                    font-size: 1rem;
+                    box-sizing: border-box;
+                    transition: all var(--transition-normal);
+                    outline: none;
+                    background: var(--light-gray);
+                    font-family: inherit;
+                }
+
+                .search-input:focus {
+                    border-color: var(--dark-blue);
+                    box-shadow: 0 0 0 3px rgba(0, 82, 157, 0.1);
+                    background: var(--white);
+                }
+
+                .clear-search-btn {
+                    position: absolute;
+                    right: 15px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: var(--gray);
+                    border: none;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: var(--radius-full);
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: var(--white);
+                    font-size: 0.8rem;
+                    transition: all var(--transition-fast);
+                }
+
+                .clear-search-btn:hover {
+                    background: var(--dark-gray);
+                }
+
+                .search-btn {
+                    padding: 16px 30px;
+                    background: var(--dark-blue);
+                    color: var(--white);
+                    border: none;
+                    border-radius: var(--radius-md);
+                    font-weight: 600;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 1rem;
+                    box-shadow: 0 4px 15px rgba(0, 82, 157, 0.3);
+                    transition: all var(--transition-normal);
+                    font-family: inherit;
+                }
+
+                .search-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(0, 82, 157, 0.4);
+                }
+
+                .filters {
+                    display: flex;
+                    gap: 15px;
+                    flex-wrap: wrap;
+                    align-items: center;
+                }
+
+                .filter-label {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: var(--text-dark);
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                }
+
+                .filter-select {
+                    padding: 12px 20px;
+                    border-radius: var(--radius-sm);
+                    border: 2px solid var(--light-gray);
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    min-width: 160px;
+                    background: var(--light-gray);
+                    color: var(--text-dark);
+                    font-weight: 500;
+                    outline: none;
+                    font-family: inherit;
+                    transition: all var(--transition-normal);
+                }
+
+                .filter-select:focus {
+                    border-color: var(--dark-blue);
+                    background: var(--white);
+                }
+
+                .clear-filters-btn {
+                    padding: 12px 20px;
+                    background: rgba(139, 35, 70, 0.1);
+                    color: var(--maroon);
+                    border: none;
+                    border-radius: var(--radius-sm);
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-weight: 600;
+                    font-family: inherit;
+                    transition: all var(--transition-normal);
+                }
+
+                .clear-filters-btn:hover {
+                    background: rgba(139, 35, 70, 0.15);
+                }
+
+                /* ==================== MAIN SECTION ==================== */
+                .main-section {
+                    padding: 50px 20px;
+                    background: var(--light-gray);
+                    min-height: 60vh;
+                }
+
+                .loading {
+                    text-align: center;
+                    padding: 80px 20px;
+                    color: var(--gray);
+                }
+
+                .spinner {
+                    width: 50px;
+                    height: 50px;
+                    border: 4px solid var(--light-gray);
+                    border-top-color: var(--dark-blue);
+                    border-radius: var(--radius-full);
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto 20px;
+                }
+
+                .results-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 25px;
+                    flex-wrap: wrap;
+                    gap: 15px;
+                }
+
+                .result-count {
+                    color: var(--gray);
+                    font-size: 0.95rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin: 0;
+                }
+
+                .sort-options {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                .sort-label {
+                    color: var(--gray);
+                    font-size: 0.9rem;
+                }
+
+                .sort-select {
+                    padding: 10px 15px;
+                    border-radius: var(--radius-sm);
+                    border: 1px solid var(--light-gray);
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    background: var(--white);
+                    color: var(--text-dark);
+                    font-family: inherit;
+                }
+
+                /* ==================== UNIVERSITIES GRID ==================== */
+                .universities-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+                    gap: 30px;
+                }
+
+                .university-card {
+                    background: var(--white);
+                    border-radius: var(--radius-xl);
+                    overflow: hidden;
+                    text-decoration: none;
+                    box-shadow: var(--shadow-sm);
+                    transition: all var(--transition-normal);
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    border: 1px solid var(--light-gray);
+                }
+
+                .university-card:hover {
+                    transform: translateY(-8px);
+                    box-shadow: 0 20px 40px rgba(0, 82, 157, 0.15);
+                }
+
+                .university-card:hover .banner-img {
+                    transform: scale(1.05);
+                }
+
+                .featured-badge {
+                    position: absolute;
+                    top: 15px;
+                    right: 15px;
+                    background: linear-gradient(135deg, var(--maroon) 0%, var(--pink) 100%);
+                    color: var(--white);
+                    padding: 6px 14px;
+                    border-radius: 20px;
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    z-index: 2;
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    box-shadow: 0 4px 10px rgba(139, 35, 70, 0.3);
+                }
+
+                .card-banner {
+                    height: 160px;
+                    overflow: hidden;
+                    position: relative;
+                }
+
+                .banner-img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transition: transform var(--transition-normal);
+                }
+
+                .banner-overlay {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 60px;
+                    background: linear-gradient(to top, rgba(0, 82, 157, 0.6), transparent);
+                }
+
+                .card-content {
+                    padding: 25px;
+                    position: relative;
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .logo-wrapper {
+                    position: absolute;
+                    top: -40px;
+                    left: 25px;
+                    width: 80px;
+                    height: 80px;
+                    background: var(--white);
+                    border-radius: var(--radius-lg);
+                    padding: 8px;
+                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 3px solid var(--light-gray);
+                }
+
+                .logo {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    border-radius: var(--radius-sm);
+                }
+
+                .card-title {
+                    margin-top: 45px;
+                    margin-bottom: 5px;
+                    color: var(--text-dark);
+                    font-size: 1.25rem;
+                    font-weight: 700;
+                    line-height: 1.3;
+                }
+
+                .short-name {
+                    color: var(--dark-blue);
+                    font-size: 0.9rem;
+                    margin: 0 0 10px 0;
+                    font-weight: 500;
+                }
+
+                .location {
+                    color: var(--gray);
+                    font-size: 0.9rem;
+                    margin: 0 0 15px 0;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+
+                .card-meta {
+                    display: flex;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                    margin-bottom: 15px;
+                }
+
+                .rating-badge {
+                    background: #FEF3C7;
+                    color: #D97706;
+                    padding: 6px 12px;
+                    border-radius: var(--radius-sm);
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                }
+
+                .acc-badge {
+                    background: rgba(0, 82, 157, 0.1);
+                    color: var(--dark-blue);
+                    padding: 6px 12px;
+                    border-radius: var(--radius-sm);
+                    font-size: 0.8rem;
+                    font-weight: 500;
+                }
+
+                .established {
+                    color: var(--gray);
+                    font-size: 0.85rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    margin: 0 0 15px 0;
+                }
+
+                .fee-range {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 15px;
+                    background: var(--light-gray);
+                    border-radius: var(--radius-md);
+                    margin-bottom: 15px;
+                    margin-top: auto;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                }
+
+                .fee-info {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                }
+
+                .fee-label {
+                    color: var(--gray);
+                    font-size: 0.8rem;
+                }
+
+                .fee-value {
+                    color: var(--maroon);
+                    font-weight: 700;
+                    font-size: 0.95rem;
+                }
+
+                .program-count {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    color: var(--dark-blue);
+                    font-size: 0.85rem;
+                    background: var(--white);
+                    padding: 8px 12px;
+                    border-radius: var(--radius-sm);
+                    font-weight: 600;
+                }
+
+                .view-btn {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                    padding: 14px;
+                    background: linear-gradient(135deg, var(--dark-blue) 0%, #003D7A 100%);
+                    color: var(--white);
+                    border-radius: var(--radius-md);
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    transition: all var(--transition-normal);
+                }
+
+                .university-card:hover .view-btn {
+                    background: linear-gradient(135deg, #003D7A 0%, var(--dark-blue) 100%);
+                }
+
+                /* ==================== EMPTY STATE ==================== */
+                .empty-state {
+                    text-align: center;
+                    padding: 100px 20px;
+                    max-width: 500px;
+                    margin: 0 auto;
+                    background: var(--white);
+                    border-radius: var(--radius-xl);
+                    box-shadow: var(--shadow-sm);
+                }
+
+                .empty-icon-wrapper {
+                    width: 100px;
+                    height: 100px;
+                    border-radius: var(--radius-full);
+                    background: rgba(0, 82, 157, 0.1);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 25px;
+                }
+
+                .empty-icon {
+                    font-size: 2.5rem;
+                    color: var(--dark-blue);
+                }
+
+                .empty-title {
+                    color: var(--text-dark);
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    margin-bottom: 10px;
+                }
+
+                .empty-text {
+                    color: var(--gray);
+                    font-size: 1rem;
+                    line-height: 1.6;
+                    margin-bottom: 25px;
+                }
+
+                .empty-clear-btn {
+                    padding: 14px 28px;
+                    background: var(--dark-blue);
+                    color: var(--white);
+                    border: none;
+                    border-radius: var(--radius-md);
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 10px;
+                    box-shadow: 0 4px 15px rgba(0, 82, 157, 0.3);
+                    font-family: inherit;
+                    transition: all var(--transition-normal);
+                }
+
+                .empty-clear-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(0, 82, 157, 0.4);
+                }
+
+                /* ==================== WHY SECTION ==================== */
+                .why-section {
+                    padding: 80px 20px;
+                    background: var(--white);
+                }
+
+                .section-header {
+                    text-align: center;
+                    margin-bottom: 50px;
+                }
+
+                .section-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: rgba(139, 35, 70, 0.1);
+                    color: var(--maroon);
+                    padding: 10px 20px;
+                    border-radius: 30px;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    margin-bottom: 15px;
+                }
+
+                .section-title {
+                    color: var(--text-dark);
+                    font-size: clamp(1.5rem, 4vw, 2rem);
+                    font-weight: 800;
+                    margin-bottom: 10px;
+                }
+
+                .section-subtitle {
+                    color: var(--gray);
+                    font-size: 1.05rem;
+                    margin: 0;
+                }
+
+                .why-grid {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 25px;
+                }
+
+                .why-card {
+                    text-align: center;
+                    padding: 30px 20px;
+                    border-radius: var(--radius-lg);
+                    background: var(--light-gray);
+                    transition: all var(--transition-normal);
+                    border: 1px solid var(--light-gray);
+                }
+
+                .why-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: var(--shadow-md);
+                    background: var(--white);
+                }
+
+                .why-icon {
+                    width: 70px;
+                    height: 70px;
+                    border-radius: var(--radius-full);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 20px;
+                    font-size: 1.5rem;
+                }
+
+                .why-icon.blue {
+                    background: rgba(0, 82, 157, 0.1);
+                    color: var(--dark-blue);
+                }
+
+                .why-icon.maroon {
+                    background: rgba(139, 35, 70, 0.1);
+                    color: var(--maroon);
+                }
+
+                .why-card-title {
+                    color: var(--text-dark);
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                    margin-bottom: 10px;
+                }
+
+                .why-card-desc {
+                    color: var(--gray);
+                    font-size: 0.9rem;
+                    line-height: 1.6;
+                    margin: 0;
+                }
+
+                /* ==================== CTA SECTION ==================== */
+                .cta-section {
+                    padding: 80px 20px;
+                    background: linear-gradient(135deg, var(--dark-maroon) 0%, var(--maroon) 100%);
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .cta-pattern {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+                    opacity: 0.5;
+                    pointer-events: none;
+                }
+
+                .cta-content {
+                    text-align: center;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    position: relative;
+                    z-index: 1;
+                }
+
+                .cta-icon {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: var(--radius-full);
+                    background: rgba(0, 153, 214, 0.2);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 25px;
+                    font-size: 2rem;
+                    color: var(--light-blue);
+                }
+
+                .cta-title {
+                    color: var(--white);
+                    font-size: clamp(1.5rem, 4vw, 2rem);
+                    font-weight: 800;
+                    margin-bottom: 15px;
+                }
+
+                .cta-text {
+                    color: rgba(255, 255, 255, 0.85);
+                    font-size: clamp(0.95rem, 2vw, 1.1rem);
+                    margin-bottom: 20px;
+                    line-height: 1.6;
+                }
+
+                .cta-tagline {
+                    display: flex;
+                    justify-content: center;
+                    gap: 15px;
+                    margin-bottom: 30px;
+                    color: var(--light-blue);
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    font-style: italic;
+                }
+
+                .cta-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 16px 32px;
+                    background: var(--light-blue);
+                    color: var(--white);
+                    border-radius: var(--radius-md);
+                    text-decoration: none;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    box-shadow: 0 4px 20px rgba(0, 153, 214, 0.4);
+                    transition: all var(--transition-normal);
+                }
+
+                .cta-btn:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 6px 25px rgba(0, 153, 214, 0.5);
+                }
+
+                /* ==================== ANIMATIONS ==================== */
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+
+                @keyframes float1 {
+                    0%, 100% { transform: translateY(0px); }
+                    50% { transform: translateY(-15px); }
+                }
+
+                @keyframes float2 {
+                    0%, 100% { transform: translateY(0px); }
+                    50% { transform: translateY(-10px); }
+                }
+
+                @keyframes pulse {
+                    0%, 100% { transform: scale(1); opacity: 0.5; }
+                    50% { transform: scale(1.1); opacity: 0.8; }
+                }
+
+                /* ==================== TABLET ==================== */
+                @media screen and (max-width: 1024px) {
+                    .hero-container {
+                        grid-template-columns: 1fr;
+                        text-align: center;
+                    }
+
+                    .hero-content {
+                        max-width: 100%;
+                    }
+
+                    .hero-images {
+                        display: none;
+                    }
+
+                    .tagline {
+                        justify-content: center;
+                    }
+
+                    .why-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
+
+                    .universities-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
+                }
+
+                /* ==================== MOBILE ==================== */
+                @media screen and (max-width: 768px) {
+                    .universities-hero {
+                        padding: 90px 0 50px;
+                    }
+
+                    .hero-title {
+                        font-size: 1.75rem;
+                    }
+
+                    .hero-stats {
+                        flex-direction: column;
+                        gap: 15px;
+                        padding: 20px;
+                    }
+
+                    .hero-stat-divider {
+                        display: none;
+                    }
+
+                    .filter-section {
+                        padding: 20px 15px;
+                        top: 60px;
+                    }
+
+                    .search-form {
+                        flex-direction: column;
+                    }
+
+                    .search-box {
+                        max-width: 100%;
+                    }
+
+                    .search-btn {
+                        width: 100%;
+                        justify-content: center;
+                    }
+
+                    .filters {
+                        overflow-x: auto;
+                        padding-bottom: 10px;
+                        flex-wrap: nowrap;
+                    }
+
+                    .filter-select {
+                        min-width: 140px;
+                        flex-shrink: 0;
+                    }
+
+                    .main-section {
+                        padding: 30px 15px;
+                    }
+
+                    .universities-grid {
+                        grid-template-columns: 1fr;
+                        gap: 25px;
+                    }
+
+                    .results-header {
+                        flex-direction: column;
+                        align-items: flex-start;
+                    }
+
+                    .why-section,
+                    .cta-section {
+                        padding: 50px 15px;
+                    }
+
+                    .why-grid {
+                        grid-template-columns: 1fr;
+                        gap: 20px;
+                    }
+
+                    .fee-range {
+                        flex-direction: column;
+                        text-align: center;
+                    }
+                }
+
+                /* ==================== SMALL MOBILE ==================== */
+                @media screen and (max-width: 480px) {
+                    .hero-badge {
+                        font-size: 0.8rem;
+                        padding: 8px 14px;
+                    }
+
+                    .card-meta {
+                        flex-direction: column;
+                        align-items: flex-start;
+                    }
+
+                    .card-content {
+                        padding: 20px;
+                    }
+
+                    .logo-wrapper {
+                        width: 70px;
+                        height: 70px;
+                        top: -35px;
+                        left: 20px;
+                    }
+
+                    .card-title {
+                        margin-top: 40px;
+                        font-size: 1.1rem;
+                    }
+                }
+
+                /* ==================== TOUCH DEVICES ==================== */
+                @media (hover: none) and (pointer: coarse) {
+                    .university-card:hover,
+                    .why-card:hover,
+                    .search-btn:hover,
+                    .cta-btn:hover {
+                        transform: none;
+                    }
+
+                    .university-card:active,
+                    .search-btn:active,
+                    .cta-btn:active {
+                        transform: scale(0.98);
+                        opacity: 0.9;
+                    }
+
+                    .university-card:hover .banner-img {
+                        transform: none;
+                    }
+
+                    .search-btn,
+                    .cta-btn,
+                    .empty-clear-btn {
+                        min-height: 48px;
+                    }
+                }
+
+                /* ==================== REDUCED MOTION ==================== */
+                @media (prefers-reduced-motion: reduce) {
+                    *,
+                    *::before,
+                    *::after {
+                        animation-duration: 0.01ms !important;
+                        animation-iteration-count: 1 !important;
+                        transition-duration: 0.01ms !important;
+                    }
+                }
+
+                /* ==================== FOCUS STATES ==================== */
+                .search-btn:focus,
+                .cta-btn:focus,
+                .filter-select:focus,
+                .university-card:focus {
+                    outline: 3px solid var(--light-blue);
+                    outline-offset: 2px;
+                }
+            `}</style>
+
+            <div className="universities-page">
+                <Navbar />
+
+                {/* Hero Section */}
+                <section className="universities-hero">
+                    <div className="hero-pattern"></div>
+                    
+                    <div className="hero-container">
+                        <div className="hero-content">
+                            <span className="hero-badge">
+                                <i className="fa-solid fa-building-columns"></i>
+                                Our Partners
+                            </span>
+                            <h1 className="hero-title">
+                                Partner <span className="highlight">Universities</span>
+                            </h1>
+                            <p className="hero-subtitle">
+                                Explore our network of accredited universities offering quality online education. 
+                                Choose from India's top institutions for your educational journey.
+                            </p>
+                            <div className="tagline">
+                                <span>learn.</span>
+                                <span>grow.</span>
+                                <span>succeed.</span>
                             </div>
-                            <div style={styles.heroStatDivider}></div>
-                            <div style={styles.heroStat}>
-                                <span style={styles.heroStatNumber}>200+</span>
-                                <span style={styles.heroStatLabel}>Programs</span>
-                            </div>
-                            <div style={styles.heroStatDivider}></div>
-                            <div style={styles.heroStat}>
-                                <span style={styles.heroStatNumber}>100%</span>
-                                <span style={styles.heroStatLabel}>UGC Approved</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right Images Section */}
-                    <div style={styles.heroImages}>
-                        {/* ============================================
-                            MAIN IMAGE (Large - Center)
-                            Recommended size: 500x400px
-                            Change the src to your own image
-                            ============================================ */}
-                        <div style={styles.mainImageContainer}>
-                            <img 
-                                src="https://images.unsplash.com/photo-1562774053-701939374585?w=500&h=400&fit=crop" 
-                                alt="University campus"
-                                style={styles.mainImage}
-                            />
-                            <div style={styles.mainImageOverlay}></div>
-                        </div>
-
-                        {/* ============================================
-                            FLOATING IMAGE 1 (Small - Top Right)
-                            Recommended size: 200x150px
-                            Change the src to your own image
-                            ============================================ */}
-                        <div style={styles.floatingImage1}>
-                            <img 
-                                src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=200&h=150&fit=crop" 
-                                alt="Graduation ceremony"
-                                style={styles.floatingImg}
-                            />
-                        </div>
-
-                        {/* ============================================
-                            FLOATING IMAGE 2 (Small - Bottom Left)
-                            Recommended size: 180x130px
-                            Change the src to your own image
-                            ============================================ */}
-                        <div style={styles.floatingImage2}>
-                            <img 
-                                src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=180&h=130&fit=crop" 
-                                alt="Students studying"
-                                style={styles.floatingImg}
-                            />
-                        </div>
-
-                        {/* Floating University Card */}
-                        <div style={styles.floatingUniCard}>
-                            <div style={styles.floatingUniIcon}>
-                                <i className="fa-solid fa-award"></i>
-                            </div>
-                            <div style={styles.floatingUniContent}>
-                                <span style={styles.floatingUniNumber}>NAAC A++</span>
-                                <span style={styles.floatingUniLabel}>Top Rated</span>
+                            
+                            <div className="hero-stats">
+                                <div className="hero-stat">
+                                    <span className="hero-stat-number">50+</span>
+                                    <span className="hero-stat-label">Universities</span>
+                                </div>
+                                <div className="hero-stat-divider"></div>
+                                <div className="hero-stat">
+                                    <span className="hero-stat-number">200+</span>
+                                    <span className="hero-stat-label">Programs</span>
+                                </div>
+                                <div className="hero-stat-divider"></div>
+                                <div className="hero-stat">
+                                    <span className="hero-stat-number">100%</span>
+                                    <span className="hero-stat-label">UGC Approved</span>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Floating Accreditation Card */}
-                        <div style={styles.floatingAccredCard}>
-                            <div style={styles.floatingAccredIcon}>
-                                <i className="fa-solid fa-shield-check"></i>
+                        <div className="hero-images">
+                            <div className="main-image-container">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1562774053-701939374585?w=500&h=400&fit=crop" 
+                                    alt="University campus"
+                                    className="main-image"
+                                />
+                                <div className="main-image-overlay"></div>
                             </div>
-                            <div style={styles.floatingAccredContent}>
-                                <span style={styles.floatingAccredNumber}>UGC-DEB</span>
-                                <span style={styles.floatingAccredLabel}>Approved</span>
+
+                            <div className="floating-image floating-image-1">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=200&h=150&fit=crop" 
+                                    alt="Graduation ceremony"
+                                    className="floating-img"
+                                />
                             </div>
-                        </div>
 
-                        {/* Decorative Elements */}
-                        <div style={styles.decorCircle1}></div>
-                        <div style={styles.decorCircle2}></div>
-                        <div style={styles.decorDots}></div>
-                    </div>
-                </div>
-            </section>
+                            <div className="floating-image floating-image-2">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=180&h=130&fit=crop" 
+                                    alt="Students studying"
+                                    className="floating-img"
+                                />
+                            </div>
 
-            {/* Search & Filter */}
-            <section style={styles.filterSection}>
-                <div style={styles.container}>
-                    <div style={styles.searchForm}>
-                        <div style={styles.searchBox}>
-                            <i className="fa-solid fa-search" style={styles.searchIcon}></i>
-                            <input
-                                type="text"
-                                placeholder="Search universities by name or location..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                style={styles.searchInput}
-                            />
-                            {search && (
-                                <button 
-                                    onClick={() => setSearch('')}
-                                    style={styles.clearSearchBtn}
-                                >
-                                    <i className="fa-solid fa-times"></i>
-                                </button>
-                            )}
-                        </div>
-                        <button style={styles.searchBtn}>
-                            <i className="fa-solid fa-search"></i>
-                            Search
-                        </button>
-                    </div>
-
-                    <div style={styles.filters}>
-                        <div style={styles.filterLabel}>
-                            <i className="fa-solid fa-filter"></i> Filter by:
-                        </div>
-                        <select
-                            value={filter.rating}
-                            onChange={(e) => setFilter({ ...filter, rating: e.target.value })}
-                            style={styles.filterSelect}
-                        >
-                            <option value="">All Ratings</option>
-                            <option value="A++">A++ Rating</option>
-                            <option value="A+">A+ Rating</option>
-                            <option value="A">A Rating</option>
-                            <option value="B++">B++ Rating</option>
-                            <option value="B+">B+ Rating</option>
-                            <option value="B">B Rating</option>
-                        </select>
-
-                        <select
-                            value={filter.featured}
-                            onChange={(e) => setFilter({ ...filter, featured: e.target.value })}
-                            style={styles.filterSelect}
-                        >
-                            <option value="">All Universities</option>
-                            <option value="true">Featured Only</option>
-                        </select>
-
-                        {(filter.rating || filter.featured || search) && (
-                            <button onClick={clearFilters} style={styles.clearBtn}>
-                                <i className="fa-solid fa-times"></i> Clear All
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </section>
-
-            {/* Universities Grid */}
-            <section style={styles.mainSection}>
-                <div style={styles.container}>
-                    {loading ? (
-                        <div style={styles.loading}>
-                            <div style={styles.spinner}></div>
-                            <p>Loading universities...</p>
-                        </div>
-                    ) : filteredUniversities.length > 0 ? (
-                        <>
-                            <div style={styles.resultsHeader}>
-                                <p style={styles.resultCount}>
-                                    <i className="fa-solid fa-building-columns"></i>
-                                    Showing <strong>{filteredUniversities.length}</strong> universit{filteredUniversities.length !== 1 ? 'ies' : 'y'}
-                                </p>
-                                <div style={styles.sortOptions}>
-                                    <span style={styles.sortLabel}>Sort by:</span>
-                                    <select style={styles.sortSelect}>
-                                        <option value="featured">Featured First</option>
-                                        <option value="name">Name (A-Z)</option>
-                                        <option value="rating">Rating</option>
-                                    </select>
+                            <div className="floating-card floating-uni-card">
+                                <div className="floating-card-icon gold">
+                                    <i className="fa-solid fa-award"></i>
+                                </div>
+                                <div className="floating-card-content">
+                                    <span className="floating-card-number">NAAC A++</span>
+                                    <span className="floating-card-label">Top Rated</span>
                                 </div>
                             </div>
 
-                            <div style={styles.grid}>
-                                {filteredUniversities.map(university => (
-                                    <Link
-                                        key={university._id}
-                                        to={`/universities/${university.slug}`}
-                                        style={styles.card}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(-8px)';
-                                            e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 82, 157, 0.15)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                            e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.06)';
-                                        }}
+                            <div className="floating-card floating-accred-card">
+                                <div className="floating-card-icon blue">
+                                    <i className="fa-solid fa-shield-check"></i>
+                                </div>
+                                <div className="floating-card-content">
+                                    <span className="floating-card-number">UGC-DEB</span>
+                                    <span className="floating-card-label">Approved</span>
+                                </div>
+                            </div>
+
+                            <div className="decor-circle decor-circle-1"></div>
+                            <div className="decor-circle decor-circle-2"></div>
+                            <div className="decor-dots"></div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Filter Section */}
+                <section className="filter-section">
+                    <div className="container">
+                        <div className="search-form">
+                            <div className="search-box">
+                                <i className="fa-solid fa-search search-icon"></i>
+                                <input
+                                    type="text"
+                                    placeholder="Search universities by name or location..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    className="search-input"
+                                />
+                                {search && (
+                                    <button 
+                                        onClick={() => setSearch('')}
+                                        className="clear-search-btn"
                                     >
-                                        {/* Featured Badge */}
-                                        {university.featured && (
-                                            <span style={styles.featuredBadge}>
-                                                <i className="fa-solid fa-star"></i> Featured
-                                            </span>
-                                        )}
-                                        
-                                        {/* Banner Image */}
-                                        <div style={styles.cardBanner}>
-                                            <img
-                                                src={university.banner || 'https://images.unsplash.com/photo-1562774053-701939374585?w=400&h=200&fit=crop'}
-                                                alt={university.name}
-                                                style={styles.bannerImg}
-                                                onError={(e) => {
-                                                    e.target.src = 'https://images.unsplash.com/photo-1562774053-701939374585?w=400&h=200&fit=crop';
-                                                }}
-                                            />
-                                            <div style={styles.bannerOverlay}></div>
-                                        </div>
-
-                                        {/* Card Content */}
-                                        <div style={styles.cardContent}>
-                                            {/* Logo */}
-                                            <div style={styles.logoWrapper}>
-                                                <img
-                                                    src={university.logo || 'https://via.placeholder.com/70x70?text=Logo'}
-                                                    alt={university.name}
-                                                    style={styles.logo}
-                                                    onError={(e) => {
-                                                        e.target.src = 'https://via.placeholder.com/70x70?text=Logo';
-                                                    }}
-                                                />
-                                            </div>
-
-                                            {/* University Name */}
-                                            <h3 style={styles.cardTitle}>{university.name}</h3>
-                                            
-                                            {/* Short Name */}
-                                            {university.shortName && (
-                                                <p style={styles.shortName}>({university.shortName})</p>
-                                            )}
-                                            
-                                            {/* Location */}
-                                            <p style={styles.location}>
-                                                <i className="fa-solid fa-location-dot"></i>
-                                                {university.location || 'India'}
-                                            </p>
-
-                                            {/* Badges Row */}
-                                            <div style={styles.cardMeta}>
-                                                {university.rating && (
-                                                    <span style={styles.ratingBadge}>
-                                                        <i className="fa-solid fa-award"></i> NAAC {university.rating}
-                                                    </span>
-                                                )}
-                                                {university.accreditations?.slice(0, 2).map((acc, i) => (
-                                                    <span key={i} style={styles.accBadge}>{acc}</span>
-                                                ))}
-                                            </div>
-
-                                            {/* Established Year */}
-                                            {university.establishedYear && (
-                                                <p style={styles.established}>
-                                                    <i className="fa-solid fa-calendar"></i>
-                                                    Est. {university.establishedYear}
-                                                </p>
-                                            )}
-
-                                            {/* Fee Range */}
-                                            <div style={styles.feeRange}>
-                                                <div style={styles.feeInfo}>
-                                                    <span style={styles.feeLabel}>Fee Range</span>
-                                                    <span style={styles.feeValue}>
-                                                        ₹{Number(university.minFee || 0).toLocaleString('en-IN')} - ₹{Number(university.maxFee || 0).toLocaleString('en-IN')}
-                                                    </span>
-                                                </div>
-                                                <div style={styles.programCount}>
-                                                    <i className="fa-solid fa-graduation-cap"></i>
-                                                    <span>{university.programCount || '10+'} Programs</span>
-                                                </div>
-                                            </div>
-
-                                            {/* View Button */}
-                                            <div style={styles.viewBtn}>
-                                                <span>View Details</span>
-                                                <i className="fa-solid fa-arrow-right"></i>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
+                                        <i className="fa-solid fa-times"></i>
+                                    </button>
+                                )}
                             </div>
-                        </>
-                    ) : (
-                        <div style={styles.emptyState}>
-                            <div style={styles.emptyIconWrapper}>
-                                <i className="fa-solid fa-building-columns" style={styles.emptyIcon}></i>
-                            </div>
-                            <h3 style={styles.emptyTitle}>No Universities Found</h3>
-                            <p style={styles.emptyText}>
-                                We couldn't find any universities matching your criteria. 
-                                Try adjusting your search or filters.
-                            </p>
-                            <button onClick={clearFilters} style={styles.clearFiltersBtn}>
-                                <i className="fa-solid fa-refresh"></i> Clear All Filters
+                            <button className="search-btn">
+                                <i className="fa-solid fa-search"></i>
+                                Search
                             </button>
                         </div>
-                    )}
-                </div>
-            </section>
 
-            {/* Why Choose Our Universities */}
-            <section style={styles.whySection}>
-                <div style={styles.container}>
-                    <div style={styles.sectionHeader}>
-                        <span style={styles.sectionBadge}>
-                            <i className="fa-solid fa-star"></i> Why Choose Us
-                        </span>
-                        <h2 style={styles.sectionTitle}>Why Our Partner Universities?</h2>
-                        <p style={styles.sectionSubtitle}>All our partner universities meet the highest standards</p>
-                    </div>
+                        <div className="filters">
+                            <div className="filter-label">
+                                <i className="fa-solid fa-filter"></i> Filter by:
+                            </div>
+                            <select
+                                value={filter.rating}
+                                onChange={(e) => setFilter({ ...filter, rating: e.target.value })}
+                                className="filter-select"
+                            >
+                                <option value="">All Ratings</option>
+                                <option value="A++">A++ Rating</option>
+                                <option value="A+">A+ Rating</option>
+                                <option value="A">A Rating</option>
+                                <option value="B++">B++ Rating</option>
+                                <option value="B+">B+ Rating</option>
+                                <option value="B">B Rating</option>
+                            </select>
 
-                    <div style={styles.whyGrid}>
-                        <div style={styles.whyCard}>
-                            <div style={styles.whyIconBlue}>
-                                <i className="fa-solid fa-shield-check"></i>
-                            </div>
-                            <h3 style={styles.whyCardTitle}>UGC-DEB Approved</h3>
-                            <p style={styles.whyCardDesc}>
-                                All universities are approved by UGC-DEB for distance and online education
-                            </p>
-                        </div>
-                        <div style={styles.whyCard}>
-                            <div style={styles.whyIconMaroon}>
-                                <i className="fa-solid fa-award"></i>
-                            </div>
-                            <h3 style={styles.whyCardTitle}>NAAC Accredited</h3>
-                            <p style={styles.whyCardDesc}>
-                                Top-rated institutions with excellent NAAC grades ensuring quality
-                            </p>
-                        </div>
-                        <div style={styles.whyCard}>
-                            <div style={styles.whyIconBlue}>
-                                <i className="fa-solid fa-briefcase"></i>
-                            </div>
-                            <h3 style={styles.whyCardTitle}>Placement Support</h3>
-                            <p style={styles.whyCardDesc}>
-                                Dedicated placement cells and career support for all students
-                            </p>
-                        </div>
-                        <div style={styles.whyCard}>
-                            <div style={styles.whyIconMaroon}>
-                                <i className="fa-solid fa-certificate"></i>
-                            </div>
-                            <h3 style={styles.whyCardTitle}>Recognized Degrees</h3>
-                            <p style={styles.whyCardDesc}>
-                                Degrees valid for government jobs, higher studies, and abroad
-                            </p>
+                            <select
+                                value={filter.featured}
+                                onChange={(e) => setFilter({ ...filter, featured: e.target.value })}
+                                className="filter-select"
+                            >
+                                <option value="">All Universities</option>
+                                <option value="true">Featured Only</option>
+                            </select>
+
+                            {(filter.rating || filter.featured || search) && (
+                                <button onClick={clearFilters} className="clear-filters-btn">
+                                    <i className="fa-solid fa-times"></i> Clear All
+                                </button>
+                            )}
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* CTA Section - Maroon Theme */}
-            <section style={styles.ctaSection}>
-                <div style={styles.ctaPattern}></div>
-                <div style={styles.container}>
-                    <div style={styles.ctaContent}>
-                        <div style={styles.ctaIcon}>
-                            <i className="fa-solid fa-headset"></i>
-                        </div>
-                        <h2 style={styles.ctaTitle}>Can't find what you're looking for?</h2>
-                        <p style={styles.ctaText}>
-                            Our counselors can help you find the perfect university based on your requirements.
-                        </p>
-                        <div style={styles.ctaTagline}>
-                            <span>learn.</span>
-                            <span>grow.</span>
-                            <span>succeed.</span>
-                        </div>
-                        <Link to="/contact" style={styles.ctaBtn}>
-                            <i className="fa-solid fa-phone"></i> Talk to a Counselor
-                        </Link>
+                {/* Universities Grid */}
+                <section className="main-section">
+                    <div className="container">
+                        {loading ? (
+                            <div className="loading">
+                                <div className="spinner"></div>
+                                <p>Loading universities...</p>
+                            </div>
+                        ) : filteredUniversities.length > 0 ? (
+                            <>
+                                <div className="results-header">
+                                    <p className="result-count">
+                                        <i className="fa-solid fa-building-columns"></i>
+                                        Showing <strong>{filteredUniversities.length}</strong> universit{filteredUniversities.length !== 1 ? 'ies' : 'y'}
+                                    </p>
+                                    <div className="sort-options">
+                                        <span className="sort-label">Sort by:</span>
+                                        <select className="sort-select">
+                                            <option value="featured">Featured First</option>
+                                            <option value="name">Name (A-Z)</option>
+                                            <option value="rating">Rating</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="universities-grid">
+                                    {filteredUniversities.map(university => (
+                                        <Link
+                                            key={university._id}
+                                            to={`/universities/${university.slug}`}
+                                            className="university-card"
+                                        >
+                                            {university.featured && (
+                                                <span className="featured-badge">
+                                                    <i className="fa-solid fa-star"></i> Featured
+                                                </span>
+                                            )}
+                                            
+                                            <div className="card-banner">
+                                                <img
+                                                    src={university.banner || 'https://images.unsplash.com/photo-1562774053-701939374585?w=400&h=200&fit=crop'}
+                                                    alt={university.name}
+                                                    className="banner-img"
+                                                    onError={(e) => {
+                                                        e.target.src = 'https://images.unsplash.com/photo-1562774053-701939374585?w=400&h=200&fit=crop';
+                                                    }}
+                                                />
+                                                <div className="banner-overlay"></div>
+                                            </div>
+
+                                            <div className="card-content">
+                                                <div className="logo-wrapper">
+                                                    <img
+                                                        src={university.logo || 'https://via.placeholder.com/70x70?text=Logo'}
+                                                        alt={university.name}
+                                                        className="logo"
+                                                        onError={(e) => {
+                                                            e.target.src = 'https://via.placeholder.com/70x70?text=Logo';
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                <h3 className="card-title">{university.name}</h3>
+                                                
+                                                {university.shortName && (
+                                                    <p className="short-name">({university.shortName})</p>
+                                                )}
+                                                
+                                                <p className="location">
+                                                    <i className="fa-solid fa-location-dot"></i>
+                                                    {university.location || 'India'}
+                                                </p>
+
+                                                <div className="card-meta">
+                                                    {university.rating && (
+                                                        <span className="rating-badge">
+                                                            <i className="fa-solid fa-award"></i> NAAC {university.rating}
+                                                        </span>
+                                                    )}
+                                                    {university.accreditations?.slice(0, 2).map((acc, i) => (
+                                                        <span key={i} className="acc-badge">{acc}</span>
+                                                    ))}
+                                                </div>
+
+                                                {university.establishedYear && (
+                                                    <p className="established">
+                                                        <i className="fa-solid fa-calendar"></i>
+                                                        Est. {university.establishedYear}
+                                                    </p>
+                                                )}
+
+                                                <div className="fee-range">
+                                                    <div className="fee-info">
+                                                        <span className="fee-label">Fee Range</span>
+                                                        <span className="fee-value">
+                                                            ₹{Number(university.minFee || 0).toLocaleString('en-IN')} - ₹{Number(university.maxFee || 0).toLocaleString('en-IN')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="program-count">
+                                                        <i className="fa-solid fa-graduation-cap"></i>
+                                                        <span>{university.programCount || '10+'} Programs</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="view-btn">
+                                                    <span>View Details</span>
+                                                    <i className="fa-solid fa-arrow-right"></i>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </>
+                        ) : (
+                            <div className="empty-state">
+                                <div className="empty-icon-wrapper">
+                                    <i className="fa-solid fa-building-columns empty-icon"></i>
+                                </div>
+                                <h3 className="empty-title">No Universities Found</h3>
+                                <p className="empty-text">
+                                    We couldn't find any universities matching your criteria. 
+                                    Try adjusting your search or filters.
+                                </p>
+                                <button onClick={clearFilters} className="empty-clear-btn">
+                                    <i className="fa-solid fa-refresh"></i> Clear All Filters
+                                </button>
+                            </div>
+                        )}
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <Footer />
+                {/* Why Section */}
+                <section className="why-section">
+                    <div className="container">
+                        <div className="section-header">
+                            <span className="section-badge">
+                                <i className="fa-solid fa-star"></i> Why Choose Us
+                            </span>
+                            <h2 className="section-title">Why Our Partner Universities?</h2>
+                            <p className="section-subtitle">All our partner universities meet the highest standards</p>
+                        </div>
+
+                        <div className="why-grid">
+                            <div className="why-card">
+                                <div className="why-icon blue">
+                                    <i className="fa-solid fa-shield-check"></i>
+                                </div>
+                                <h3 className="why-card-title">UGC-DEB Approved</h3>
+                                <p className="why-card-desc">
+                                    All universities are approved by UGC-DEB for distance and online education
+                                </p>
+                            </div>
+                            <div className="why-card">
+                                <div className="why-icon maroon">
+                                    <i className="fa-solid fa-award"></i>
+                                </div>
+                                <h3 className="why-card-title">NAAC Accredited</h3>
+                                <p className="why-card-desc">
+                                    Top-rated institutions with excellent NAAC grades ensuring quality
+                                </p>
+                            </div>
+                            <div className="why-card">
+                                <div className="why-icon blue">
+                                    <i className="fa-solid fa-briefcase"></i>
+                                </div>
+                                <h3 className="why-card-title">Placement Support</h3>
+                                <p className="why-card-desc">
+                                    Dedicated placement cells and career support for all students
+                                </p>
+                            </div>
+                            <div className="why-card">
+                                <div className="why-icon maroon">
+                                    <i className="fa-solid fa-certificate"></i>
+                                </div>
+                                <h3 className="why-card-title">Recognized Degrees</h3>
+                                <p className="why-card-desc">
+                                    Degrees valid for government jobs, higher studies, and abroad
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* CTA Section */}
+                <section className="cta-section">
+                    <div className="cta-pattern"></div>
+                    <div className="container">
+                        <div className="cta-content">
+                            <div className="cta-icon">
+                                <i className="fa-solid fa-headset"></i>
+                            </div>
+                            <h2 className="cta-title">Can't find what you're looking for?</h2>
+                            <p className="cta-text">
+                                Our counselors can help you find the perfect university based on your requirements.
+                            </p>
+                            <div className="cta-tagline">
+                                <span>learn.</span>
+                                <span>grow.</span>
+                                <span>succeed.</span>
+                            </div>
+                            <Link to="/contact" className="cta-btn">
+                                <i className="fa-solid fa-phone"></i> Talk to a Counselor
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+
+                <Footer />
+            </div>
         </>
     );
 };
-
-// Edufolio Brand Colors from PDF
-const colors = {
-    // Primary Colors
-    lightBlue: '#0099D6',
-    darkBlue: '#00529D',
-    maroon: '#8B2346',
-    darkMaroon: '#6B1D3A',
-    
-    // Supporting Colors
-    pink: '#C4567A',
-    lightPink: '#E8B4C4',
-    
-    // Neutrals
-    white: '#FFFFFF',
-    lightGray: '#F5F7FA',
-    gray: '#64748B',
-    darkGray: '#1E293B',
-    
-    // Text Colors
-    textDark: '#2D1B4E',
-    textLight: '#FFFFFF',
-    textMuted: '#94A3B8'
-};
-
-const styles = {
-    // Hero Section - Blue Background with Images
-    hero: {
-        background: `linear-gradient(135deg, ${colors.darkBlue} 0%, #003D7A 100%)`,
-        padding: '100px 0 60px',
-        position: 'relative',
-        overflow: 'hidden'
-    },
-    heroPattern: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        opacity: 0.5
-    },
-    heroContainer: {
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: '0 20px',
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '60px',
-        alignItems: 'center',
-        position: 'relative',
-        zIndex: 2
-    },
-    heroContent: {
-        maxWidth: '550px'
-    },
-    heroBadge: {
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '8px',
-        background: 'rgba(0, 153, 214, 0.2)',
-        color: colors.lightBlue,
-        padding: '10px 20px',
-        borderRadius: '30px',
-        fontSize: '0.9rem',
-        fontWeight: '600',
-        marginBottom: '20px',
-        backdropFilter: 'blur(10px)'
-    },
-    heroTitle: {
-        color: colors.white,
-        fontSize: '2.8rem',
-        fontWeight: '800',
-        lineHeight: 1.2,
-        marginBottom: '20px'
-    },
-    highlight: {
-        color: colors.lightBlue
-    },
-    heroSubtitle: {
-        color: 'rgba(255, 255, 255, 0.85)',
-        fontSize: '1.1rem',
-        lineHeight: 1.7,
-        marginBottom: '20px'
-    },
-    tagline: {
-        display: 'flex',
-        gap: '15px',
-        marginBottom: '30px',
-        color: colors.lightBlue,
-        fontSize: '1.1rem',
-        fontWeight: '600',
-        fontStyle: 'italic'
-    },
-    heroStats: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '25px',
-        background: 'rgba(255, 255, 255, 0.1)',
-        padding: '20px 30px',
-        borderRadius: '16px',
-        backdropFilter: 'blur(10px)'
-    },
-    heroStat: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center'
-    },
-    heroStatNumber: {
-        color: colors.white,
-        fontSize: '1.8rem',
-        fontWeight: '800'
-    },
-    heroStatLabel: {
-        color: 'rgba(255, 255, 255, 0.7)',
-        fontSize: '0.85rem'
-    },
-    heroStatDivider: {
-        width: '1px',
-        height: '40px',
-        background: 'rgba(255, 255, 255, 0.2)'
-    },
-
-    // Hero Images Section
-    heroImages: {
-        position: 'relative',
-        height: '450px'
-    },
-    mainImageContainer: {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '380px',
-        height: '300px',
-        borderRadius: '24px',
-        overflow: 'hidden',
-        boxShadow: '0 30px 60px rgba(0, 0, 0, 0.4)',
-        border: '5px solid rgba(255, 255, 255, 0.2)'
-    },
-    mainImage: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover'
-    },
-    mainImageOverlay: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: '100px',
-        background: 'linear-gradient(to top, rgba(0, 82, 157, 0.6), transparent)'
-    },
-    floatingImage1: {
-        position: 'absolute',
-        top: '10px',
-        right: '20px',
-        width: '160px',
-        height: '110px',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.3)',
-        border: '4px solid rgba(255, 255, 255, 0.3)',
-        animation: 'float1 6s ease-in-out infinite'
-    },
-    floatingImage2: {
-        position: 'absolute',
-        bottom: '40px',
-        left: '10px',
-        width: '140px',
-        height: '100px',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.3)',
-        border: '4px solid rgba(255, 255, 255, 0.3)',
-        animation: 'float2 6s ease-in-out infinite'
-    },
-    floatingImg: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover'
-    },
-    floatingUniCard: {
-        position: 'absolute',
-        top: '30px',
-        left: '0',
-        background: colors.white,
-        padding: '15px 20px',
-        borderRadius: '14px',
-        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.2)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        animation: 'float1 5s ease-in-out infinite'
-    },
-    floatingUniIcon: {
-        width: '45px',
-        height: '45px',
-        borderRadius: '12px',
-        background: '#FEF3C7',
-        color: '#D97706',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '1.2rem'
-    },
-    floatingUniContent: {
-        display: 'flex',
-        flexDirection: 'column'
-    },
-    floatingUniNumber: {
-        color: colors.textDark,
-        fontSize: '1.2rem',
-        fontWeight: '800'
-    },
-    floatingUniLabel: {
-        color: colors.gray,
-        fontSize: '0.75rem'
-    },
-    floatingAccredCard: {
-        position: 'absolute',
-        bottom: '20px',
-        right: '0',
-        background: colors.white,
-        padding: '15px 20px',
-        borderRadius: '14px',
-        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.2)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        animation: 'float2 5s ease-in-out infinite'
-    },
-    floatingAccredIcon: {
-        width: '45px',
-        height: '45px',
-        borderRadius: '12px',
-        background: `${colors.darkBlue}15`,
-        color: colors.darkBlue,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '1.2rem'
-    },
-    floatingAccredContent: {
-        display: 'flex',
-        flexDirection: 'column'
-    },
-    floatingAccredNumber: {
-        color: colors.textDark,
-        fontSize: '1.2rem',
-        fontWeight: '800'
-    },
-    floatingAccredLabel: {
-        color: colors.gray,
-        fontSize: '0.75rem'
-    },
-    decorCircle1: {
-        position: 'absolute',
-        top: '15%',
-        right: '10%',
-        width: '70px',
-        height: '70px',
-        borderRadius: '50%',
-        border: `3px solid ${colors.lightBlue}40`,
-        animation: 'pulse 3s ease-in-out infinite'
-    },
-    decorCircle2: {
-        position: 'absolute',
-        bottom: '20%',
-        left: '5%',
-        width: '50px',
-        height: '50px',
-        borderRadius: '50%',
-        background: `${colors.lightBlue}20`,
-        animation: 'pulse 4s ease-in-out infinite'
-    },
-    decorDots: {
-        position: 'absolute',
-        top: '60%',
-        right: '5%',
-        width: '60px',
-        height: '60px',
-        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 2px, transparent 2px)',
-        backgroundSize: '12px 12px'
-    },
-
-    // Filter Section
-    filterSection: {
-        background: colors.white,
-        padding: '25px 20px',
-        borderBottom: `3px solid ${colors.lightGray}`,
-        position: 'sticky',
-        top: '70px',
-        zIndex: 100,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-    },
-    container: {
-        maxWidth: '1200px',
-        margin: '0 auto',
-        position: 'relative',
-        zIndex: 1
-    },
-    searchForm: {
-        display: 'flex',
-        gap: '15px',
-        marginBottom: '20px'
-    },
-    searchBox: {
-        position: 'relative',
-        flex: 1,
-        maxWidth: '500px'
-    },
-    searchIcon: {
-        position: 'absolute',
-        left: '18px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        color: colors.gray,
-        fontSize: '1rem'
-    },
-    searchInput: {
-        width: '100%',
-        padding: '16px 50px 16px 50px',
-        borderRadius: '12px',
-        border: `2px solid ${colors.lightGray}`,
-        fontSize: '1rem',
-        boxSizing: 'border-box',
-        transition: 'all 0.3s ease',
-        outline: 'none',
-        background: colors.lightGray
-    },
-    clearSearchBtn: {
-        position: 'absolute',
-        right: '15px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        background: colors.gray,
-        border: 'none',
-        width: '28px',
-        height: '28px',
-        borderRadius: '50%',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: colors.white,
-        fontSize: '0.8rem',
-        transition: 'background 0.3s ease'
-    },
-    searchBtn: {
-        padding: '16px 30px',
-        background: colors.darkBlue,
-        color: colors.white,
-        border: 'none',
-        borderRadius: '12px',
-        fontWeight: '600',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        fontSize: '1rem',
-        boxShadow: `0 4px 15px ${colors.darkBlue}40`,
-        transition: 'all 0.3s ease'
-    },
-    filters: {
-        display: 'flex',
-        gap: '15px',
-        flexWrap: 'wrap',
-        alignItems: 'center'
-    },
-    filterLabel: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        color: colors.textDark,
-        fontSize: '0.9rem',
-        fontWeight: '600'
-    },
-    filterSelect: {
-        padding: '12px 20px',
-        borderRadius: '10px',
-        border: `2px solid ${colors.lightGray}`,
-        fontSize: '0.9rem',
-        cursor: 'pointer',
-        minWidth: '160px',
-        background: colors.lightGray,
-        color: colors.textDark,
-        fontWeight: '500',
-        outline: 'none',
-        transition: 'all 0.3s ease'
-    },
-    clearBtn: {
-        padding: '12px 20px',
-        background: `${colors.maroon}15`,
-        color: colors.maroon,
-        border: 'none',
-        borderRadius: '10px',
-        fontSize: '0.9rem',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        fontWeight: '600',
-        transition: 'all 0.3s ease'
-    },
-
-    // Main Section
-    mainSection: {
-        padding: '50px 20px',
-        background: colors.lightGray,
-        minHeight: '60vh'
-    },
-    loading: {
-        textAlign: 'center',
-        padding: '80px 20px',
-        color: colors.gray
-    },
-    spinner: {
-        width: '50px',
-        height: '50px',
-        border: `4px solid ${colors.lightGray}`,
-        borderTopColor: colors.darkBlue,
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
-        margin: '0 auto 20px'
-    },
-    resultsHeader: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '25px',
-        flexWrap: 'wrap',
-        gap: '15px'
-    },
-    resultCount: {
-        color: colors.gray,
-        fontSize: '0.95rem',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        margin: 0
-    },
-    sortOptions: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px'
-    },
-    sortLabel: {
-        color: colors.gray,
-        fontSize: '0.9rem'
-    },
-    sortSelect: {
-        padding: '10px 15px',
-        borderRadius: '8px',
-        border: `1px solid ${colors.lightGray}`,
-        fontSize: '0.9rem',
-        cursor: 'pointer',
-        background: colors.white,
-        color: colors.textDark
-    },
-    grid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
-        gap: '30px'
-    },
-    card: {
-        background: colors.white,
-        borderRadius: '20px',
-        overflow: 'hidden',
-        textDecoration: 'none',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        border: `1px solid ${colors.lightGray}`
-    },
-    featuredBadge: {
-        position: 'absolute',
-        top: '15px',
-        right: '15px',
-        background: `linear-gradient(135deg, ${colors.maroon} 0%, ${colors.pink} 100%)`,
-        color: colors.white,
-        padding: '6px 14px',
-        borderRadius: '20px',
-        fontSize: '0.8rem',
-        fontWeight: '600',
-        zIndex: 2,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '5px',
-        boxShadow: `0 4px 10px ${colors.maroon}40`
-    },
-    cardBanner: {
-        height: '160px',
-        overflow: 'hidden',
-        position: 'relative'
-    },
-    bannerImg: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        transition: 'transform 0.3s ease'
-    },
-    bannerOverlay: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: '60px',
-        background: `linear-gradient(to top, ${colors.darkBlue}60, transparent)`
-    },
-    cardContent: {
-        padding: '25px',
-        position: 'relative',
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column'
-    },
-    logoWrapper: {
-        position: 'absolute',
-        top: '-40px',
-        left: '25px',
-        width: '80px',
-        height: '80px',
-        background: colors.white,
-        borderRadius: '16px',
-        padding: '8px',
-        boxShadow: '0 8px 25px rgba(0,0,0,0.12)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        border: `3px solid ${colors.lightGray}`
-    },
-    logo: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'contain',
-        borderRadius: '10px'
-    },
-    cardTitle: {
-        marginTop: '45px',
-        marginBottom: '5px',
-        color: colors.textDark,
-        fontSize: '1.25rem',
-        fontWeight: '700',
-        lineHeight: 1.3
-    },
-    shortName: {
-        color: colors.darkBlue,
-        fontSize: '0.9rem',
-        margin: '0 0 10px 0',
-        fontWeight: '500'
-    },
-    location: {
-        color: colors.gray,
-        fontSize: '0.9rem',
-        marginBottom: '15px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '6px'
-    },
-    cardMeta: {
-        display: 'flex',
-        gap: '8px',
-        flexWrap: 'wrap',
-        marginBottom: '15px'
-    },
-    ratingBadge: {
-        background: '#FEF3C7',
-        color: '#D97706',
-        padding: '6px 12px',
-        borderRadius: '8px',
-        fontSize: '0.8rem',
-        fontWeight: '600',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '5px'
-    },
-    accBadge: {
-        background: `${colors.darkBlue}15`,
-        color: colors.darkBlue,
-        padding: '6px 12px',
-        borderRadius: '8px',
-        fontSize: '0.8rem',
-        fontWeight: '500'
-    },
-    established: {
-        color: colors.gray,
-        fontSize: '0.85rem',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '6px',
-        marginBottom: '15px'
-    },
-    feeRange: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '15px',
-        background: colors.lightGray,
-        borderRadius: '12px',
-        marginBottom: '15px',
-        marginTop: 'auto'
-    },
-    feeInfo: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '4px'
-    },
-    feeLabel: {
-        color: colors.gray,
-        fontSize: '0.8rem'
-    },
-    feeValue: {
-        color: colors.maroon,
-        fontWeight: '700',
-        fontSize: '0.95rem'
-    },
-    programCount: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '6px',
-        color: colors.darkBlue,
-        fontSize: '0.85rem',
-        background: colors.white,
-        padding: '8px 12px',
-        borderRadius: '8px',
-        fontWeight: '600'
-    },
-    viewBtn: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '10px',
-        padding: '14px',
-        background: `linear-gradient(135deg, ${colors.darkBlue} 0%, #003D7A 100%)`,
-        color: colors.white,
-        borderRadius: '12px',
-        fontWeight: '600',
-        fontSize: '0.95rem',
-        transition: 'all 0.3s ease'
-    },
-
-    // Empty State
-    emptyState: {
-        textAlign: 'center',
-        padding: '100px 20px',
-        maxWidth: '500px',
-        margin: '0 auto',
-        background: colors.white,
-        borderRadius: '20px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.06)'
-    },
-    emptyIconWrapper: {
-        width: '100px',
-        height: '100px',
-        borderRadius: '50%',
-        background: `${colors.darkBlue}10`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '0 auto 25px'
-    },
-    emptyIcon: {
-        fontSize: '2.5rem',
-        color: colors.darkBlue
-    },
-    emptyTitle: {
-        color: colors.textDark,
-        fontSize: '1.5rem',
-        fontWeight: '700',
-        marginBottom: '10px'
-    },
-    emptyText: {
-        color: colors.gray,
-        fontSize: '1rem',
-        lineHeight: 1.6,
-        marginBottom: '25px'
-    },
-    clearFiltersBtn: {
-        padding: '14px 28px',
-        background: colors.darkBlue,
-        color: colors.white,
-        border: 'none',
-        borderRadius: '12px',
-        cursor: 'pointer',
-        fontWeight: '600',
-        fontSize: '1rem',
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '10px',
-        boxShadow: `0 4px 15px ${colors.darkBlue}30`,
-        transition: 'all 0.3s ease'
-    },
-
-    // Why Section
-    whySection: {
-        padding: '80px 20px',
-        background: colors.white
-    },
-    sectionHeader: {
-        textAlign: 'center',
-        marginBottom: '50px'
-    },
-    sectionBadge: {
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '8px',
-        background: `${colors.maroon}15`,
-        color: colors.maroon,
-        padding: '10px 20px',
-        borderRadius: '30px',
-        fontSize: '0.9rem',
-        fontWeight: '600',
-        marginBottom: '15px'
-    },
-    sectionTitle: {
-        color: colors.textDark,
-        fontSize: '2rem',
-        fontWeight: '800',
-        marginBottom: '10px'
-    },
-    sectionSubtitle: {
-        color: colors.gray,
-        fontSize: '1.05rem'
-    },
-    whyGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '25px'
-    },
-    whyCard: {
-        textAlign: 'center',
-        padding: '30px 20px',
-        borderRadius: '16px',
-        background: colors.lightGray,
-        transition: 'all 0.3s ease',
-        border: `1px solid ${colors.lightGray}`
-    },
-    whyIconBlue: {
-        width: '70px',
-        height: '70px',
-        borderRadius: '50%',
-        background: `${colors.darkBlue}15`,
-        color: colors.darkBlue,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '0 auto 20px',
-        fontSize: '1.5rem'
-    },
-    whyIconMaroon: {
-        width: '70px',
-        height: '70px',
-        borderRadius: '50%',
-        background: `${colors.maroon}15`,
-        color: colors.maroon,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '0 auto 20px',
-        fontSize: '1.5rem'
-    },
-    whyCardTitle: {
-        color: colors.textDark,
-        fontSize: '1.1rem',
-        fontWeight: '700',
-        marginBottom: '10px'
-    },
-    whyCardDesc: {
-        color: colors.gray,
-        fontSize: '0.9rem',
-        lineHeight: 1.6,
-        margin: 0
-    },
-
-    // CTA Section - Maroon Background
-    ctaSection: {
-        padding: '80px 20px',
-        background: `linear-gradient(135deg, ${colors.darkMaroon} 0%, ${colors.maroon} 100%)`,
-        position: 'relative',
-        overflow: 'hidden'
-    },
-    ctaPattern: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        opacity: 0.5
-    },
-    ctaContent: {
-        textAlign: 'center',
-        maxWidth: '600px',
-        margin: '0 auto',
-        position: 'relative',
-        zIndex: 1
-    },
-    ctaIcon: {
-        width: '80px',
-        height: '80px',
-        borderRadius: '50%',
-        background: 'rgba(0, 153, 214, 0.2)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '0 auto 25px',
-        fontSize: '2rem',
-        color: colors.lightBlue
-    },
-    ctaTitle: {
-        color: colors.white,
-        fontSize: '2rem',
-        fontWeight: '800',
-        marginBottom: '15px'
-    },
-    ctaText: {
-        color: 'rgba(255, 255, 255, 0.85)',
-        fontSize: '1.1rem',
-        marginBottom: '20px',
-        lineHeight: 1.6
-    },
-    ctaTagline: {
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '15px',
-        marginBottom: '30px',
-        color: colors.lightBlue,
-        fontSize: '1.1rem',
-        fontWeight: '600',
-        fontStyle: 'italic'
-    },
-    ctaBtn: {
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '10px',
-        padding: '16px 32px',
-        background: colors.lightBlue,
-        color: colors.white,
-        borderRadius: '12px',
-        textDecoration: 'none',
-        fontWeight: '600',
-        fontSize: '1rem',
-        boxShadow: `0 4px 20px ${colors.lightBlue}40`,
-        transition: 'all 0.3s ease'
-    }
-};
-
-// Add keyframes and responsive styles
-if (typeof document !== 'undefined') {
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = `
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        @keyframes float1 {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-        }
-        
-        @keyframes float2 {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
-        
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        .search-input:focus {
-            border-color: ${colors.darkBlue} !important;
-            box-shadow: 0 0 0 3px ${colors.darkBlue}20 !important;
-            background: ${colors.white} !important;
-        }
-        
-        .filter-select:focus {
-            border-color: ${colors.darkBlue} !important;
-            background: ${colors.white} !important;
-        }
-        
-        .why-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            background: ${colors.white};
-        }
-        
-        @media (max-width: 1024px) {
-            .hero-container {
-                grid-template-columns: 1fr !important;
-                text-align: center;
-            }
-            .hero-content {
-                max-width: 100% !important;
-            }
-            .hero-images {
-                display: none !important;
-            }
-            .hero-stats {
-                justify-content: center;
-            }
-            .tagline {
-                justify-content: center;
-            }
-            .why-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .hero-title { 
-                font-size: 2rem !important; 
-            }
-            .grid { 
-                grid-template-columns: 1fr !important; 
-            }
-            .results-header { 
-                flex-direction: column; 
-                align-items: flex-start; 
-            }
-            .search-form { 
-                flex-direction: column; 
-            }
-            .why-grid {
-                grid-template-columns: 1fr !important;
-            }
-            .hero-stats {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .hero-stat-divider {
-                display: none;
-            }
-        }
-    `;
-    document.head.appendChild(styleSheet);
-}
 
 export default Universities;
