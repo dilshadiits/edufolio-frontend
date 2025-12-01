@@ -138,14 +138,14 @@ const Navbar = () => {
                     display: flex !important;
                     align-items: center !important;
                     justify-content: flex-start !important;
-                    height: 45px !important;
+                    height: 50px !important;
                     width: 180px !important;
                     flex-shrink: 0 !important;
                 }
 
                 .logo-white,
                 .logo-black {
-                    height: 45px !important;
+                    height: 170px !important;
                     width: auto !important;
                     max-width: 180px !important;
                     object-fit: contain !important;
