@@ -118,7 +118,7 @@ const Navbar = () => {
 
                 .logo-white,
                 .logo-black {
-                    height: 100px;
+                    height: 200px;
                     width: auto;
                     transition: opacity var(--nav-transition);
                     object-fit: contain;
