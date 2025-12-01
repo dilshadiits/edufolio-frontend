@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
+// Import your logo images (adjust paths based on your project structure)
+import logoWhite from '../assets/images/edufolio-logo-white.png';
+import logoBlack from '../assets/images/edufolio-logo-black.png';
+
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const location = useLocation();
-
-    // Logo URLs
-    const logoWhite = "https://i.pinimg.com/736x/48/98/7c/48987c8e3c2a3d6b97ec6a8a89e80015.jpg";
-    const logoBlack = "https://i.pinimg.com/736x/87/76/2e/87762e5b8c3217b306173f3e79c28fe8.jpg";
 
     useEffect(() => {
         const handleScroll = () => {
@@ -48,19 +48,13 @@ const Navbar = () => {
 
     const isActive = (path) => location.pathname === path;
 
-    // Determine which logo to show
-    const currentLogo = (isScrolled || isMobileMenuOpen) ? logoBlack : logoWhite;
-
-    // Dynamic classes based on state
     const navbarClass = `navbar ${isScrolled ? 'scrolled' : ''} ${isMobileMenuOpen ? 'menu-open' : ''}`;
 
     return (
         <>
             <style>{`
-                /* ==================== NAVBAR STYLES ==================== */
                 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
-                /* ==================== CSS VARIABLES ==================== */
                 :root {
                     --nav-light-blue: #0099D6;
                     --nav-dark-blue: #00529D;
@@ -76,7 +70,6 @@ const Navbar = () => {
                     --nav-radius-lg: 12px;
                 }
 
-                /* ==================== BASE NAVBAR ==================== */
                 .navbar {
                     position: fixed;
                     top: 0;
@@ -104,40 +97,34 @@ const Navbar = () => {
                     align-items: center;
                 }
 
-                /* ==================== LOGO ==================== */
+                /* ==================== LOGO STYLES ==================== */
                 .navbar-logo {
                     display: flex;
                     align-items: center;
                     text-decoration: none;
-                    gap: 10px;
                 }
 
-                .logo-image-container {
+                .logo-wrapper {
                     position: relative;
-                    width: 140px;
-                    height: 50px;
+                    height: 45px;
                     display: flex;
                     align-items: center;
-                    justify-content: center;
-                    overflow: hidden;
                 }
 
-                .logo-image {
-                    max-width: 100%;
-                    max-height: 100%;
+                .logo-img {
+                    height: 45px;
                     width: auto;
-                    height: auto;
                     object-fit: contain;
-                    transition: opacity var(--nav-transition), transform var(--nav-transition);
+                    position: absolute;
+                    left: 0;
+                    transition: opacity 0.3s ease;
                 }
 
                 .logo-white {
-                    position: absolute;
                     opacity: 1;
                 }
 
                 .logo-black {
-                    position: absolute;
                     opacity: 0;
                 }
 
@@ -151,8 +138,14 @@ const Navbar = () => {
                     opacity: 1;
                 }
 
-                .navbar-logo:hover .logo-image {
+                .navbar-logo:hover .logo-img {
                     transform: scale(1.02);
+                }
+
+                /* Placeholder to maintain space */
+                .logo-placeholder {
+                    height: 45px;
+                    width: 180px;
                 }
 
                 /* ==================== NAV LINKS ==================== */
@@ -485,9 +478,13 @@ const Navbar = () => {
                         display: flex !important;
                     }
 
-                    .logo-image-container {
-                        width: 120px;
-                        height: 45px;
+                    .logo-img {
+                        height: 38px;
+                    }
+
+                    .logo-placeholder {
+                        height: 38px;
+                        width: 150px;
                     }
                 }
 
@@ -496,9 +493,13 @@ const Navbar = () => {
                         padding: 0 15px;
                     }
 
-                    .logo-image-container {
-                        width: 100px;
-                        height: 40px;
+                    .logo-img {
+                        height: 32px;
+                    }
+
+                    .logo-placeholder {
+                        height: 32px;
+                        width: 130px;
                     }
 
                     .mobile-menu {
@@ -506,7 +507,7 @@ const Navbar = () => {
                     }
                 }
 
-                /* ==================== TOUCH DEVICES ==================== */
+                /* ==================== TOUCH & ACCESSIBILITY ==================== */
                 @media (hover: none) and (pointer: coarse) {
                     .login-btn:hover,
                     .cta-btn:hover,
@@ -531,7 +532,6 @@ const Navbar = () => {
                     }
                 }
 
-                /* ==================== REDUCED MOTION ==================== */
                 @media (prefers-reduced-motion: reduce) {
                     .navbar,
                     .nav-link,
@@ -539,13 +539,12 @@ const Navbar = () => {
                     .cta-btn,
                     .mobile-menu,
                     .navbar-overlay,
-                    .logo-image {
+                    .logo-img {
                         animation: none !important;
                         transition-duration: 0.01ms !important;
                     }
                 }
 
-                /* ==================== FOCUS STATES ==================== */
                 .nav-link:focus,
                 .login-btn:focus,
                 .cta-btn:focus,
@@ -557,27 +556,25 @@ const Navbar = () => {
                     outline: 3px solid var(--nav-light-blue);
                     outline-offset: 2px;
                 }
-
-                .mobile-menu-btn:focus {
-                    outline-offset: 0;
-                }
             `}</style>
 
             <nav className={navbarClass}>
                 <div className="navbar-container">
-                    {/* Logo with image swap on scroll */}
+                    {/* Logo */}
                     <Link to="/" className="navbar-logo">
-                        <div className="logo-image-container">
+                        <div className="logo-wrapper">
                             <img 
                                 src={logoWhite} 
-                                alt="EduFolio Logo" 
-                                className="logo-image logo-white"
+                                alt="EduFolio" 
+                                className="logo-img logo-white"
                             />
                             <img 
                                 src={logoBlack} 
-                                alt="EduFolio Logo" 
-                                className="logo-image logo-black"
+                                alt="EduFolio" 
+                                className="logo-img logo-black"
                             />
+                            {/* Invisible placeholder to maintain layout */}
+                            <div className="logo-placeholder" aria-hidden="true"></div>
                         </div>
                     </Link>
 
@@ -675,7 +672,6 @@ const Navbar = () => {
                 )}
             </nav>
 
-            {/* Overlay for mobile menu */}
             {isMobileMenuOpen && (
                 <div 
                     className="navbar-overlay"
