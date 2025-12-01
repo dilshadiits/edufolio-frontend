@@ -7,6 +7,10 @@ const Navbar = () => {
     const [isMobile, setIsMobile] = useState(false);
     const location = useLocation();
 
+    // Logo URLs
+    const logoWhite = "https://i.pinimg.com/736x/48/98/7c/48987c8e3c2a3d6b97ec6a8a89e80015.jpg";
+    const logoBlack = "https://i.pinimg.com/736x/87/76/2e/87762e5b8c3217b306173f3e79c28fe8.jpg";
+
     useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 50);
@@ -43,6 +47,9 @@ const Navbar = () => {
     ];
 
     const isActive = (path) => location.pathname === path;
+
+    // Determine which logo to show
+    const currentLogo = (isScrolled || isMobileMenuOpen) ? logoBlack : logoWhite;
 
     // Dynamic classes based on state
     const navbarClass = `navbar ${isScrolled ? 'scrolled' : ''} ${isMobileMenuOpen ? 'menu-open' : ''}`;
@@ -105,45 +112,47 @@ const Navbar = () => {
                     gap: 10px;
                 }
 
-                .logo-icon {
-                    width: 44px;
-                    height: 44px;
-                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
-                    border-radius: var(--nav-radius-lg);
+                .logo-image-container {
+                    position: relative;
+                    width: 140px;
+                    height: 50px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    box-shadow: 0 4px 15px rgba(139, 35, 70, 0.4);
-                    flex-shrink: 0;
+                    overflow: hidden;
                 }
 
-                .logo-text {
-                    display: flex;
-                    font-size: 1.6rem;
-                    font-weight: 700;
-                    letter-spacing: -0.5px;
+                .logo-image {
+                    max-width: 100%;
+                    max-height: 100%;
+                    width: auto;
+                    height: auto;
+                    object-fit: contain;
+                    transition: opacity var(--nav-transition), transform var(--nav-transition);
                 }
 
-                .logo-edu {
-                    font-weight: 800;
-                    transition: color var(--nav-transition);
-                    color: var(--nav-white);
+                .logo-white {
+                    position: absolute;
+                    opacity: 1;
                 }
 
-                .logo-folio {
-                    font-weight: 400;
-                    transition: color var(--nav-transition);
-                    color: var(--nav-light-blue);
+                .logo-black {
+                    position: absolute;
+                    opacity: 0;
                 }
 
-                .navbar.scrolled .logo-edu,
-                .navbar.menu-open .logo-edu {
-                    color: var(--nav-maroon);
+                .navbar.scrolled .logo-white,
+                .navbar.menu-open .logo-white {
+                    opacity: 0;
                 }
 
-                .navbar.scrolled .logo-folio,
-                .navbar.menu-open .logo-folio {
-                    color: var(--nav-dark-blue);
+                .navbar.scrolled .logo-black,
+                .navbar.menu-open .logo-black {
+                    opacity: 1;
+                }
+
+                .navbar-logo:hover .logo-image {
+                    transform: scale(1.02);
                 }
 
                 /* ==================== NAV LINKS ==================== */
@@ -475,6 +484,11 @@ const Navbar = () => {
                     .mobile-menu-btn {
                         display: flex !important;
                     }
+
+                    .logo-image-container {
+                        width: 120px;
+                        height: 45px;
+                    }
                 }
 
                 @media screen and (max-width: 480px) {
@@ -482,12 +496,8 @@ const Navbar = () => {
                         padding: 0 15px;
                     }
 
-                    .logo-text {
-                        font-size: 1.4rem;
-                    }
-
-                    .logo-icon {
-                        width: 40px;
+                    .logo-image-container {
+                        width: 100px;
                         height: 40px;
                     }
 
@@ -528,7 +538,8 @@ const Navbar = () => {
                     .login-btn,
                     .cta-btn,
                     .mobile-menu,
-                    .navbar-overlay {
+                    .navbar-overlay,
+                    .logo-image {
                         animation: none !important;
                         transition-duration: 0.01ms !important;
                     }
@@ -554,21 +565,19 @@ const Navbar = () => {
 
             <nav className={navbarClass}>
                 <div className="navbar-container">
-                    {/* Logo */}
+                    {/* Logo with image swap on scroll */}
                     <Link to="/" className="navbar-logo">
-                        <div className="logo-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 3L20 7.5V9H4V7.5L12 3Z" fill="white"/>
-                                <path d="M6 10H18V11L12 14L6 11V10Z" fill="#0099D6"/>
-                                <path d="M8 12V16L12 18L16 16V12" stroke="white" strokeWidth="1.5" fill="none"/>
-                                <circle cx="12" cy="6" r="1.5" fill="#0099D6"/>
-                                <line x1="12" y1="18" x2="12" y2="21" stroke="white" strokeWidth="1.5"/>
-                                <circle cx="12" cy="21" r="1" fill="white"/>
-                            </svg>
-                        </div>
-                        <div className="logo-text">
-                            <span className="logo-edu">edu</span>
-                            <span className="logo-folio">folio</span>
+                        <div className="logo-image-container">
+                            <img 
+                                src={logoWhite} 
+                                alt="EduFolio Logo" 
+                                className="logo-image logo-white"
+                            />
+                            <img 
+                                src={logoBlack} 
+                                alt="EduFolio Logo" 
+                                className="logo-image logo-black"
+                            />
                         </div>
                     </Link>
 
