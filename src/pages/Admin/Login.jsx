@@ -2,17 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import API_BASE from '../../api';
+
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [focusedField, setFocusedField] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
-
-
     useEffect(() => {
-        // Check if already logged in
         const token = localStorage.getItem('token');
         if (token) {
             navigate('/admin/dashboard');
@@ -44,106 +44,177 @@ const Login = () => {
 
     return (
         <div style={styles.container}>
-            {/* Background Pattern */}
-            <div style={styles.bgPattern}></div>
+            {/* Animated Background */}
+            <div style={styles.bgGradient}></div>
+            <div style={styles.orb1}></div>
+            <div style={styles.orb2}></div>
+            <div style={styles.orb3}></div>
+            
+            {/* Floating particles */}
+            <div style={styles.particles}>
+                {[...Array(20)].map((_, i) => (
+                    <div 
+                        key={i} 
+                        style={{
+                            ...styles.particle,
+                            left: `${Math.random() * 100}%`,
+                            animationDelay: `${Math.random() * 5}s`,
+                            animationDuration: `${15 + Math.random() * 10}s`
+                        }}
+                    />
+                ))}
+            </div>
 
             <div style={styles.card}>
+                {/* Glow effect */}
+                <div style={styles.cardGlow}></div>
+                
                 {/* Header */}
                 <div style={styles.header}>
-                    <div style={styles.iconWrapper}>
-                        <i className="fa-solid fa-graduation-cap" style={styles.icon}></i>
+                    <div style={styles.logoContainer}>
+                        <div style={styles.logoRing}></div>
+                        <div style={styles.iconWrapper}>
+                            <i className="fa-solid fa-graduation-cap" style={styles.icon}></i>
+                        </div>
                     </div>
-                    <h1 style={styles.title}>EduFolio Admin</h1>
-                    <p style={styles.subtitle}>Sign in to manage your platform</p>
+                    <h1 style={styles.title}>Welcome Back</h1>
+                    <p style={styles.subtitle}>Sign in to EduFolio Admin Panel</p>
                 </div>
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} style={styles.form}>
                     {error && (
                         <div style={styles.error}>
-                            <i className="fa-solid fa-exclamation-circle"></i>
+                            <div style={styles.errorIcon}>
+                                <i className="fa-solid fa-exclamation"></i>
+                            </div>
                             <span>{error}</span>
                         </div>
                     )}
 
                     <div style={styles.field}>
-                        <label style={styles.label}>
-                            <i className="fa-solid fa-envelope" style={styles.labelIcon}></i>
-                            Email Address
-                        </label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="admin@edufolio.com"
-                            style={styles.input}
-                            required
-                            disabled={loading}
-                        />
+                        <div style={{
+                            ...styles.inputWrapper,
+                            ...(focusedField === 'email' ? styles.inputWrapperFocused : {}),
+                            ...(email ? styles.inputWrapperFilled : {})
+                        }}>
+                            <div style={{
+                                ...styles.inputIcon,
+                                ...(focusedField === 'email' ? styles.inputIconActive : {})
+                            }}>
+                                <i className="fa-solid fa-envelope"></i>
+                            </div>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                onFocus={() => setFocusedField('email')}
+                                onBlur={() => setFocusedField(null)}
+                                placeholder="Email Address"
+                                style={styles.input}
+                                required
+                                disabled={loading}
+                            />
+                        </div>
                     </div>
 
                     <div style={styles.field}>
-                        <label style={styles.label}>
-                            <i className="fa-solid fa-lock" style={styles.labelIcon}></i>
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Enter your password"
-                            style={styles.input}
-                            required
-                            disabled={loading}
-                        />
+                        <div style={{
+                            ...styles.inputWrapper,
+                            ...(focusedField === 'password' ? styles.inputWrapperFocused : {}),
+                            ...(password ? styles.inputWrapperFilled : {})
+                        }}>
+                            <div style={{
+                                ...styles.inputIcon,
+                                ...(focusedField === 'password' ? styles.inputIconActive : {})
+                            }}>
+                                <i className="fa-solid fa-lock"></i>
+                            </div>
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                onFocus={() => setFocusedField('password')}
+                                onBlur={() => setFocusedField(null)}
+                                placeholder="Password"
+                                style={styles.input}
+                                required
+                                disabled={loading}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={styles.togglePassword}
+                            >
+                                <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                            </button>
+                        </div>
                     </div>
 
                     <button
                         type="submit"
                         style={{
                             ...styles.button,
-                            opacity: loading ? 0.7 : 1,
-                            cursor: loading ? 'not-allowed' : 'pointer'
+                            ...(loading ? styles.buttonLoading : {})
                         }}
                         disabled={loading}
                     >
-                        {loading ? (
-                            <>
-                                <i className="fa-solid fa-spinner fa-spin"></i>
-                                <span>Signing in...</span>
-                            </>
-                        ) : (
-                            <>
-                                <i className="fa-solid fa-right-to-bracket"></i>
-                                <span>Sign In</span>
-                            </>
-                        )}
+                        <span style={styles.buttonContent}>
+                            {loading ? (
+                                <>
+                                    <div style={styles.spinner}></div>
+                                    <span>Authenticating...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span>Sign In</span>
+                                    <i className="fa-solid fa-arrow-right" style={styles.buttonArrow}></i>
+                                </>
+                            )}
+                        </span>
+                        <div style={styles.buttonShine}></div>
                     </button>
                 </form>
-
-                {/* Footer */}
-                <div style={styles.footer}>
-                    <div style={styles.divider}>
-                        <span style={styles.dividerText}>Default Credentials</span>
-                    </div>
-                    <div style={styles.credentials}>
-                        <p style={styles.credentialItem}>
-                            <i className="fa-solid fa-user"></i>
-                            <span>admin@edufolio.com</span>
-                        </p>
-                        <p style={styles.credentialItem}>
-                            <i className="fa-solid fa-key"></i>
-                            <span>admin123</span>
-                        </p>
-                    </div>
-                </div>
 
                 {/* Back to site */}
                 <a href="/" style={styles.backLink}>
                     <i className="fa-solid fa-arrow-left"></i>
-                    Back to Website
+                    <span>Back to Website</span>
                 </a>
             </div>
+
+            <style>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) rotate(0deg); }
+                    50% { transform: translateY(-20px) rotate(5deg); }
+                }
+                @keyframes pulse {
+                    0%, 100% { transform: scale(1); opacity: 0.5; }
+                    50% { transform: scale(1.1); opacity: 0.8; }
+                }
+                @keyframes rise {
+                    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+                    10% { opacity: 1; }
+                    90% { opacity: 1; }
+                    100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+                }
+                @keyframes shimmer {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                }
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                @keyframes ringPulse {
+                    0%, 100% { transform: scale(1); opacity: 0.3; }
+                    50% { transform: scale(1.2); opacity: 0.1; }
+                }
+                @keyframes glow {
+                    0%, 100% { opacity: 0.5; }
+                    50% { opacity: 0.8; }
+                }
+            `}</style>
         </div>
     );
 };
@@ -154,160 +225,280 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%)',
+        background: '#0a0a0f',
         padding: '20px',
         position: 'relative',
         overflow: 'hidden'
     },
-    bgPattern: {
+    bgGradient: {
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        opacity: 0.5
+        background: 'radial-gradient(ellipse at 50% 50%, #1a1a2e 0%, #0a0a0f 70%)',
+    },
+    orb1: {
+        position: 'absolute',
+        width: '600px',
+        height: '600px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(255, 107, 53, 0.15) 0%, transparent 70%)',
+        top: '-200px',
+        right: '-200px',
+        animation: 'pulse 8s ease-in-out infinite',
+    },
+    orb2: {
+        position: 'absolute',
+        width: '500px',
+        height: '500px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)',
+        bottom: '-150px',
+        left: '-150px',
+        animation: 'pulse 10s ease-in-out infinite',
+        animationDelay: '2s',
+    },
+    orb3: {
+        position: 'absolute',
+        width: '300px',
+        height: '300px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%)',
+        top: '50%',
+        left: '10%',
+        animation: 'float 12s ease-in-out infinite',
+    },
+    particles: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflow: 'hidden',
+        pointerEvents: 'none',
+    },
+    particle: {
+        position: 'absolute',
+        width: '4px',
+        height: '4px',
+        background: 'rgba(255, 255, 255, 0.3)',
+        borderRadius: '50%',
+        bottom: '-10px',
+        animation: 'rise 20s linear infinite',
     },
     card: {
-        background: '#fff',
+        background: 'rgba(255, 255, 255, 0.03)',
+        backdropFilter: 'blur(20px)',
         borderRadius: '24px',
-        padding: '40px',
+        padding: '50px 40px',
         width: '100%',
         maxWidth: '420px',
-        boxShadow: '0 25px 80px rgba(0,0,0,0.4)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
         position: 'relative',
-        zIndex: 1
+        zIndex: 1,
+        overflow: 'hidden',
+    },
+    cardGlow: {
+        position: 'absolute',
+        top: '-50%',
+        left: '-50%',
+        width: '200%',
+        height: '200%',
+        background: 'conic-gradient(from 0deg, transparent, rgba(255, 107, 53, 0.1), transparent 30%)',
+        animation: 'spin 10s linear infinite',
+        pointerEvents: 'none',
     },
     header: {
         textAlign: 'center',
-        marginBottom: '35px'
+        marginBottom: '40px',
+        position: 'relative',
+        zIndex: 1,
+    },
+    logoContainer: {
+        position: 'relative',
+        width: '90px',
+        height: '90px',
+        margin: '0 auto 25px',
+    },
+    logoRing: {
+        position: 'absolute',
+        top: '-10px',
+        left: '-10px',
+        right: '-10px',
+        bottom: '-10px',
+        border: '2px solid rgba(255, 107, 53, 0.3)',
+        borderRadius: '50%',
+        animation: 'ringPulse 3s ease-in-out infinite',
     },
     iconWrapper: {
-        width: '80px',
-        height: '80px',
-        background: 'linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%)',
-        borderRadius: '20px',
+        width: '90px',
+        height: '90px',
+        background: 'linear-gradient(135deg, #FF6B35 0%, #FF8B5C 50%, #FF6B35 100%)',
+        backgroundSize: '200% 200%',
+        borderRadius: '24px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        margin: '0 auto 20px',
-        boxShadow: '0 10px 30px rgba(255, 107, 53, 0.3)'
+        boxShadow: '0 20px 40px rgba(255, 107, 53, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+        animation: 'float 6s ease-in-out infinite',
     },
     icon: {
-        fontSize: '2.2rem',
-        color: '#fff'
+        fontSize: '2.5rem',
+        color: '#fff',
     },
     title: {
         margin: '0 0 8px',
-        color: '#0F172A',
-        fontSize: '1.8rem',
-        fontWeight: '700'
+        color: '#fff',
+        fontSize: '2rem',
+        fontWeight: '700',
+        letterSpacing: '-0.5px',
     },
     subtitle: {
         margin: 0,
-        color: '#64748B',
-        fontSize: '0.95rem'
+        color: 'rgba(255, 255, 255, 0.5)',
+        fontSize: '0.95rem',
+        fontWeight: '400',
     },
     form: {
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px'
+        gap: '20px',
+        position: 'relative',
+        zIndex: 1,
     },
     field: {
         display: 'flex',
         flexDirection: 'column',
-        gap: '8px'
     },
-    label: {
-        color: '#334155',
-        fontWeight: '600',
-        fontSize: '0.9rem',
+    inputWrapper: {
+        position: 'relative',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px'
+        background: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: '14px',
+        border: '2px solid rgba(255, 255, 255, 0.1)',
+        transition: 'all 0.3s ease',
+        overflow: 'hidden',
     },
-    labelIcon: {
+    inputWrapperFocused: {
+        border: '2px solid rgba(255, 107, 53, 0.5)',
+        background: 'rgba(255, 255, 255, 0.08)',
+        boxShadow: '0 0 30px rgba(255, 107, 53, 0.15)',
+    },
+    inputWrapperFilled: {
+        border: '2px solid rgba(255, 255, 255, 0.2)',
+    },
+    inputIcon: {
+        padding: '0 0 0 18px',
+        color: 'rgba(255, 255, 255, 0.3)',
+        fontSize: '1rem',
+        transition: 'all 0.3s ease',
+    },
+    inputIconActive: {
         color: '#FF6B35',
-        fontSize: '0.85rem'
     },
     input: {
-        padding: '14px 18px',
-        borderRadius: '12px',
-        border: '2px solid #E2E8F0',
+        flex: 1,
+        padding: '18px 18px',
+        background: 'transparent',
+        border: 'none',
         fontSize: '1rem',
-        transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+        color: '#fff',
+        outline: 'none',
         width: '100%',
-        boxSizing: 'border-box'
+    },
+    togglePassword: {
+        background: 'transparent',
+        border: 'none',
+        color: 'rgba(255, 255, 255, 0.3)',
+        padding: '0 18px',
+        cursor: 'pointer',
+        fontSize: '1rem',
+        transition: 'color 0.3s ease',
     },
     button: {
-        padding: '16px',
+        position: 'relative',
+        padding: '18px 24px',
         background: 'linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%)',
         color: '#fff',
         border: 'none',
-        borderRadius: '12px',
+        borderRadius: '14px',
         fontSize: '1rem',
         fontWeight: '600',
+        marginTop: '10px',
+        cursor: 'pointer',
+        overflow: 'hidden',
+        transition: 'all 0.3s ease',
+        boxShadow: '0 10px 40px rgba(255, 107, 53, 0.3)',
+    },
+    buttonLoading: {
+        opacity: 0.8,
+        cursor: 'not-allowed',
+    },
+    buttonContent: {
+        position: 'relative',
+        zIndex: 1,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: '10px',
-        marginTop: '10px',
-        boxShadow: '0 4px 20px rgba(255, 107, 53, 0.35)',
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-        cursor: 'pointer'
+    },
+    buttonArrow: {
+        transition: 'transform 0.3s ease',
+    },
+    buttonShine: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
+        animation: 'shimmer 3s infinite',
+    },
+    spinner: {
+        width: '20px',
+        height: '20px',
+        border: '2px solid rgba(255, 255, 255, 0.3)',
+        borderTopColor: '#fff',
+        borderRadius: '50%',
+        animation: 'spin 0.8s linear infinite',
     },
     error: {
-        background: '#FEF2F2',
-        color: '#DC2626',
-        padding: '14px 18px',
+        background: 'rgba(220, 38, 38, 0.1)',
+        color: '#ff6b6b',
+        padding: '16px 18px',
         borderRadius: '12px',
         fontSize: '0.9rem',
         display: 'flex',
         alignItems: 'center',
-        gap: '10px',
-        border: '1px solid #FECACA'
+        gap: '12px',
+        border: '1px solid rgba(220, 38, 38, 0.2)',
+        backdropFilter: 'blur(10px)',
     },
-    footer: {
-        marginTop: '30px'
-    },
-    divider: {
-        textAlign: 'center',
-        position: 'relative',
-        marginBottom: '15px'
-    },
-    dividerText: {
-        background: '#fff',
-        padding: '0 15px',
-        color: '#94A3B8',
-        fontSize: '0.8rem',
-        position: 'relative',
-        zIndex: 1
-    },
-    credentials: {
-        background: '#F8FAFC',
-        padding: '15px 20px',
-        borderRadius: '12px',
-        border: '1px dashed #CBD5E1'
-    },
-    credentialItem: {
-        margin: '8px 0',
-        color: '#64748B',
-        fontSize: '0.85rem',
+    errorIcon: {
+        width: '24px',
+        height: '24px',
+        background: 'rgba(220, 38, 38, 0.2)',
+        borderRadius: '50%',
         display: 'flex',
         alignItems: 'center',
-        gap: '10px'
+        justifyContent: 'center',
+        fontSize: '0.75rem',
     },
     backLink: {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '8px',
-        marginTop: '25px',
-        color: '#64748B',
+        gap: '10px',
+        marginTop: '35px',
+        color: 'rgba(255, 255, 255, 0.4)',
         textDecoration: 'none',
         fontSize: '0.9rem',
-        transition: 'color 0.2s ease'
-    }
+        transition: 'all 0.3s ease',
+        position: 'relative',
+        zIndex: 1,
+    },
 };
 
 export default Login;
