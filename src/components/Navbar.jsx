@@ -151,7 +151,7 @@ const Navbar = () => {
                 }
 
                 .navbar-logo-img {
-                    height: 100px !important;
+                    height: 180px !important;
                     width: auto !important;
                     max-width: 180px !important;
                     object-fit: contain !important;
