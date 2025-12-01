@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -26,7 +27,9 @@ const Navbar = () => {
         };
     }, []);
 
+    // Scroll to top on route change
     useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
         setIsMobileMenuOpen(false);
     }, [location.pathname]);
 
@@ -39,6 +42,13 @@ const Navbar = () => {
     ];
 
     const isActive = (path) => location.pathname === path;
+
+    const handleNavClick = (e, path) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        navigate(path);
+        setIsMobileMenuOpen(false);
+    };
 
     const navbarClass = `navbar ${isScrolled ? 'scrolled' : ''} ${isMobileMenuOpen ? 'menu-open' : ''}`;
 
@@ -94,80 +104,138 @@ const Navbar = () => {
                     display: flex;
                     align-items: center;
                     text-decoration: none;
-                    gap: 10px;
+                    gap: 12px;
                 }
 
                 .logo-icon {
-                    width: 40px;
-                    height: 40px;
+                    width: 45px;
+                    height: 45px;
                     background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
-                    border-radius: 10px;
+                    border-radius: 12px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 1.2rem;
+                    font-size: 1.3rem;
                     color: white;
                     font-weight: 700;
-                    box-shadow: 0 4px 12px rgba(139, 35, 70, 0.3);
+                    box-shadow: 0 4px 15px rgba(139, 35, 70, 0.35);
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .logo-icon::before {
+                    content: '';
+                    position: absolute;
+                    top: -50%;
+                    left: -50%;
+                    width: 200%;
+                    height: 200%;
+                    background: linear-gradient(
+                        45deg,
+                        transparent,
+                        rgba(255, 255, 255, 0.1),
+                        transparent
+                    );
+                    transform: rotate(45deg);
+                    animation: logoShine 3s ease-in-out infinite;
+                }
+
+                @keyframes logoShine {
+                    0%, 100% { transform: translateX(-100%) rotate(45deg); }
+                    50% { transform: translateX(100%) rotate(45deg); }
                 }
 
                 .logo-text {
-                    font-size: 1.5rem;
-                    font-weight: 700;
-                    transition: color var(--nav-transition);
+                    font-size: 1.6rem;
+                    font-weight: 800;
+                    transition: all var(--nav-transition);
                     color: var(--nav-white);
+                    letter-spacing: 0.5px;
+                    text-shadow: 
+                        -1px -1px 0 rgba(0, 0, 0, 0.3),
+                        1px -1px 0 rgba(0, 0, 0, 0.3),
+                        -1px 1px 0 rgba(0, 0, 0, 0.3),
+                        1px 1px 0 rgba(0, 0, 0, 0.3);
                 }
 
                 .logo-text span {
                     color: var(--nav-pink);
+                    text-shadow: 
+                        -1px -1px 0 rgba(139, 35, 70, 0.5),
+                        1px -1px 0 rgba(139, 35, 70, 0.5),
+                        -1px 1px 0 rgba(139, 35, 70, 0.5),
+                        1px 1px 0 rgba(139, 35, 70, 0.5);
                 }
 
                 .navbar.scrolled .logo-text,
                 .navbar.menu-open .logo-text {
                     color: var(--nav-text-dark);
+                    text-shadow: 
+                        -1px -1px 0 rgba(139, 35, 70, 0.2),
+                        1px -1px 0 rgba(139, 35, 70, 0.2),
+                        -1px 1px 0 rgba(139, 35, 70, 0.2),
+                        1px 1px 0 rgba(139, 35, 70, 0.2);
                 }
 
                 .navbar-logo:hover {
                     opacity: 0.9;
                 }
 
+                .navbar-logo:hover .logo-icon {
+                    transform: scale(1.05);
+                    transition: transform 0.3s ease;
+                }
+
                 /* ==================== NAV LINKS ==================== */
                 .nav-links {
                     display: flex;
-                    gap: 32px;
+                    gap: 8px;
                     align-items: center;
                 }
 
                 .nav-link {
                     text-decoration: none;
-                    font-size: 0.95rem;
-                    font-weight: 500;
+                    font-size: 0.9rem;
+                    font-weight: 600;
                     position: relative;
-                    transition: color var(--nav-transition);
-                    padding: 8px 0;
+                    transition: all var(--nav-transition);
+                    padding: 10px 16px;
                     color: var(--nav-white);
+                    border-radius: var(--nav-radius);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    text-shadow: 
+                        0 1px 2px rgba(0, 0, 0, 0.3);
+                }
+
+                .nav-link .nav-icon {
+                    font-size: 0.85rem;
+                    opacity: 0.85;
                 }
 
                 .navbar.scrolled .nav-link {
                     color: var(--nav-text-dark);
+                    text-shadow: none;
                 }
 
                 .nav-link:hover {
-                    opacity: 0.85;
+                    background: rgba(255, 255, 255, 0.15);
+                }
+
+                .navbar.scrolled .nav-link:hover {
+                    background: var(--nav-light-gray);
                 }
 
                 .nav-link.active {
-                    color: var(--nav-maroon) !important;
+                    color: var(--nav-white) !important;
+                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%) !important;
+                    box-shadow: 0 4px 15px rgba(139, 35, 70, 0.3);
+                    text-shadow: none !important;
                 }
 
-                .active-indicator {
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    height: 3px;
-                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
-                    border-radius: 2px;
+                .nav-link.active .nav-icon {
+                    opacity: 1;
                 }
 
                 /* ==================== CTA CONTAINER ==================== */
@@ -204,7 +272,8 @@ const Navbar = () => {
                     background: var(--nav-dark-blue) !important;
                     color: var(--nav-white) !important;
                     border-color: var(--nav-dark-blue) !important;
-                    transform: translateY(-1px);
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 15px rgba(0, 82, 157, 0.3);
                 }
 
                 .cta-btn {
@@ -220,6 +289,28 @@ const Navbar = () => {
                     font-size: 0.9rem;
                     box-shadow: 0 4px 15px rgba(139, 35, 70, 0.4);
                     transition: all var(--nav-transition);
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .cta-btn::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(
+                        90deg,
+                        transparent,
+                        rgba(255, 255, 255, 0.2),
+                        transparent
+                    );
+                    transition: left 0.5s ease;
+                }
+
+                .cta-btn:hover::before {
+                    left: 100%;
                 }
 
                 .cta-btn:hover {
@@ -288,6 +379,21 @@ const Navbar = () => {
                     padding: 10px 0 15px;
                     border-bottom: 1px solid var(--nav-light-gray);
                     margin-bottom: 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                .mobile-menu-logo {
+                    width: 35px;
+                    height: 35px;
+                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 1rem;
                 }
 
                 .mobile-menu-tagline {
@@ -317,9 +423,10 @@ const Navbar = () => {
                 }
 
                 .mobile-nav-link.active {
-                    color: var(--nav-maroon);
-                    background: rgba(139, 35, 70, 0.1);
-                    border-left-color: var(--nav-maroon);
+                    color: var(--nav-white);
+                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
+                    border-left-color: transparent;
+                    border-radius: var(--nav-radius);
                 }
 
                 .mobile-nav-link-content {
@@ -328,19 +435,30 @@ const Navbar = () => {
                     gap: 12px;
                 }
 
-                .mobile-nav-link-content i {
+                .mobile-nav-icon {
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(0, 82, 157, 0.1);
                     color: var(--nav-dark-blue);
-                    width: 20px;
-                    text-align: center;
+                    font-size: 0.85rem;
                 }
 
-                .mobile-nav-link.active .mobile-nav-link-content i {
-                    color: var(--nav-maroon);
+                .mobile-nav-link.active .mobile-nav-icon {
+                    background: rgba(255, 255, 255, 0.2);
+                    color: var(--nav-white);
                 }
 
                 .mobile-nav-link .chevron {
                     font-size: 0.75rem;
                     color: var(--nav-maroon);
+                }
+
+                .mobile-nav-link.active .chevron {
+                    color: var(--nav-white);
                 }
 
                 /* ==================== MOBILE BUTTONS ==================== */
@@ -447,7 +565,22 @@ const Navbar = () => {
                 /* ==================== RESPONSIVE ==================== */
                 @media screen and (max-width: 1024px) {
                     .nav-links {
-                        gap: 24px;
+                        gap: 4px;
+                    }
+
+                    .nav-link {
+                        padding: 8px 12px;
+                        font-size: 0.85rem;
+                    }
+
+                    .nav-link .nav-icon {
+                        display: none;
+                    }
+                }
+
+                @media screen and (max-width: 900px) {
+                    .nav-link .nav-text {
+                        display: block;
                     }
                 }
 
@@ -462,13 +595,13 @@ const Navbar = () => {
                     }
 
                     .logo-icon {
-                        width: 36px;
-                        height: 36px;
-                        font-size: 1rem;
+                        width: 40px;
+                        height: 40px;
+                        font-size: 1.1rem;
                     }
 
                     .logo-text {
-                        font-size: 1.3rem;
+                        font-size: 1.4rem;
                     }
                 }
 
@@ -478,13 +611,13 @@ const Navbar = () => {
                     }
 
                     .logo-icon {
-                        width: 32px;
-                        height: 32px;
-                        font-size: 0.9rem;
+                        width: 36px;
+                        height: 36px;
+                        font-size: 1rem;
                     }
 
                     .logo-text {
-                        font-size: 1.1rem;
+                        font-size: 1.2rem;
                     }
 
                     .mobile-menu {
@@ -523,7 +656,9 @@ const Navbar = () => {
                     .login-btn,
                     .cta-btn,
                     .mobile-menu,
-                    .navbar-overlay {
+                    .navbar-overlay,
+                    .logo-icon::before,
+                    .cta-btn::before {
                         animation: none !important;
                         transition-duration: 0.01ms !important;
                     }
@@ -545,37 +680,50 @@ const Navbar = () => {
             <nav className={navbarClass}>
                 <div className="navbar-container">
                     {/* Logo */}
-                    <Link to="/" className="navbar-logo">
+                    <a 
+                        href="/" 
+                        className="navbar-logo"
+                        onClick={(e) => handleNavClick(e, '/')}
+                    >
                         <div className="logo-icon">
                             <i className="fa-solid fa-graduation-cap"></i>
                         </div>
                         <span className="logo-text">Edu<span>Folio</span></span>
-                    </Link>
+                    </a>
 
                     {/* Desktop Nav Links */}
                     <div className="nav-links">
                         {navLinks.map((link) => (
-                            <Link
+                            <a
                                 key={link.path}
-                                to={link.path}
+                                href={link.path}
                                 className={`nav-link ${isActive(link.path) ? 'active' : ''}`}
+                                onClick={(e) => handleNavClick(e, link.path)}
                             >
-                                {link.name}
-                                {isActive(link.path) && <span className="active-indicator"></span>}
-                            </Link>
+                                <i className={`fa-solid ${link.icon} nav-icon`}></i>
+                                <span className="nav-text">{link.name}</span>
+                            </a>
                         ))}
                     </div>
 
                     {/* CTA Buttons - Desktop */}
                     <div className="cta-container">
-                        <Link to="/admin/login" className="login-btn">
+                        <a 
+                            href="/admin/login" 
+                            className="login-btn"
+                            onClick={(e) => handleNavClick(e, '/admin/login')}
+                        >
                             <i className="fa-solid fa-user"></i>
                             Login
-                        </Link>
-                        <Link to="/contact" className="cta-btn">
+                        </a>
+                        <a 
+                            href="/contact" 
+                            className="cta-btn"
+                            onClick={(e) => handleNavClick(e, '/contact')}
+                        >
                             <i className="fa-solid fa-paper-plane"></i>
                             Get Started
-                        </Link>
+                        </a>
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -593,43 +741,46 @@ const Navbar = () => {
                 {isMobileMenuOpen && (
                     <div className="mobile-menu">
                         <div className="mobile-menu-header">
+                            <div className="mobile-menu-logo">
+                                <i className="fa-solid fa-graduation-cap"></i>
+                            </div>
                             <span className="mobile-menu-tagline">learn. grow. succeed.</span>
                         </div>
 
                         {navLinks.map((link) => (
-                            <Link
+                            <a
                                 key={link.path}
-                                to={link.path}
+                                href={link.path}
                                 className={`mobile-nav-link ${isActive(link.path) ? 'active' : ''}`}
-                                onClick={() => setIsMobileMenuOpen(false)}
+                                onClick={(e) => handleNavClick(e, link.path)}
                             >
                                 <div className="mobile-nav-link-content">
-                                    <i className={`fa-solid ${link.icon}`}></i>
+                                    <div className="mobile-nav-icon">
+                                        <i className={`fa-solid ${link.icon}`}></i>
+                                    </div>
                                     <span>{link.name}</span>
                                 </div>
-                                {isActive(link.path) && (
-                                    <i className="fa-solid fa-chevron-right chevron"></i>
-                                )}
-                            </Link>
+                                <i className="fa-solid fa-chevron-right chevron"></i>
+                            </a>
                         ))}
                         
                         <div className="mobile-buttons">
-                            <Link 
-                                to="/admin/login" 
+                            <a 
+                                href="/admin/login" 
                                 className="mobile-login-btn"
-                                onClick={() => setIsMobileMenuOpen(false)}
+                                onClick={(e) => handleNavClick(e, '/admin/login')}
                             >
                                 <i className="fa-solid fa-user"></i>
                                 Login to Dashboard
-                            </Link>
-                            <Link 
-                                to="/contact" 
+                            </a>
+                            <a 
+                                href="/contact" 
                                 className="mobile-cta-btn"
-                                onClick={() => setIsMobileMenuOpen(false)}
+                                onClick={(e) => handleNavClick(e, '/contact')}
                             >
                                 <i className="fa-solid fa-paper-plane"></i>
                                 Get Started Free
-                            </Link>
+                            </a>
                         </div>
 
                         <div className="mobile-contact">
