@@ -18,23 +18,54 @@ const Dashboard = () => {
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
 
+    // Search & Filter States
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterCategory, setFilterCategory] = useState('');
+    const [filterStatus, setFilterStatus] = useState('');
+    const [sortBy, setSortBy] = useState('newest');
 
+    // Delete confirmation modal
+    const [deleteModal, setDeleteModal] = useState({ show: false, type: '', id: '', name: '' });
+    const [deleting, setDeleting] = useState(false);
+
+    // Toast notification
+    const [toast, setToast] = useState({ show: false, message: '', type: '' });
+
+    const categories = ['MBA', 'MCA', 'BBA', 'BCA', 'B.Com', 'M.Com', 'BA', 'MA', 'B.Sc', 'M.Sc', 'B.Tech', 'M.Tech', 'PhD', 'Diploma', 'Certificate'];
 
     useEffect(() => {
         checkAuth();
     }, []);
 
+    // Auto-hide toast
+    useEffect(() => {
+        if (toast.show) {
+            const timer = setTimeout(() => {
+                setToast({ show: false, message: '', type: '' });
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast.show]);
+
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+    };
+
     const checkAuth = () => {
         const token = localStorage.getItem('token');
         const userData = localStorage.getItem('user');
-        
+
         if (!token) {
             navigate('/admin/login');
             return;
         }
 
         if (userData) {
-            setUser(JSON.parse(userData));
+            try {
+                setUser(JSON.parse(userData));
+            } catch (e) {
+                setUser({ name: 'Admin' });
+            }
         }
 
         fetchData(token);
@@ -62,6 +93,8 @@ const Dashboard = () => {
             console.error('Error fetching data:', err);
             if (err.response?.status === 401) {
                 handleLogout();
+            } else {
+                showToast('Failed to fetch data', 'error');
             }
         } finally {
             setLoading(false);
@@ -74,57 +107,247 @@ const Dashboard = () => {
         navigate('/admin/login');
     };
 
-    const handleDelete = async (type, id) => {
-        if (!window.confirm('Are you sure you want to delete this item?')) return;
+    // Open delete confirmation modal
+    const openDeleteModal = (type, id, name) => {
+        setDeleteModal({ show: true, type, id, name });
+    };
 
+    // Close delete modal
+    const closeDeleteModal = () => {
+        setDeleteModal({ show: false, type: '', id: '', name: '' });
+    };
+
+    // Confirm delete
+    const confirmDelete = async () => {
+        setDeleting(true);
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`${API_BASE}/admin/${type}/${id}`, {
+            await axios.delete(`${API_BASE}/admin/${deleteModal.type}/${deleteModal.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            showToast(`${deleteModal.type.slice(0, -1)} deleted successfully`, 'success');
             fetchData(token);
         } catch (err) {
             console.error('Delete error:', err);
-            alert('Failed to delete item');
+            showToast('Failed to delete item', 'error');
+        } finally {
+            setDeleting(false);
+            closeDeleteModal();
         }
     };
 
-    const handleToggleStatus = async (type, id) => {
+    const handleToggleStatus = async (type, id, currentStatus) => {
         try {
             const token = localStorage.getItem('token');
             await axios.put(`${API_BASE}/admin/${type}/${id}/toggle`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            showToast(`Status updated to ${currentStatus ? 'Inactive' : 'Active'}`, 'success');
             fetchData(token);
         } catch (err) {
             console.error('Toggle error:', err);
+            showToast('Failed to update status', 'error');
+        }
+    };
+
+    const handleToggleFeatured = async (type, id, currentFeatured) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(`${API_BASE}/admin/${type}/${id}/featured`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            showToast(`${currentFeatured ? 'Removed from' : 'Added to'} featured`, 'success');
+            fetchData(token);
+        } catch (err) {
+            console.error('Toggle featured error:', err);
+            showToast('Failed to update featured status', 'error');
         }
     };
 
     const updateEnquiryStatus = async (id, status) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`${API_BASE}/admin/enquiries/${id}/status`, 
+            await axios.put(`${API_BASE}/admin/enquiries/${id}/status`,
                 { status },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+            showToast('Enquiry status updated', 'success');
             fetchData(token);
         } catch (err) {
             console.error('Update status error:', err);
+            showToast('Failed to update status', 'error');
         }
+    };
+
+    // Filter functions
+    const getFilteredUniversities = () => {
+        let filtered = [...universities];
+
+        if (searchTerm) {
+            filtered = filtered.filter(uni =>
+                uni.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                uni.location?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        if (filterStatus === 'active') {
+            filtered = filtered.filter(uni => uni.isActive);
+        } else if (filterStatus === 'inactive') {
+            filtered = filtered.filter(uni => !uni.isActive);
+        } else if (filterStatus === 'featured') {
+            filtered = filtered.filter(uni => uni.featured);
+        }
+
+        // Sort
+        if (sortBy === 'newest') {
+            filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else if (sortBy === 'oldest') {
+            filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        } else if (sortBy === 'name') {
+            filtered.sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        return filtered;
+    };
+
+    const getFilteredPrograms = () => {
+        let filtered = [...programs];
+
+        if (searchTerm) {
+            filtered = filtered.filter(prog =>
+                prog.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                prog.universityId?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        if (filterCategory) {
+            filtered = filtered.filter(prog => prog.category === filterCategory);
+        }
+
+        if (filterStatus === 'active') {
+            filtered = filtered.filter(prog => prog.isActive);
+        } else if (filterStatus === 'inactive') {
+            filtered = filtered.filter(prog => !prog.isActive);
+        } else if (filterStatus === 'featured') {
+            filtered = filtered.filter(prog => prog.featured);
+        }
+
+        // Sort
+        if (sortBy === 'newest') {
+            filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else if (sortBy === 'oldest') {
+            filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        } else if (sortBy === 'name') {
+            filtered.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (sortBy === 'fee-low') {
+            filtered.sort((a, b) => a.fee - b.fee);
+        } else if (sortBy === 'fee-high') {
+            filtered.sort((a, b) => b.fee - a.fee);
+        }
+
+        return filtered;
+    };
+
+    const getFilteredEnquiries = () => {
+        let filtered = [...enquiries];
+
+        if (searchTerm) {
+            filtered = filtered.filter(enq =>
+                enq.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                enq.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                enq.phone.includes(searchTerm)
+            );
+        }
+
+        if (filterStatus) {
+            filtered = filtered.filter(enq => enq.status === filterStatus);
+        }
+
+        // Sort
+        if (sortBy === 'newest') {
+            filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else if (sortBy === 'oldest') {
+            filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        }
+
+        return filtered;
+    };
+
+    // Reset filters when changing tabs
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        setSearchTerm('');
+        setFilterCategory('');
+        setFilterStatus('');
+        setSortBy('newest');
     };
 
     if (loading) {
         return (
             <div style={styles.loadingScreen}>
-                <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '2rem', color: '#FF6B35' }}></i>
-                <p>Loading dashboard...</p>
+                <div style={styles.loadingSpinner}>
+                    <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '2.5rem', color: '#FF6B35' }}></i>
+                </div>
+                <p style={{ color: '#64748B', marginTop: '20px' }}>Loading dashboard...</p>
             </div>
         );
     }
 
     return (
         <div style={styles.wrapper}>
+            {/* Toast Notification */}
+            {toast.show && (
+                <div style={{
+                    ...styles.toast,
+                    background: toast.type === 'error' ? '#FEE2E2' : '#D1FAE5',
+                    color: toast.type === 'error' ? '#DC2626' : '#059669',
+                    borderColor: toast.type === 'error' ? '#FECACA' : '#A7F3D0'
+                }}>
+                    <i className={`fa-solid ${toast.type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}`}></i>
+                    {toast.message}
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteModal.show && (
+                <div style={styles.modalOverlay}>
+                    <div style={styles.modal}>
+                        <div style={styles.modalIcon}>
+                            <i className="fa-solid fa-trash-alt"></i>
+                        </div>
+                        <h3 style={styles.modalTitle}>Delete {deleteModal.type.slice(0, -1)}?</h3>
+                        <p style={styles.modalText}>
+                            Are you sure you want to delete <strong>"{deleteModal.name}"</strong>?
+                            This action cannot be undone.
+                        </p>
+                        <div style={styles.modalActions}>
+                            <button
+                                style={styles.modalCancelBtn}
+                                onClick={closeDeleteModal}
+                                disabled={deleting}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                style={styles.modalDeleteBtn}
+                                onClick={confirmDelete}
+                                disabled={deleting}
+                            >
+                                {deleting ? (
+                                    <>
+                                        <i className="fa-solid fa-spinner fa-spin"></i> Deleting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="fa-solid fa-trash"></i> Delete
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Sidebar */}
             <aside style={styles.sidebar}>
                 <div style={styles.sidebarHeader}>
@@ -135,28 +358,30 @@ const Dashboard = () => {
                 <nav style={styles.sidebarNav}>
                     <button
                         style={activeTab === 'overview' ? styles.navItemActive : styles.navItem}
-                        onClick={() => setActiveTab('overview')}
+                        onClick={() => handleTabChange('overview')}
                     >
                         <i className="fa-solid fa-chart-pie"></i>
                         <span>Overview</span>
                     </button>
                     <button
                         style={activeTab === 'universities' ? styles.navItemActive : styles.navItem}
-                        onClick={() => setActiveTab('universities')}
+                        onClick={() => handleTabChange('universities')}
                     >
                         <i className="fa-solid fa-building-columns"></i>
                         <span>Universities</span>
+                        <span style={styles.countBadge}>{universities.length}</span>
                     </button>
                     <button
                         style={activeTab === 'programs' ? styles.navItemActive : styles.navItem}
-                        onClick={() => setActiveTab('programs')}
+                        onClick={() => handleTabChange('programs')}
                     >
                         <i className="fa-solid fa-graduation-cap"></i>
                         <span>Programs</span>
+                        <span style={styles.countBadge}>{programs.length}</span>
                     </button>
                     <button
                         style={activeTab === 'enquiries' ? styles.navItemActive : styles.navItem}
-                        onClick={() => setActiveTab('enquiries')}
+                        onClick={() => handleTabChange('enquiries')}
                     >
                         <i className="fa-solid fa-envelope"></i>
                         <span>Enquiries</span>
@@ -167,7 +392,7 @@ const Dashboard = () => {
                 </nav>
 
                 <div style={styles.sidebarFooter}>
-                    <a href="/" target="_blank" style={styles.viewSiteLink}>
+                    <a href="/" target="_blank" rel="noreferrer" style={styles.viewSiteLink}>
                         <i className="fa-solid fa-external-link"></i>
                         <span>View Website</span>
                     </a>
@@ -190,7 +415,7 @@ const Dashboard = () => {
                             {activeTab === 'enquiries' && 'Enquiries'}
                         </h1>
                         <p style={styles.pageSubtitle}>
-                            Welcome back, {user?.name || 'Admin'}!
+                            Welcome back, {user?.name || 'Admin'}! 👋
                         </p>
                     </div>
                     <div style={styles.headerActions}>
@@ -214,7 +439,10 @@ const Dashboard = () => {
                         <>
                             {/* Stats Grid */}
                             <div style={styles.statsGrid}>
-                                <div style={styles.statCard}>
+                                <div
+                                    style={styles.statCard}
+                                    onClick={() => handleTabChange('universities')}
+                                >
                                     <div style={{ ...styles.statIcon, background: '#DBEAFE', color: '#3B82F6' }}>
                                         <i className="fa-solid fa-building-columns"></i>
                                     </div>
@@ -222,8 +450,12 @@ const Dashboard = () => {
                                         <span style={styles.statNumber}>{stats.universities}</span>
                                         <span style={styles.statLabel}>Universities</span>
                                     </div>
+                                    <i className="fa-solid fa-arrow-right" style={styles.statArrow}></i>
                                 </div>
-                                <div style={styles.statCard}>
+                                <div
+                                    style={styles.statCard}
+                                    onClick={() => handleTabChange('programs')}
+                                >
                                     <div style={{ ...styles.statIcon, background: '#DCFCE7', color: '#16A34A' }}>
                                         <i className="fa-solid fa-graduation-cap"></i>
                                     </div>
@@ -231,8 +463,12 @@ const Dashboard = () => {
                                         <span style={styles.statNumber}>{stats.programs}</span>
                                         <span style={styles.statLabel}>Programs</span>
                                     </div>
+                                    <i className="fa-solid fa-arrow-right" style={styles.statArrow}></i>
                                 </div>
-                                <div style={styles.statCard}>
+                                <div
+                                    style={styles.statCard}
+                                    onClick={() => handleTabChange('enquiries')}
+                                >
                                     <div style={{ ...styles.statIcon, background: '#FEF3C7', color: '#D97706' }}>
                                         <i className="fa-solid fa-envelope"></i>
                                     </div>
@@ -240,8 +476,15 @@ const Dashboard = () => {
                                         <span style={styles.statNumber}>{stats.enquiries}</span>
                                         <span style={styles.statLabel}>Total Enquiries</span>
                                     </div>
+                                    <i className="fa-solid fa-arrow-right" style={styles.statArrow}></i>
                                 </div>
-                                <div style={styles.statCard}>
+                                <div
+                                    style={styles.statCard}
+                                    onClick={() => {
+                                        handleTabChange('enquiries');
+                                        setFilterStatus('New');
+                                    }}
+                                >
                                     <div style={{ ...styles.statIcon, background: '#F3E8FF', color: '#9333EA' }}>
                                         <i className="fa-solid fa-bell"></i>
                                     </div>
@@ -249,16 +492,54 @@ const Dashboard = () => {
                                         <span style={styles.statNumber}>{stats.newEnquiries}</span>
                                         <span style={styles.statLabel}>New Enquiries</span>
                                     </div>
+                                    <i className="fa-solid fa-arrow-right" style={styles.statArrow}></i>
+                                </div>
+                            </div>
+
+                            {/* Quick Actions */}
+                            <div style={styles.quickActions}>
+                                <h3 style={styles.quickActionsTitle}>Quick Actions</h3>
+                                <div style={styles.quickActionsGrid}>
+                                    <Link to="/admin/universities/add" style={styles.quickActionCard}>
+                                        <div style={{ ...styles.quickActionIcon, background: '#DBEAFE' }}>
+                                            <i className="fa-solid fa-plus" style={{ color: '#3B82F6' }}></i>
+                                        </div>
+                                        <span>Add University</span>
+                                    </Link>
+                                    <Link to="/admin/programs/add" style={styles.quickActionCard}>
+                                        <div style={{ ...styles.quickActionIcon, background: '#DCFCE7' }}>
+                                            <i className="fa-solid fa-plus" style={{ color: '#16A34A' }}></i>
+                                        </div>
+                                        <span>Add Program</span>
+                                    </Link>
+                                    <button
+                                        style={styles.quickActionCard}
+                                        onClick={() => handleTabChange('enquiries')}
+                                    >
+                                        <div style={{ ...styles.quickActionIcon, background: '#FEF3C7' }}>
+                                            <i className="fa-solid fa-envelope-open" style={{ color: '#D97706' }}></i>
+                                        </div>
+                                        <span>View Enquiries</span>
+                                    </button>
+                                    <a href="/" target="_blank" rel="noreferrer" style={styles.quickActionCard}>
+                                        <div style={{ ...styles.quickActionIcon, background: '#F3E8FF' }}>
+                                            <i className="fa-solid fa-eye" style={{ color: '#9333EA' }}></i>
+                                        </div>
+                                        <span>Preview Site</span>
+                                    </a>
                                 </div>
                             </div>
 
                             {/* Recent Enquiries */}
                             <div style={styles.card}>
                                 <div style={styles.cardHeader}>
-                                    <h2 style={styles.cardTitle}>Recent Enquiries</h2>
-                                    <button 
+                                    <h2 style={styles.cardTitle}>
+                                        <i className="fa-solid fa-clock" style={{ marginRight: '10px', color: '#FF6B35' }}></i>
+                                        Recent Enquiries
+                                    </h2>
+                                    <button
                                         style={styles.viewAllBtn}
-                                        onClick={() => setActiveTab('enquiries')}
+                                        onClick={() => handleTabChange('enquiries')}
                                     >
                                         View All <i className="fa-solid fa-arrow-right"></i>
                                     </button>
@@ -276,21 +557,27 @@ const Dashboard = () => {
                                         </thead>
                                         <tbody>
                                             {enquiries.slice(0, 5).map(enq => (
-                                                <tr key={enq._id}>
-                                                    <td style={styles.td}>{enq.name}</td>
+                                                <tr key={enq._id} style={styles.tableRow}>
+                                                    <td style={styles.td}>
+                                                        <span style={styles.enquiryName}>{enq.name}</span>
+                                                    </td>
                                                     <td style={styles.td}>{enq.email}</td>
                                                     <td style={styles.td}>{enq.phone}</td>
                                                     <td style={styles.td}>
                                                         <span style={{
                                                             ...styles.statusBadge,
-                                                            background: enq.status === 'New' ? '#FEF3C7' : '#DCFCE7',
-                                                            color: enq.status === 'New' ? '#D97706' : '#16A34A'
+                                                            background: enq.status === 'New' ? '#FEF3C7' : enq.status === 'Contacted' ? '#DBEAFE' : '#DCFCE7',
+                                                            color: enq.status === 'New' ? '#D97706' : enq.status === 'Contacted' ? '#3B82F6' : '#16A34A'
                                                         }}>
                                                             {enq.status}
                                                         </span>
                                                     </td>
                                                     <td style={styles.td}>
-                                                        {new Date(enq.createdAt).toLocaleDateString()}
+                                                        {new Date(enq.createdAt).toLocaleDateString('en-IN', {
+                                                            day: 'numeric',
+                                                            month: 'short',
+                                                            year: 'numeric'
+                                                        })}
                                                     </td>
                                                 </tr>
                                             ))}
@@ -307,6 +594,52 @@ const Dashboard = () => {
                     {/* Universities Tab */}
                     {activeTab === 'universities' && (
                         <div style={styles.card}>
+                            {/* Filters */}
+                            <div style={styles.filters}>
+                                <div style={styles.searchBox}>
+                                    <i className="fa-solid fa-search" style={styles.searchIcon}></i>
+                                    <input
+                                        type="text"
+                                        placeholder="Search universities..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        style={styles.searchInput}
+                                    />
+                                    {searchTerm && (
+                                        <button
+                                            style={styles.clearSearch}
+                                            onClick={() => setSearchTerm('')}
+                                        >
+                                            <i className="fa-solid fa-times"></i>
+                                        </button>
+                                    )}
+                                </div>
+                                <select
+                                    value={filterStatus}
+                                    onChange={(e) => setFilterStatus(e.target.value)}
+                                    style={styles.filterSelect}
+                                >
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="featured">Featured</option>
+                                </select>
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    style={styles.filterSelect}
+                                >
+                                    <option value="newest">Newest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                    <option value="name">Name (A-Z)</option>
+                                </select>
+                            </div>
+
+                            {/* Results count */}
+                            <div style={styles.resultsInfo}>
+                                Showing {getFilteredUniversities().length} of {universities.length} universities
+                            </div>
+
                             <div style={styles.tableWrapper}>
                                 <table style={styles.table}>
                                     <thead>
@@ -314,31 +647,52 @@ const Dashboard = () => {
                                             <th style={styles.th}>University</th>
                                             <th style={styles.th}>Location</th>
                                             <th style={styles.th}>Rating</th>
+                                            <th style={styles.th}>Featured</th>
                                             <th style={styles.th}>Status</th>
                                             <th style={styles.th}>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {universities.map(uni => (
-                                            <tr key={uni._id}>
+                                        {getFilteredUniversities().map(uni => (
+                                            <tr key={uni._id} style={styles.tableRow}>
                                                 <td style={styles.td}>
                                                     <div style={styles.uniCell}>
                                                         <img
-                                                            src={uni.logo || 'https://via.placeholder.com/40'}
+                                                            src={uni.logo || 'https://via.placeholder.com/40?text=U'}
                                                             alt={uni.name}
                                                             style={styles.uniLogo}
+                                                            onError={(e) => e.target.src = 'https://via.placeholder.com/40?text=U'}
                                                         />
                                                         <div>
                                                             <span style={styles.uniName}>{uni.name}</span>
-                                                            {uni.featured && (
-                                                                <span style={styles.featuredBadge}>Featured</span>
-                                                            )}
+                                                            <span style={styles.uniType}>{uni.type || 'University'}</span>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td style={styles.td}>{uni.location}</td>
                                                 <td style={styles.td}>
-                                                    <span style={styles.ratingBadge}>{uni.rating || 'N/A'}</span>
+                                                    <span style={styles.locationText}>
+                                                        <i className="fa-solid fa-location-dot" style={{ marginRight: '6px', color: '#94A3B8' }}></i>
+                                                        {uni.location || 'N/A'}
+                                                    </span>
+                                                </td>
+                                                <td style={styles.td}>
+                                                    <span style={styles.ratingBadge}>
+                                                        <i className="fa-solid fa-star" style={{ marginRight: '4px' }}></i>
+                                                        {uni.rating || 'N/A'}
+                                                    </span>
+                                                </td>
+                                                <td style={styles.td}>
+                                                    <button
+                                                        style={{
+                                                            ...styles.featuredToggle,
+                                                            background: uni.featured ? '#FEF3C7' : '#F1F5F9',
+                                                            color: uni.featured ? '#D97706' : '#94A3B8'
+                                                        }}
+                                                        onClick={() => handleToggleFeatured('universities', uni._id, uni.featured)}
+                                                        title={uni.featured ? 'Remove from featured' : 'Add to featured'}
+                                                    >
+                                                        <i className={`fa-solid fa-star`}></i>
+                                                    </button>
                                                 </td>
                                                 <td style={styles.td}>
                                                     <button
@@ -347,8 +701,9 @@ const Dashboard = () => {
                                                             background: uni.isActive ? '#DCFCE7' : '#FEE2E2',
                                                             color: uni.isActive ? '#16A34A' : '#DC2626'
                                                         }}
-                                                        onClick={() => handleToggleStatus('universities', uni._id)}
+                                                        onClick={() => handleToggleStatus('universities', uni._id, uni.isActive)}
                                                     >
+                                                        <i className={`fa-solid ${uni.isActive ? 'fa-check-circle' : 'fa-times-circle'}`} style={{ marginRight: '6px' }}></i>
                                                         {uni.isActive ? 'Active' : 'Inactive'}
                                                     </button>
                                                 </td>
@@ -357,12 +712,14 @@ const Dashboard = () => {
                                                         <Link
                                                             to={`/admin/universities/edit/${uni._id}`}
                                                             style={styles.editBtn}
+                                                            title="Edit"
                                                         >
                                                             <i className="fa-solid fa-pen"></i>
                                                         </Link>
                                                         <button
                                                             style={styles.deleteBtn}
-                                                            onClick={() => handleDelete('universities', uni._id)}
+                                                            onClick={() => openDeleteModal('universities', uni._id, uni.name)}
+                                                            title="Delete"
                                                         >
                                                             <i className="fa-solid fa-trash"></i>
                                                         </button>
@@ -372,6 +729,22 @@ const Dashboard = () => {
                                         ))}
                                     </tbody>
                                 </table>
+                                {getFilteredUniversities().length === 0 && universities.length > 0 && (
+                                    <div style={styles.noResults}>
+                                        <i className="fa-solid fa-search" style={styles.noResultsIcon}></i>
+                                        <h3>No universities found</h3>
+                                        <p>Try adjusting your search or filters</p>
+                                        <button
+                                            style={styles.clearFiltersBtn}
+                                            onClick={() => {
+                                                setSearchTerm('');
+                                                setFilterStatus('');
+                                            }}
+                                        >
+                                            Clear Filters
+                                        </button>
+                                    </div>
+                                )}
                                 {universities.length === 0 && (
                                     <div style={styles.emptyState}>
                                         <i className="fa-solid fa-building-columns" style={styles.emptyIcon}></i>
@@ -389,6 +762,64 @@ const Dashboard = () => {
                     {/* Programs Tab */}
                     {activeTab === 'programs' && (
                         <div style={styles.card}>
+                            {/* Filters */}
+                            <div style={styles.filters}>
+                                <div style={styles.searchBox}>
+                                    <i className="fa-solid fa-search" style={styles.searchIcon}></i>
+                                    <input
+                                        type="text"
+                                        placeholder="Search programs..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        style={styles.searchInput}
+                                    />
+                                    {searchTerm && (
+                                        <button
+                                            style={styles.clearSearch}
+                                            onClick={() => setSearchTerm('')}
+                                        >
+                                            <i className="fa-solid fa-times"></i>
+                                        </button>
+                                    )}
+                                </div>
+                                <select
+                                    value={filterCategory}
+                                    onChange={(e) => setFilterCategory(e.target.value)}
+                                    style={styles.filterSelect}
+                                >
+                                    <option value="">All Categories</option>
+                                    {categories.map(cat => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
+                                <select
+                                    value={filterStatus}
+                                    onChange={(e) => setFilterStatus(e.target.value)}
+                                    style={styles.filterSelect}
+                                >
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="featured">Featured</option>
+                                </select>
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    style={styles.filterSelect}
+                                >
+                                    <option value="newest">Newest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                    <option value="name">Name (A-Z)</option>
+                                    <option value="fee-low">Fee: Low to High</option>
+                                    <option value="fee-high">Fee: High to Low</option>
+                                </select>
+                            </div>
+
+                            {/* Results count */}
+                            <div style={styles.resultsInfo}>
+                                Showing {getFilteredPrograms().length} of {programs.length} programs
+                            </div>
+
                             <div style={styles.tableWrapper}>
                                 <table style={styles.table}>
                                     <thead>
@@ -397,27 +828,49 @@ const Dashboard = () => {
                                             <th style={styles.th}>University</th>
                                             <th style={styles.th}>Category</th>
                                             <th style={styles.th}>Fee</th>
+                                            <th style={styles.th}>Featured</th>
                                             <th style={styles.th}>Status</th>
                                             <th style={styles.th}>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {programs.map(prog => (
-                                            <tr key={prog._id}>
+                                        {getFilteredPrograms().map(prog => (
+                                            <tr key={prog._id} style={styles.tableRow}>
                                                 <td style={styles.td}>
                                                     <div>
                                                         <span style={styles.progName}>{prog.name}</span>
-                                                        <span style={styles.progLevel}>{prog.level}</span>
+                                                        <span style={styles.progLevel}>
+                                                            <i className="fa-solid fa-clock" style={{ marginRight: '4px' }}></i>
+                                                            {prog.duration} • {prog.mode}
+                                                        </span>
                                                     </div>
                                                 </td>
                                                 <td style={styles.td}>
-                                                    {prog.universityId?.name || 'N/A'}
+                                                    <span style={styles.uniNameSmall}>
+                                                        {prog.universityId?.name || 'N/A'}
+                                                    </span>
                                                 </td>
                                                 <td style={styles.td}>
                                                     <span style={styles.categoryBadge}>{prog.category}</span>
                                                 </td>
                                                 <td style={styles.td}>
-                                                    ₹{Number(prog.fee).toLocaleString('en-IN')}
+                                                    <span style={styles.feeText}>
+                                                        ₹{Number(prog.fee).toLocaleString('en-IN')}
+                                                    </span>
+                                                    <span style={styles.feePeriod}>{prog.feePeriod}</span>
+                                                </td>
+                                                <td style={styles.td}>
+                                                    <button
+                                                        style={{
+                                                            ...styles.featuredToggle,
+                                                            background: prog.featured ? '#FEF3C7' : '#F1F5F9',
+                                                            color: prog.featured ? '#D97706' : '#94A3B8'
+                                                        }}
+                                                        onClick={() => handleToggleFeatured('programs', prog._id, prog.featured)}
+                                                        title={prog.featured ? 'Remove from featured' : 'Add to featured'}
+                                                    >
+                                                        <i className={`fa-solid fa-star`}></i>
+                                                    </button>
                                                 </td>
                                                 <td style={styles.td}>
                                                     <button
@@ -426,8 +879,9 @@ const Dashboard = () => {
                                                             background: prog.isActive ? '#DCFCE7' : '#FEE2E2',
                                                             color: prog.isActive ? '#16A34A' : '#DC2626'
                                                         }}
-                                                        onClick={() => handleToggleStatus('programs', prog._id)}
+                                                        onClick={() => handleToggleStatus('programs', prog._id, prog.isActive)}
                                                     >
+                                                        <i className={`fa-solid ${prog.isActive ? 'fa-check-circle' : 'fa-times-circle'}`} style={{ marginRight: '6px' }}></i>
                                                         {prog.isActive ? 'Active' : 'Inactive'}
                                                     </button>
                                                 </td>
@@ -436,12 +890,14 @@ const Dashboard = () => {
                                                         <Link
                                                             to={`/admin/programs/edit/${prog._id}`}
                                                             style={styles.editBtn}
+                                                            title="Edit"
                                                         >
                                                             <i className="fa-solid fa-pen"></i>
                                                         </Link>
                                                         <button
                                                             style={styles.deleteBtn}
-                                                            onClick={() => handleDelete('programs', prog._id)}
+                                                            onClick={() => openDeleteModal('programs', prog._id, prog.name)}
+                                                            title="Delete"
                                                         >
                                                             <i className="fa-solid fa-trash"></i>
                                                         </button>
@@ -451,6 +907,23 @@ const Dashboard = () => {
                                         ))}
                                     </tbody>
                                 </table>
+                                {getFilteredPrograms().length === 0 && programs.length > 0 && (
+                                    <div style={styles.noResults}>
+                                        <i className="fa-solid fa-search" style={styles.noResultsIcon}></i>
+                                        <h3>No programs found</h3>
+                                        <p>Try adjusting your search or filters</p>
+                                        <button
+                                            style={styles.clearFiltersBtn}
+                                            onClick={() => {
+                                                setSearchTerm('');
+                                                setFilterCategory('');
+                                                setFilterStatus('');
+                                            }}
+                                        >
+                                            Clear Filters
+                                        </button>
+                                    </div>
+                                )}
                                 {programs.length === 0 && (
                                     <div style={styles.emptyState}>
                                         <i className="fa-solid fa-graduation-cap" style={styles.emptyIcon}></i>
@@ -468,40 +941,112 @@ const Dashboard = () => {
                     {/* Enquiries Tab */}
                     {activeTab === 'enquiries' && (
                         <div style={styles.card}>
+                            {/* Filters */}
+                            <div style={styles.filters}>
+                                <div style={styles.searchBox}>
+                                    <i className="fa-solid fa-search" style={styles.searchIcon}></i>
+                                    <input
+                                        type="text"
+                                        placeholder="Search by name, email, phone..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        style={styles.searchInput}
+                                    />
+                                    {searchTerm && (
+                                        <button
+                                            style={styles.clearSearch}
+                                            onClick={() => setSearchTerm('')}
+                                        >
+                                            <i className="fa-solid fa-times"></i>
+                                        </button>
+                                    )}
+                                </div>
+                                <select
+                                    value={filterStatus}
+                                    onChange={(e) => setFilterStatus(e.target.value)}
+                                    style={styles.filterSelect}
+                                >
+                                    <option value="">All Status</option>
+                                    <option value="New">New</option>
+                                    <option value="Contacted">Contacted</option>
+                                    <option value="Interested">Interested</option>
+                                    <option value="Not Interested">Not Interested</option>
+                                    <option value="Converted">Converted</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    style={styles.filterSelect}
+                                >
+                                    <option value="newest">Newest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                </select>
+                            </div>
+
+                            {/* Results count */}
+                            <div style={styles.resultsInfo}>
+                                Showing {getFilteredEnquiries().length} of {enquiries.length} enquiries
+                            </div>
+
                             <div style={styles.tableWrapper}>
                                 <table style={styles.table}>
                                     <thead>
                                         <tr>
                                             <th style={styles.th}>Name</th>
                                             <th style={styles.th}>Contact</th>
-                                            <th style={styles.th}>Program</th>
-                                            <th style={styles.th}>Source</th>
+                                            <th style={styles.th}>Program/University</th>
+                                            <th style={styles.th}>Message</th>
                                             <th style={styles.th}>Status</th>
                                             <th style={styles.th}>Date</th>
                                             <th style={styles.th}>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {enquiries.map(enq => (
-                                            <tr key={enq._id}>
-                                                <td style={styles.td}>{enq.name}</td>
+                                        {getFilteredEnquiries().map(enq => (
+                                            <tr key={enq._id} style={styles.tableRow}>
+                                                <td style={styles.td}>
+                                                    <span style={styles.enquiryName}>{enq.name}</span>
+                                                </td>
                                                 <td style={styles.td}>
                                                     <div>
-                                                        <span style={styles.contactEmail}>{enq.email}</span>
-                                                        <span style={styles.contactPhone}>{enq.phone}</span>
+                                                        <a href={`mailto:${enq.email}`} style={styles.contactEmail}>
+                                                            <i className="fa-solid fa-envelope" style={{ marginRight: '6px' }}></i>
+                                                            {enq.email}
+                                                        </a>
+                                                        <a href={`tel:${enq.phone}`} style={styles.contactPhone}>
+                                                            <i className="fa-solid fa-phone" style={{ marginRight: '6px' }}></i>
+                                                            {enq.phone}
+                                                        </a>
                                                     </div>
                                                 </td>
                                                 <td style={styles.td}>
-                                                    {enq.programId?.name || enq.universityId?.name || 'General'}
+                                                    <span style={styles.enquiryProgram}>
+                                                        {enq.programId?.name || enq.universityId?.name || 'General Enquiry'}
+                                                    </span>
                                                 </td>
                                                 <td style={styles.td}>
-                                                    <span style={styles.sourceBadge}>{enq.source}</span>
+                                                    <span style={styles.messagePreview} title={enq.message}>
+                                                        {enq.message ? (enq.message.length > 50 ? enq.message.substring(0, 50) + '...' : enq.message) : '-'}
+                                                    </span>
                                                 </td>
                                                 <td style={styles.td}>
                                                     <select
                                                         value={enq.status}
                                                         onChange={(e) => updateEnquiryStatus(enq._id, e.target.value)}
-                                                        style={styles.statusSelect}
+                                                        style={{
+                                                            ...styles.statusSelect,
+                                                            background: enq.status === 'New' ? '#FEF3C7' :
+                                                                enq.status === 'Contacted' ? '#DBEAFE' :
+                                                                    enq.status === 'Interested' ? '#D1FAE5' :
+                                                                        enq.status === 'Converted' ? '#DCFCE7' :
+                                                                            enq.status === 'Not Interested' ? '#FEE2E2' : '#F1F5F9',
+                                                            color: enq.status === 'New' ? '#D97706' :
+                                                                enq.status === 'Contacted' ? '#3B82F6' :
+                                                                    enq.status === 'Interested' ? '#059669' :
+                                                                        enq.status === 'Converted' ? '#16A34A' :
+                                                                            enq.status === 'Not Interested' ? '#DC2626' : '#64748B'
+                                                        }}
                                                     >
                                                         <option value="New">New</option>
                                                         <option value="Contacted">Contacted</option>
@@ -512,20 +1057,60 @@ const Dashboard = () => {
                                                     </select>
                                                 </td>
                                                 <td style={styles.td}>
-                                                    {new Date(enq.createdAt).toLocaleDateString()}
+                                                    <span style={styles.dateText}>
+                                                        {new Date(enq.createdAt).toLocaleDateString('en-IN', {
+                                                            day: 'numeric',
+                                                            month: 'short',
+                                                            year: 'numeric'
+                                                        })}
+                                                    </span>
+                                                    <span style={styles.timeText}>
+                                                        {new Date(enq.createdAt).toLocaleTimeString('en-IN', {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                    </span>
                                                 </td>
                                                 <td style={styles.td}>
-                                                    <button
-                                                        style={styles.deleteBtn}
-                                                        onClick={() => handleDelete('enquiries', enq._id)}
-                                                    >
-                                                        <i className="fa-solid fa-trash"></i>
-                                                    </button>
+                                                    <div style={styles.actions}>
+                                                        <a
+                                                            href={`https://wa.me/${enq.phone.replace(/\D/g, '')}`}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            style={styles.whatsappBtn}
+                                                            title="WhatsApp"
+                                                        >
+                                                            <i className="fa-brands fa-whatsapp"></i>
+                                                        </a>
+                                                        <button
+                                                            style={styles.deleteBtn}
+                                                            onClick={() => openDeleteModal('enquiries', enq._id, enq.name)}
+                                                            title="Delete"
+                                                        >
+                                                            <i className="fa-solid fa-trash"></i>
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
+                                {getFilteredEnquiries().length === 0 && enquiries.length > 0 && (
+                                    <div style={styles.noResults}>
+                                        <i className="fa-solid fa-search" style={styles.noResultsIcon}></i>
+                                        <h3>No enquiries found</h3>
+                                        <p>Try adjusting your search or filters</p>
+                                        <button
+                                            style={styles.clearFiltersBtn}
+                                            onClick={() => {
+                                                setSearchTerm('');
+                                                setFilterStatus('');
+                                            }}
+                                        >
+                                            Clear Filters
+                                        </button>
+                                    </div>
+                                )}
                                 {enquiries.length === 0 && (
                                     <div style={styles.emptyState}>
                                         <i className="fa-solid fa-envelope" style={styles.emptyIcon}></i>
@@ -543,15 +1128,120 @@ const Dashboard = () => {
 };
 
 const styles = {
+    // Loading
     loadingScreen: {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '15px',
         background: '#F8FAFC'
     },
+    loadingSpinner: {
+        width: '80px',
+        height: '80px',
+        borderRadius: '50%',
+        background: '#FFF7ED',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+
+    // Toast
+    toast: {
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        padding: '16px 24px',
+        borderRadius: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        fontSize: '0.95rem',
+        fontWeight: '600',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+        zIndex: 1000,
+        animation: 'slideIn 0.3s ease',
+        border: '1px solid'
+    },
+
+    // Modal
+    modalOverlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(15, 23, 42, 0.7)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        backdropFilter: 'blur(4px)'
+    },
+    modal: {
+        background: '#fff',
+        borderRadius: '20px',
+        padding: '40px',
+        maxWidth: '400px',
+        width: '90%',
+        textAlign: 'center',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+    },
+    modalIcon: {
+        width: '70px',
+        height: '70px',
+        borderRadius: '50%',
+        background: '#FEE2E2',
+        color: '#DC2626',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.8rem',
+        margin: '0 auto 20px'
+    },
+    modalTitle: {
+        color: '#0F172A',
+        fontSize: '1.3rem',
+        fontWeight: '700',
+        marginBottom: '10px'
+    },
+    modalText: {
+        color: '#64748B',
+        fontSize: '0.95rem',
+        marginBottom: '30px',
+        lineHeight: '1.6'
+    },
+    modalActions: {
+        display: 'flex',
+        gap: '12px',
+        justifyContent: 'center'
+    },
+    modalCancelBtn: {
+        padding: '12px 28px',
+        background: '#F1F5F9',
+        color: '#475569',
+        border: 'none',
+        borderRadius: '10px',
+        fontSize: '0.95rem',
+        fontWeight: '600',
+        cursor: 'pointer'
+    },
+    modalDeleteBtn: {
+        padding: '12px 28px',
+        background: '#DC2626',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '10px',
+        fontSize: '0.95rem',
+        fontWeight: '600',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+    },
+
+    // Layout
     wrapper: {
         display: 'flex',
         minHeight: '100vh',
@@ -630,6 +1320,15 @@ const styles = {
         fontSize: '0.75rem',
         fontWeight: '600'
     },
+    countBadge: {
+        marginLeft: 'auto',
+        background: 'rgba(148, 163, 184, 0.2)',
+        color: '#94A3B8',
+        padding: '2px 8px',
+        borderRadius: '10px',
+        fontSize: '0.75rem',
+        fontWeight: '600'
+    },
     sidebarFooter: {
         display: 'flex',
         flexDirection: 'column',
@@ -668,7 +1367,9 @@ const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '30px'
+        marginBottom: '30px',
+        flexWrap: 'wrap',
+        gap: '20px'
     },
     pageTitle: {
         color: '#0F172A',
@@ -686,14 +1387,17 @@ const styles = {
         alignItems: 'center',
         gap: '8px',
         padding: '12px 24px',
-        background: '#FF6B35',
+        background: 'linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%)',
         color: '#fff',
         borderRadius: '10px',
         textDecoration: 'none',
         fontWeight: '600',
-        fontSize: '0.9rem'
+        fontSize: '0.9rem',
+        boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)'
     },
     content: {},
+
+    // Stats
     statsGrid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',
@@ -707,7 +1411,10 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         gap: '20px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
+        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        position: 'relative'
     },
     statIcon: {
         width: '60px',
@@ -728,6 +1435,56 @@ const styles = {
         color: '#64748B',
         fontSize: '0.9rem'
     },
+    statArrow: {
+        position: 'absolute',
+        right: '20px',
+        color: '#CBD5E1',
+        fontSize: '0.9rem'
+    },
+
+    // Quick Actions
+    quickActions: {
+        marginBottom: '30px'
+    },
+    quickActionsTitle: {
+        color: '#0F172A',
+        fontSize: '1.1rem',
+        fontWeight: '600',
+        marginBottom: '15px'
+    },
+    quickActionsGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '15px'
+    },
+    quickActionCard: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '20px',
+        background: '#fff',
+        borderRadius: '14px',
+        textDecoration: 'none',
+        color: '#334155',
+        fontSize: '0.9rem',
+        fontWeight: '600',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+        cursor: 'pointer',
+        border: 'none',
+        transition: 'all 0.2s ease'
+    },
+    quickActionIcon: {
+        width: '50px',
+        height: '50px',
+        borderRadius: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.2rem'
+    },
+
+    // Card
     card: {
         background: '#fff',
         borderRadius: '16px',
@@ -744,7 +1501,9 @@ const styles = {
     cardTitle: {
         color: '#0F172A',
         fontSize: '1.1rem',
-        fontWeight: '600'
+        fontWeight: '600',
+        display: 'flex',
+        alignItems: 'center'
     },
     viewAllBtn: {
         display: 'flex',
@@ -757,6 +1516,64 @@ const styles = {
         fontSize: '0.9rem',
         cursor: 'pointer'
     },
+
+    // Filters
+    filters: {
+        display: 'flex',
+        gap: '15px',
+        padding: '20px 25px',
+        borderBottom: '1px solid #E2E8F0',
+        flexWrap: 'wrap'
+    },
+    searchBox: {
+        flex: 1,
+        minWidth: '250px',
+        position: 'relative'
+    },
+    searchIcon: {
+        position: 'absolute',
+        left: '15px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        color: '#94A3B8'
+    },
+    searchInput: {
+        width: '100%',
+        padding: '12px 40px',
+        border: '2px solid #E2E8F0',
+        borderRadius: '10px',
+        fontSize: '0.9rem',
+        outline: 'none',
+        boxSizing: 'border-box'
+    },
+    clearSearch: {
+        position: 'absolute',
+        right: '15px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        background: 'none',
+        border: 'none',
+        color: '#94A3B8',
+        cursor: 'pointer'
+    },
+    filterSelect: {
+        padding: '12px 16px',
+        border: '2px solid #E2E8F0',
+        borderRadius: '10px',
+        fontSize: '0.9rem',
+        outline: 'none',
+        cursor: 'pointer',
+        background: '#fff',
+        minWidth: '150px'
+    },
+    resultsInfo: {
+        padding: '12px 25px',
+        color: '#64748B',
+        fontSize: '0.85rem',
+        borderBottom: '1px solid #E2E8F0'
+    },
+
+    // Table
     tableWrapper: {
         overflowX: 'auto'
     },
@@ -769,7 +1586,7 @@ const styles = {
         padding: '15px 20px',
         background: '#F8FAFC',
         color: '#64748B',
-        fontSize: '0.85rem',
+        fontSize: '0.8rem',
         fontWeight: '600',
         textTransform: 'uppercase',
         letterSpacing: '0.5px'
@@ -780,48 +1597,111 @@ const styles = {
         color: '#334155',
         fontSize: '0.9rem'
     },
+    tableRow: {
+        transition: 'background 0.2s ease'
+    },
+
+    // University cell
     uniCell: {
         display: 'flex',
         alignItems: 'center',
         gap: '12px'
     },
     uniLogo: {
-        width: '40px',
-        height: '40px',
-        borderRadius: '8px',
+        width: '45px',
+        height: '45px',
+        borderRadius: '10px',
         objectFit: 'contain',
-        background: '#F8FAFC'
+        background: '#F8FAFC',
+        padding: '5px'
     },
     uniName: {
         display: 'block',
         fontWeight: '600',
         color: '#0F172A'
     },
-    featuredBadge: {
-        display: 'inline-block',
-        background: '#FEF3C7',
-        color: '#D97706',
-        padding: '2px 8px',
-        borderRadius: '4px',
-        fontSize: '0.7rem',
-        fontWeight: '600',
-        marginTop: '4px'
+    uniType: {
+        display: 'block',
+        color: '#94A3B8',
+        fontSize: '0.8rem'
+    },
+    uniNameSmall: {
+        color: '#334155',
+        fontWeight: '500',
+        fontSize: '0.85rem'
+    },
+    locationText: {
+        color: '#64748B',
+        display: 'flex',
+        alignItems: 'center'
     },
     ratingBadge: {
+        display: 'inline-flex',
+        alignItems: 'center',
         background: '#FEF3C7',
         color: '#D97706',
-        padding: '4px 10px',
-        borderRadius: '6px',
+        padding: '6px 12px',
+        borderRadius: '8px',
+        fontSize: '0.85rem',
+        fontWeight: '600'
+    },
+
+    // Program cell
+    progName: {
+        display: 'block',
+        fontWeight: '600',
+        color: '#0F172A',
+        marginBottom: '4px'
+    },
+    progLevel: {
+        display: 'flex',
+        alignItems: 'center',
+        color: '#94A3B8',
+        fontSize: '0.8rem'
+    },
+    categoryBadge: {
+        display: 'inline-block',
+        background: '#DBEAFE',
+        color: '#1D4ED8',
+        padding: '6px 12px',
+        borderRadius: '8px',
         fontSize: '0.8rem',
         fontWeight: '600'
+    },
+    feeText: {
+        display: 'block',
+        fontWeight: '600',
+        color: '#0F172A'
+    },
+    feePeriod: {
+        display: 'block',
+        color: '#94A3B8',
+        fontSize: '0.75rem'
+    },
+
+    // Buttons
+    featuredToggle: {
+        width: '36px',
+        height: '36px',
+        borderRadius: '8px',
+        border: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        fontSize: '0.9rem',
+        transition: 'all 0.2s ease'
     },
     statusToggle: {
         padding: '6px 12px',
         border: 'none',
-        borderRadius: '6px',
+        borderRadius: '8px',
         fontSize: '0.8rem',
         fontWeight: '600',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        transition: 'all 0.2s ease'
     },
     actions: {
         display: 'flex',
@@ -837,7 +1717,8 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         textDecoration: 'none',
-        fontSize: '0.9rem'
+        fontSize: '0.9rem',
+        transition: 'all 0.2s ease'
     },
     deleteBtn: {
         width: '36px',
@@ -850,64 +1731,111 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
-        fontSize: '0.9rem'
+        fontSize: '0.9rem',
+        transition: 'all 0.2s ease'
     },
-    progName: {
-        display: 'block',
+    whatsappBtn: {
+        width: '36px',
+        height: '36px',
+        borderRadius: '8px',
+        background: '#D1FAE5',
+        color: '#059669',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textDecoration: 'none',
+        fontSize: '1rem'
+    },
+
+    // Enquiry specific
+    enquiryName: {
         fontWeight: '600',
         color: '#0F172A'
     },
-    progLevel: {
-        display: 'block',
-        color: '#64748B',
-        fontSize: '0.8rem'
-    },
-    categoryBadge: {
-        background: '#DBEAFE',
-        color: '#1D4ED8',
-        padding: '4px 10px',
-        borderRadius: '6px',
-        fontSize: '0.8rem',
-        fontWeight: '500'
-    },
     contactEmail: {
-        display: 'block',
-        fontWeight: '500'
+        display: 'flex',
+        alignItems: 'center',
+        color: '#3B82F6',
+        textDecoration: 'none',
+        fontSize: '0.85rem',
+        marginBottom: '4px'
     },
     contactPhone: {
-        display: 'block',
+        display: 'flex',
+        alignItems: 'center',
         color: '#64748B',
+        textDecoration: 'none',
         fontSize: '0.85rem'
     },
-    sourceBadge: {
-        background: '#F1F5F9',
-        color: '#475569',
-        padding: '4px 10px',
-        borderRadius: '6px',
-        fontSize: '0.8rem'
-    },
-    statusSelect: {
-        padding: '6px 10px',
-        borderRadius: '6px',
-        border: '1px solid #E2E8F0',
-        fontSize: '0.8rem',
-        cursor: 'pointer'
-    },
-    statusBadge: {
-        padding: '4px 10px',
-        borderRadius: '6px',
-        fontSize: '0.8rem',
+    enquiryProgram: {
+        color: '#334155',
         fontWeight: '500'
     },
+    messagePreview: {
+        color: '#64748B',
+        fontSize: '0.85rem',
+        maxWidth: '150px',
+        display: 'block',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+    },
+    statusSelect: {
+        padding: '8px 12px',
+        borderRadius: '8px',
+        border: 'none',
+        fontSize: '0.8rem',
+        fontWeight: '600',
+        cursor: 'pointer',
+        outline: 'none'
+    },
+    dateText: {
+        display: 'block',
+        fontWeight: '500'
+    },
+    timeText: {
+        display: 'block',
+        color: '#94A3B8',
+        fontSize: '0.8rem'
+    },
+    statusBadge: {
+        padding: '6px 12px',
+        borderRadius: '8px',
+        fontSize: '0.8rem',
+        fontWeight: '600'
+    },
+
+    // Empty & No Results
     emptyState: {
-        padding: '60px 20px',
+        padding: '80px 20px',
         textAlign: 'center',
         color: '#64748B'
     },
     emptyIcon: {
+        fontSize: '4rem',
+        color: '#CBD5E1',
+        marginBottom: '20px'
+    },
+    noResults: {
+        padding: '60px 20px',
+        textAlign: 'center',
+        color: '#64748B'
+    },
+    noResultsIcon: {
         fontSize: '3rem',
         color: '#CBD5E1',
         marginBottom: '15px'
+    },
+    clearFiltersBtn: {
+        marginTop: '15px',
+        padding: '10px 24px',
+        background: '#FF6B35',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '8px',
+        fontSize: '0.9rem',
+        fontWeight: '600',
+        cursor: 'pointer'
     },
     noData: {
         padding: '40px 20px',
