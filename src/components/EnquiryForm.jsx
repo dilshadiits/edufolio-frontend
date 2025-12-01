@@ -33,7 +33,7 @@ const EnquiryForm = ({ programId, universityId, source = 'Website' }) => {
         setLoading(true);
 
         try {
-            await axios.post(`${API_BASE}/public/enquiry`, {
+            await axios.post(`${API_BASE}/public/inquiry`, {
                 ...formData,
                 programId,
                 universityId,
