@@ -126,15 +126,15 @@ const Contact = () => {
                         </div>
 
                         {/* Right Column - Form */}
-                        <div style={styles.rightColumn}>
-                            <div style={styles.formCard}>
-                                <div style={styles.formHeader}>
-                                    <h3 style={styles.formTitle}>Send us a Message</h3>
-                                    <p style={styles.formSubtitle}>Fill out the form and our team will get back to you within 24 hours</p>
-                                </div>
-                                <EnquiryForm source="Contact Page" />
-                            </div>
-                        </div>
+                       <div style={styles.rightColumn}>
+    <div style={styles.formCard}>
+        <div style={styles.formHeader}>
+            <h3 style={styles.formTitle}>Send us a Message</h3>
+            <p style={styles.formSubtitle}>Fill out the form and our team will get back to you within 24 hours</p>
+        </div>
+        <EnquiryForm source="Contact Form" />  {/* ✅ Changed here */}
+    </div>
+</div>
                     </div>
                 </div>
             </section>
