@@ -30,7 +30,7 @@ const Contact = () => {
         setError('');
 
         try {
-            await axios.post(`${API_BASE}/public/inquiries`, formData);
+           await axios.post(`${API_BASE}/public/enquiry`, formData);
             setSuccess(true);
             setFormData({
                 name: '',
