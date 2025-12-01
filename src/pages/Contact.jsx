@@ -8,9 +8,9 @@ const Contact = () => {
         <>
             <Navbar />
 
-            {/* Hero Section */}
+            {/* Hero Section - Maroon Theme */}
             <section style={styles.hero}>
-                <div style={styles.heroOverlay}></div>
+                <div style={styles.heroPattern}></div>
                 <div style={styles.heroContent}>
                     <span style={styles.heroBadge}>
                         <i className="fa-solid fa-headset"></i> Get in Touch
@@ -19,6 +19,11 @@ const Contact = () => {
                     <p style={styles.heroSubtitle}>
                         Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
                     </p>
+                    <div style={styles.tagline}>
+                        <span>learn.</span>
+                        <span>grow.</span>
+                        <span>succeed.</span>
+                    </div>
                 </div>
             </section>
 
@@ -97,7 +102,7 @@ const Contact = () => {
                                     </div>
                                     <div style={styles.hoursItem}>
                                         <span style={styles.hoursDay}>Sunday</span>
-                                        <span style={styles.hoursTime}>Closed</span>
+                                        <span style={styles.hoursClosed}>Closed</span>
                                     </div>
                                 </div>
                             </div>
@@ -106,19 +111,19 @@ const Contact = () => {
                             <div style={styles.socialSection}>
                                 <h3 style={styles.socialTitle}>Follow Us</h3>
                                 <div style={styles.socialLinks}>
-                                    <a href="#" style={styles.socialLink} title="Facebook">
+                                    <a href="#" style={{...styles.socialLink, ...styles.socialFacebook}} title="Facebook">
                                         <i className="fa-brands fa-facebook-f"></i>
                                     </a>
-                                    <a href="#" style={styles.socialLink} title="Twitter">
+                                    <a href="#" style={{...styles.socialLink, ...styles.socialTwitter}} title="Twitter">
                                         <i className="fa-brands fa-twitter"></i>
                                     </a>
-                                    <a href="#" style={styles.socialLink} title="LinkedIn">
+                                    <a href="#" style={{...styles.socialLink, ...styles.socialLinkedin}} title="LinkedIn">
                                         <i className="fa-brands fa-linkedin-in"></i>
                                     </a>
-                                    <a href="#" style={styles.socialLink} title="Instagram">
+                                    <a href="#" style={{...styles.socialLink, ...styles.socialInstagram}} title="Instagram">
                                         <i className="fa-brands fa-instagram"></i>
                                     </a>
-                                    <a href="#" style={styles.socialLink} title="YouTube">
+                                    <a href="#" style={{...styles.socialLink, ...styles.socialYoutube}} title="YouTube">
                                         <i className="fa-brands fa-youtube"></i>
                                     </a>
                                 </div>
@@ -126,26 +131,35 @@ const Contact = () => {
                         </div>
 
                         {/* Right Column - Form */}
-                       <div style={styles.rightColumn}>
-    <div style={styles.formCard}>
-        <div style={styles.formHeader}>
-            <h3 style={styles.formTitle}>Send us a Message</h3>
-            <p style={styles.formSubtitle}>Fill out the form and our team will get back to you within 24 hours</p>
-        </div>
-        <EnquiryForm source="Contact Form" />  {/* ✅ Changed here */}
-    </div>
-</div>
+                        <div style={styles.rightColumn}>
+                            <div style={styles.formCard}>
+                                <div style={styles.formHeader}>
+                                    <div style={styles.formIconWrapper}>
+                                        <i className="fa-solid fa-paper-plane"></i>
+                                    </div>
+                                    <h3 style={styles.formTitle}>Send us a Message</h3>
+                                    <p style={styles.formSubtitle}>Fill out the form and our team will get back to you within 24 hours</p>
+                                </div>
+                                <EnquiryForm source="Contact Form" />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Map Section */}
             <section style={styles.mapSection}>
+                <div style={styles.mapHeader}>
+                    <h2 style={styles.mapTitle}>
+                        <i className="fa-solid fa-location-dot"></i>
+                        Find Us Here
+                    </h2>
+                </div>
                 <div style={styles.mapContainer}>
                     <iframe
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d241317.11609823277!2d72.74109995709657!3d19.08219783958221!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c6306644edc1%3A0x5da4ed8f8d648c69!2sMumbai%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1635000000000!5m2!1sen!2sin"
                         width="100%"
-                        height="400"
+                        height="450"
                         style={{ border: 0 }}
                         allowFullScreen=""
                         loading="lazy"
@@ -168,7 +182,7 @@ const Contact = () => {
                     
                     <div style={styles.faqGrid}>
                         <div style={styles.faqItem}>
-                            <div style={styles.faqIcon}>
+                            <div style={styles.faqIconMaroon}>
                                 <i className="fa-solid fa-graduation-cap"></i>
                             </div>
                             <h3 style={styles.faqQuestion}>How do I apply for a program?</h3>
@@ -179,7 +193,7 @@ const Contact = () => {
                         </div>
 
                         <div style={styles.faqItem}>
-                            <div style={styles.faqIcon}>
+                            <div style={styles.faqIconBlue}>
                                 <i className="fa-solid fa-certificate"></i>
                             </div>
                             <h3 style={styles.faqQuestion}>Are the degrees valid for government jobs?</h3>
@@ -190,7 +204,7 @@ const Contact = () => {
                         </div>
 
                         <div style={styles.faqItem}>
-                            <div style={styles.faqIcon}>
+                            <div style={styles.faqIconBlue}>
                                 <i className="fa-solid fa-credit-card"></i>
                             </div>
                             <h3 style={styles.faqQuestion}>What are the payment options?</h3>
@@ -201,7 +215,7 @@ const Contact = () => {
                         </div>
 
                         <div style={styles.faqItem}>
-                            <div style={styles.faqIcon}>
+                            <div style={styles.faqIconMaroon}>
                                 <i className="fa-solid fa-file-pen"></i>
                             </div>
                             <h3 style={styles.faqQuestion}>Is there any entrance exam?</h3>
@@ -214,8 +228,9 @@ const Contact = () => {
                 </div>
             </section>
 
-            {/* CTA Section */}
+            {/* CTA Section - Blue Theme */}
             <section style={styles.ctaSection}>
+                <div style={styles.ctaPattern}></div>
                 <div style={styles.container}>
                     <div style={styles.ctaContent}>
                         <div style={styles.ctaIcon}>
@@ -225,6 +240,11 @@ const Contact = () => {
                         <p style={styles.ctaText}>
                             Our counselors are available to help you with any questions. Call us now for instant support.
                         </p>
+                        <div style={styles.ctaTagline}>
+                            <span>learn.</span>
+                            <span>grow.</span>
+                            <span>succeed.</span>
+                        </div>
                         <a href="tel:+919876543210" style={styles.ctaBtn}>
                             <i className="fa-solid fa-phone"></i>
                             Call Now: +91 98765 43210
@@ -238,34 +258,47 @@ const Contact = () => {
     );
 };
 
-// Edufolio Brand Colors
+// Edufolio Brand Colors from PDF
 const colors = {
-    primaryDark: '#1E3A5F',
-    primaryMaroon: '#8B2346',
-    accentBlue: '#4A90A4',
-    accentPink: '#C4567A',
-    textLight: '#A8C5E2',
-    bgLight: '#F5F7FA',
-    bgDark: '#152A45'
+    // Primary Colors
+    lightBlue: '#0099D6',
+    darkBlue: '#00529D',
+    maroon: '#8B2346',
+    darkMaroon: '#6B1D3A',
+    
+    // Supporting Colors
+    pink: '#C4567A',
+    lightPink: '#E8B4C4',
+    
+    // Neutrals
+    white: '#FFFFFF',
+    lightGray: '#F5F7FA',
+    gray: '#64748B',
+    darkGray: '#1E293B',
+    
+    // Text Colors
+    textDark: '#2D1B4E',
+    textLight: '#FFFFFF',
+    textMuted: '#94A3B8'
 };
 
 const styles = {
-    // Hero Section
+    // Hero Section - Maroon Background
     hero: {
-        background: `linear-gradient(135deg, ${colors.primaryDark} 0%, ${colors.bgDark} 100%)`,
+        background: `linear-gradient(135deg, ${colors.darkMaroon} 0%, ${colors.maroon} 100%)`,
         padding: '120px 20px 80px',
         textAlign: 'center',
         position: 'relative',
         overflow: 'hidden'
     },
-    heroOverlay: {
+    heroPattern: {
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        opacity: 0.1,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        opacity: 0.5
     },
     heroContent: {
         maxWidth: '800px',
@@ -277,36 +310,48 @@ const styles = {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '8px',
-        background: `rgba(139, 35, 70, 0.3)`,
-        color: colors.accentPink,
+        background: 'rgba(255, 255, 255, 0.15)',
+        color: colors.white,
         padding: '10px 20px',
         borderRadius: '30px',
         fontSize: '0.9rem',
         fontWeight: '600',
-        marginBottom: '20px'
+        marginBottom: '20px',
+        backdropFilter: 'blur(10px)'
     },
     heroTitle: {
-        color: '#fff',
+        color: colors.white,
         fontSize: '2.8rem',
         fontWeight: '800',
         marginBottom: '15px'
     },
     heroSubtitle: {
-        color: colors.textLight,
+        color: 'rgba(255, 255, 255, 0.85)',
         fontSize: '1.15rem',
         lineHeight: 1.6,
         maxWidth: '600px',
-        margin: '0 auto'
+        margin: '0 auto 20px'
+    },
+    tagline: {
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '15px',
+        color: colors.lightBlue,
+        fontSize: '1.1rem',
+        fontWeight: '600',
+        fontStyle: 'italic'
     },
 
     // Main Section
     mainSection: {
         padding: '80px 20px',
-        background: colors.bgLight
+        background: colors.lightGray
     },
     container: {
         maxWidth: '1200px',
-        margin: '0 auto'
+        margin: '0 auto',
+        position: 'relative',
+        zIndex: 1
     },
     contentGrid: {
         display: 'grid',
@@ -319,13 +364,13 @@ const styles = {
 
     // Section Title
     sectionTitle: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '2rem',
         fontWeight: '800',
         marginBottom: '15px'
     },
     sectionText: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '1.05rem',
         lineHeight: 1.7,
         marginBottom: '35px'
@@ -343,18 +388,18 @@ const styles = {
         alignItems: 'flex-start',
         gap: '15px',
         padding: '22px',
-        background: '#fff',
+        background: colors.white,
         borderRadius: '16px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
-        border: '1px solid #E2E8F0',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+        border: `1px solid ${colors.lightGray}`,
         transition: 'all 0.3s ease'
     },
     contactIconPhone: {
         width: '55px',
         height: '55px',
         borderRadius: '14px',
-        background: `${colors.primaryMaroon}15`,
-        color: colors.primaryMaroon,
+        background: `${colors.maroon}15`,
+        color: colors.maroon,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -365,8 +410,8 @@ const styles = {
         width: '55px',
         height: '55px',
         borderRadius: '14px',
-        background: `${colors.accentBlue}15`,
-        color: colors.accentBlue,
+        background: `${colors.darkBlue}15`,
+        color: colors.darkBlue,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -377,8 +422,8 @@ const styles = {
         width: '55px',
         height: '55px',
         borderRadius: '14px',
-        background: `${colors.accentPink}15`,
-        color: colors.accentPink,
+        background: `${colors.pink}15`,
+        color: colors.pink,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -398,36 +443,36 @@ const styles = {
         flexShrink: 0
     },
     contactLabel: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '1rem',
         fontWeight: '700',
         marginBottom: '5px'
     },
     contactValue: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '0.95rem',
         fontWeight: '500',
         marginBottom: '3px'
     },
     contactNote: {
-        color: '#94A3B8',
+        color: colors.textMuted,
         fontSize: '0.85rem'
     },
 
     // Working Hours
     workingHours: {
-        background: '#fff',
+        background: colors.white,
         borderRadius: '16px',
         padding: '25px',
         marginBottom: '35px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
-        border: '1px solid #E2E8F0'
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+        border: `1px solid ${colors.lightGray}`
     },
     workingTitle: {
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '1.1rem',
         fontWeight: '700',
         marginBottom: '20px'
@@ -442,16 +487,21 @@ const styles = {
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: '12px 15px',
-        background: colors.bgLight,
+        background: colors.lightGray,
         borderRadius: '10px'
     },
     hoursDay: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontWeight: '500',
         fontSize: '0.95rem'
     },
     hoursTime: {
-        color: colors.primaryMaroon,
+        color: colors.darkBlue,
+        fontWeight: '600',
+        fontSize: '0.95rem'
+    },
+    hoursClosed: {
+        color: colors.maroon,
         fontWeight: '600',
         fontSize: '0.95rem'
     },
@@ -459,10 +509,10 @@ const styles = {
     // Social Section
     socialSection: {
         paddingTop: '25px',
-        borderTop: '1px solid #E2E8F0'
+        borderTop: `1px solid ${colors.lightGray}`
     },
     socialTitle: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '1.1rem',
         fontWeight: '700',
         marginBottom: '15px'
@@ -475,55 +525,92 @@ const styles = {
         width: '48px',
         height: '48px',
         borderRadius: '12px',
-        background: colors.primaryDark,
-        color: '#fff',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         textDecoration: 'none',
         fontSize: '1.1rem',
-        transition: 'all 0.3s ease'
+        transition: 'all 0.3s ease',
+        color: colors.white
+    },
+    socialFacebook: {
+        background: '#1877F2'
+    },
+    socialTwitter: {
+        background: '#1DA1F2'
+    },
+    socialLinkedin: {
+        background: '#0A66C2'
+    },
+    socialInstagram: {
+        background: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)'
+    },
+    socialYoutube: {
+        background: '#FF0000'
     },
 
     // Form Card
     formCard: {
-        background: '#fff',
+        background: colors.white,
         borderRadius: '24px',
         padding: '35px',
         boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
-        border: '1px solid #E2E8F0'
+        border: `1px solid ${colors.lightGray}`
     },
     formHeader: {
         marginBottom: '25px',
         textAlign: 'center'
     },
+    formIconWrapper: {
+        width: '60px',
+        height: '60px',
+        borderRadius: '16px',
+        background: `linear-gradient(135deg, ${colors.maroon} 0%, ${colors.pink} 100%)`,
+        color: colors.white,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.5rem',
+        margin: '0 auto 20px',
+        boxShadow: `0 8px 20px ${colors.maroon}30`
+    },
     formTitle: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '1.5rem',
         fontWeight: '800',
         marginBottom: '8px'
     },
     formSubtitle: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '0.95rem'
     },
 
     // Map Section
     mapSection: {
-        background: '#fff'
+        background: colors.white,
+        padding: '60px 0 0'
+    },
+    mapHeader: {
+        textAlign: 'center',
+        marginBottom: '30px'
+    },
+    mapTitle: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '12px',
+        color: colors.textDark,
+        fontSize: '1.5rem',
+        fontWeight: '700'
     },
     mapContainer: {
         width: '100%',
-        maxWidth: '1200px',
-        margin: '0 auto',
-        borderRadius: '0',
         overflow: 'hidden'
     },
 
     // FAQ Section
     faqSection: {
         padding: '80px 20px',
-        background: colors.bgLight
+        background: colors.lightGray
     },
     faqHeader: {
         textAlign: 'center',
@@ -533,8 +620,8 @@ const styles = {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '8px',
-        background: `${colors.primaryMaroon}15`,
-        color: colors.primaryMaroon,
+        background: `${colors.darkBlue}15`,
+        color: colors.darkBlue,
         padding: '10px 20px',
         borderRadius: '30px',
         fontSize: '0.9rem',
@@ -542,13 +629,13 @@ const styles = {
         marginBottom: '15px'
     },
     faqTitle: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '2rem',
         fontWeight: '800',
         marginBottom: '10px'
     },
     faqSubtitle: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '1.05rem'
     },
     faqGrid: {
@@ -558,18 +645,30 @@ const styles = {
     },
     faqItem: {
         padding: '30px',
-        background: '#fff',
+        background: colors.white,
         borderRadius: '20px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
-        border: '1px solid #E2E8F0',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+        border: `1px solid ${colors.lightGray}`,
         transition: 'all 0.3s ease'
     },
-    faqIcon: {
+    faqIconMaroon: {
         width: '50px',
         height: '50px',
         borderRadius: '12px',
-        background: `linear-gradient(135deg, ${colors.primaryMaroon}15, ${colors.accentPink}15)`,
-        color: colors.primaryMaroon,
+        background: `${colors.maroon}15`,
+        color: colors.maroon,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.2rem',
+        marginBottom: '20px'
+    },
+    faqIconBlue: {
+        width: '50px',
+        height: '50px',
+        borderRadius: '12px',
+        background: `${colors.darkBlue}15`,
+        color: colors.darkBlue,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -577,65 +676,88 @@ const styles = {
         marginBottom: '20px'
     },
     faqQuestion: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '1.1rem',
         fontWeight: '700',
         marginBottom: '12px',
         lineHeight: 1.4
     },
     faqAnswer: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '0.95rem',
         lineHeight: 1.7
     },
 
-    // CTA Section
+    // CTA Section - Blue Background
     ctaSection: {
         padding: '80px 20px',
-        background: `linear-gradient(135deg, ${colors.primaryMaroon} 0%, ${colors.accentPink} 100%)`,
-        textAlign: 'center'
+        background: `linear-gradient(135deg, ${colors.darkBlue} 0%, #003D7A 100%)`,
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden'
+    },
+    ctaPattern: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        opacity: 0.5
     },
     ctaContent: {
         maxWidth: '600px',
-        margin: '0 auto'
+        margin: '0 auto',
+        position: 'relative',
+        zIndex: 1
     },
     ctaIcon: {
         width: '80px',
         height: '80px',
         borderRadius: '50%',
-        background: 'rgba(255, 255, 255, 0.2)',
+        background: 'rgba(0, 153, 214, 0.2)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         margin: '0 auto 25px',
         fontSize: '2rem',
-        color: '#fff'
+        color: colors.lightBlue
     },
     ctaTitle: {
-        color: '#fff',
+        color: colors.white,
         fontSize: '2rem',
         fontWeight: '800',
         marginBottom: '15px'
     },
     ctaText: {
-        color: 'rgba(255, 255, 255, 0.9)',
+        color: 'rgba(255, 255, 255, 0.85)',
         fontSize: '1.1rem',
-        marginBottom: '30px',
+        marginBottom: '20px',
         lineHeight: 1.6
+    },
+    ctaTagline: {
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '15px',
+        marginBottom: '30px',
+        color: colors.lightBlue,
+        fontSize: '1.1rem',
+        fontWeight: '600',
+        fontStyle: 'italic'
     },
     ctaBtn: {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '10px',
         padding: '18px 36px',
-        background: '#fff',
-        color: colors.primaryMaroon,
+        background: colors.lightBlue,
+        color: colors.white,
         borderRadius: '12px',
         textDecoration: 'none',
         fontWeight: '700',
         fontSize: '1.1rem',
-        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.2)',
-        transition: 'transform 0.2s ease'
+        boxShadow: `0 8px 25px ${colors.lightBlue}40`,
+        transition: 'all 0.3s ease'
     }
 };
 
@@ -643,23 +765,30 @@ const styles = {
 if (typeof document !== 'undefined') {
     const styleSheet = document.createElement('style');
     styleSheet.textContent = `
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
         .contact-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
         }
         
         .social-link:hover {
-            background: linear-gradient(135deg, #8B2346 0%, #C4567A 100%) !important;
             transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
         
         .faq-item:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.08);
         }
         
         .cta-btn:hover {
             transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 153, 214, 0.5);
         }
         
         @media (max-width: 1024px) {
