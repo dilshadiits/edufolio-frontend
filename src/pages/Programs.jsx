@@ -4,6 +4,7 @@ import axios from 'axios';
 import API_BASE from '../api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import EnrollModal from '../components/EnrollModal';
 
 const Programs = () => {
     const [searchParams] = useSearchParams();
@@ -15,8 +16,8 @@ const Programs = () => {
         category: searchParams.get('category') || '',
         level: ''
     });
-
-
+    const [showEnrollModal, setShowEnrollModal] = useState(false);
+    const [selectedProgram, setSelectedProgram] = useState(null);
 
     useEffect(() => {
         fetchData();
@@ -49,6 +50,13 @@ const Programs = () => {
         fetchData();
     };
 
+    const handleEnrollClick = (e, program) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setSelectedProgram(program);
+        setShowEnrollModal(true);
+    };
+
     const filteredPrograms = programs.filter(prog =>
         prog.name.toLowerCase().includes(search.toLowerCase()) ||
         prog.category.toLowerCase().includes(search.toLowerCase())
@@ -65,7 +73,7 @@ const Programs = () => {
 
             {/* Hero Section */}
             <section style={styles.hero}>
-                <div style={styles.heroOverlay}></div>
+                <div style={styles.heroPattern}></div>
                 <div style={styles.heroContent}>
                     <span style={styles.heroBadge}>
                         <i className="fa-solid fa-graduation-cap"></i>
@@ -75,6 +83,11 @@ const Programs = () => {
                     <p style={styles.heroSubtitle}>
                         Find the perfect program to advance your career from our wide selection of UGC-approved courses
                     </p>
+                    <div style={styles.tagline}>
+                        <span>learn.</span>
+                        <span>grow.</span>
+                        <span>succeed.</span>
+                    </div>
                 </div>
             </section>
 
@@ -182,11 +195,7 @@ const Programs = () => {
                             </div>
                             <div style={styles.grid}>
                                 {filteredPrograms.map(program => (
-                                    <Link
-                                        key={program._id}
-                                        to={`/programs/${program.slug}`}
-                                        style={styles.card}
-                                    >
+                                    <div key={program._id} style={styles.card}>
                                         {program.featured && (
                                             <span style={styles.featuredBadge}>
                                                 <i className="fa-solid fa-star"></i> Featured
@@ -225,18 +234,34 @@ const Programs = () => {
                                             </div>
                                         </div>
 
-                                        <div style={styles.cardFooter}>
+                                        <div style={styles.feeSection}>
                                             <div style={styles.fee}>
                                                 <span style={styles.feeLabel}>Total Fee</span>
                                                 <span style={styles.feeValue}>
                                                     ₹{Number(program.fee).toLocaleString('en-IN')}
                                                 </span>
                                             </div>
-                                            <span style={styles.viewLink}>
-                                                View Details <i className="fa-solid fa-arrow-right"></i>
+                                            <span style={styles.emiTag}>
+                                                <i className="fa-solid fa-check-circle"></i> EMI Available
                                             </span>
                                         </div>
-                                    </Link>
+
+                                        <div style={styles.cardFooter}>
+                                            <Link 
+                                                to={`/programs/${program.slug}`}
+                                                style={styles.viewBtn}
+                                            >
+                                                View Details
+                                            </Link>
+                                            <button 
+                                                style={styles.enrollBtn}
+                                                onClick={(e) => handleEnrollClick(e, program)}
+                                            >
+                                                <i className="fa-solid fa-paper-plane"></i>
+                                                Enroll Now
+                                            </button>
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         </>
@@ -258,6 +283,7 @@ const Programs = () => {
 
             {/* CTA Section */}
             <section style={styles.ctaSection}>
+                <div style={styles.ctaPattern}></div>
                 <div style={styles.container}>
                     <div style={styles.ctaContent}>
                         <div style={styles.ctaIcon}>
@@ -275,38 +301,60 @@ const Programs = () => {
                 </div>
             </section>
 
+            {/* Enroll Modal */}
+            <EnrollModal
+                isOpen={showEnrollModal}
+                onClose={() => setShowEnrollModal(false)}
+                program={selectedProgram}
+                university={selectedProgram?.universityId}
+            />
+
             <Footer />
         </>
     );
 };
 
-// Edufolio Brand Colors
+// Edufolio Brand Colors from PDF
 const colors = {
-    primaryDark: '#1E3A5F',
-    primaryMaroon: '#8B2346',
-    accentBlue: '#4A90A4',
-    accentPink: '#C4567A',
-    textLight: '#A8C5E2',
-    bgLight: '#F5F7FA',
-    bgDark: '#152A45'
+    // Primary Colors
+    lightBlue: '#0099D6',
+    darkBlue: '#00529D',
+    maroon: '#8B2346',
+    darkMaroon: '#6B1D3A',
+    
+    // Supporting Colors
+    pink: '#C4567A',
+    lightPink: '#E8B4C4',
+    
+    // Neutrals
+    white: '#FFFFFF',
+    lightGray: '#F5F7FA',
+    gray: '#64748B',
+    darkGray: '#1E293B',
+    
+    // Text Colors
+    textDark: '#2D1B4E',
+    textLight: '#FFFFFF',
+    textMuted: '#94A3B8'
 };
 
 const styles = {
-    // Hero Section
+    // Hero Section - Maroon Background
     hero: {
-        background: `linear-gradient(135deg, ${colors.primaryDark} 0%, ${colors.bgDark} 100%)`,
+        background: `linear-gradient(135deg, ${colors.darkMaroon} 0%, ${colors.maroon} 100%)`,
         padding: '120px 20px 60px',
         textAlign: 'center',
-        position: 'relative'
+        position: 'relative',
+        overflow: 'hidden'
     },
-    heroOverlay: {
+    heroPattern: {
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        opacity: 0.1,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        opacity: 0.5
     },
     heroContent: {
         maxWidth: '800px',
@@ -318,40 +366,52 @@ const styles = {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '8px',
-        background: `rgba(139, 35, 70, 0.3)`,
-        color: colors.accentPink,
+        background: 'rgba(255, 255, 255, 0.15)',
+        color: colors.white,
         padding: '10px 20px',
         borderRadius: '30px',
         fontSize: '0.9rem',
         fontWeight: '600',
-        marginBottom: '20px'
+        marginBottom: '20px',
+        backdropFilter: 'blur(10px)'
     },
     heroTitle: {
-        color: '#fff',
+        color: colors.white,
         fontSize: '2.8rem',
         fontWeight: '800',
         marginBottom: '15px'
     },
     heroSubtitle: {
-        color: colors.textLight,
+        color: 'rgba(255, 255, 255, 0.85)',
         fontSize: '1.1rem',
-        margin: 0,
+        margin: '0 0 20px 0',
         lineHeight: 1.6
+    },
+    tagline: {
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '15px',
+        color: colors.lightBlue,
+        fontSize: '1.1rem',
+        fontWeight: '600',
+        fontStyle: 'italic'
     },
 
     // Filter Section
     filterSection: {
-        background: '#fff',
+        background: colors.white,
         padding: '25px 20px',
-        borderBottom: '1px solid #E2E8F0',
+        borderBottom: `3px solid ${colors.lightGray}`,
         position: 'sticky',
         top: '70px',
         zIndex: 100,
-        boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
     },
     container: {
         maxWidth: '1200px',
-        margin: '0 auto'
+        margin: '0 auto',
+        position: 'relative',
+        zIndex: 1
     },
     searchForm: {
         display: 'flex',
@@ -367,25 +427,26 @@ const styles = {
         left: '18px',
         top: '50%',
         transform: 'translateY(-50%)',
-        color: '#94A3B8',
+        color: colors.gray,
         fontSize: '1rem'
     },
     searchInput: {
         width: '100%',
         padding: '16px 50px 16px 50px',
         borderRadius: '12px',
-        border: `2px solid #E2E8F0`,
+        border: `2px solid ${colors.lightGray}`,
         fontSize: '1rem',
         boxSizing: 'border-box',
         outline: 'none',
-        transition: 'border-color 0.2s ease'
+        transition: 'all 0.3s ease',
+        background: colors.lightGray
     },
     clearSearchBtn: {
         position: 'absolute',
         right: '15px',
         top: '50%',
         transform: 'translateY(-50%)',
-        background: '#E2E8F0',
+        background: colors.gray,
         border: 'none',
         width: '28px',
         height: '28px',
@@ -394,13 +455,14 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#64748B',
-        fontSize: '0.8rem'
+        color: colors.white,
+        fontSize: '0.8rem',
+        transition: 'background 0.3s ease'
     },
     searchBtn: {
         padding: '16px 30px',
-        background: `linear-gradient(135deg, ${colors.primaryMaroon} 0%, ${colors.accentPink} 100%)`,
-        color: '#fff',
+        background: colors.darkBlue,
+        color: colors.white,
         border: 'none',
         borderRadius: '12px',
         fontWeight: '600',
@@ -409,8 +471,8 @@ const styles = {
         alignItems: 'center',
         gap: '8px',
         fontSize: '1rem',
-        boxShadow: '0 4px 15px rgba(139, 35, 70, 0.3)',
-        transition: 'transform 0.2s ease'
+        boxShadow: `0 4px 15px ${colors.darkBlue}40`,
+        transition: 'all 0.3s ease'
     },
     filters: {
         display: 'flex',
@@ -422,26 +484,26 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontWeight: '600',
         fontSize: '0.9rem'
     },
     filterSelect: {
         padding: '12px 20px',
         borderRadius: '10px',
-        border: '2px solid #E2E8F0',
+        border: `2px solid ${colors.lightGray}`,
         fontSize: '0.9rem',
         cursor: 'pointer',
         minWidth: '160px',
-        background: '#fff',
-        color: colors.primaryDark,
+        background: colors.lightGray,
+        color: colors.textDark,
         outline: 'none',
-        transition: 'border-color 0.2s ease'
+        transition: 'all 0.3s ease'
     },
     clearBtn: {
         padding: '12px 20px',
-        background: '#FEE2E2',
-        color: '#DC2626',
+        background: `${colors.maroon}15`,
+        color: colors.maroon,
         border: 'none',
         borderRadius: '10px',
         fontSize: '0.9rem',
@@ -450,25 +512,25 @@ const styles = {
         alignItems: 'center',
         gap: '6px',
         fontWeight: '600',
-        transition: 'background 0.2s ease'
+        transition: 'all 0.3s ease'
     },
 
     // Main Section
     mainSection: {
         padding: '50px 20px',
-        background: colors.bgLight,
+        background: colors.lightGray,
         minHeight: '50vh'
     },
     loading: {
         textAlign: 'center',
         padding: '80px 20px',
-        color: '#64748B'
+        color: colors.gray
     },
     spinner: {
         width: '50px',
         height: '50px',
-        border: '4px solid #E2E8F0',
-        borderTopColor: colors.primaryMaroon,
+        border: `4px solid ${colors.lightGray}`,
+        borderTopColor: colors.maroon,
         borderRadius: '50%',
         animation: 'spin 1s linear infinite',
         margin: '0 auto 20px'
@@ -482,7 +544,7 @@ const styles = {
         gap: '15px'
     },
     resultCount: {
-        color: '#64748B',
+        color: colors.gray,
         margin: 0,
         fontSize: '0.95rem'
     },
@@ -494,8 +556,8 @@ const styles = {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '8px',
-        background: `${colors.primaryMaroon}15`,
-        color: colors.primaryMaroon,
+        background: `${colors.darkBlue}15`,
+        color: colors.darkBlue,
         padding: '6px 12px',
         borderRadius: '20px',
         fontSize: '0.85rem',
@@ -507,24 +569,23 @@ const styles = {
         gap: '25px'
     },
     card: {
-        background: '#fff',
+        background: colors.white,
         borderRadius: '20px',
         padding: '25px',
-        textDecoration: 'none',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
         display: 'flex',
         flexDirection: 'column',
         gap: '15px',
-        border: '1px solid #E2E8F0',
+        border: `1px solid ${colors.lightGray}`,
         position: 'relative'
     },
     featuredBadge: {
         position: 'absolute',
         top: '15px',
         right: '15px',
-        background: `linear-gradient(135deg, ${colors.primaryMaroon} 0%, ${colors.accentPink} 100%)`,
-        color: '#fff',
+        background: `linear-gradient(135deg, ${colors.maroon} 0%, ${colors.pink} 100%)`,
+        color: colors.white,
         padding: '5px 12px',
         borderRadius: '20px',
         fontSize: '0.75rem',
@@ -539,16 +600,16 @@ const styles = {
         flexWrap: 'wrap'
     },
     categoryTag: {
-        background: `${colors.primaryMaroon}15`,
-        color: colors.primaryMaroon,
+        background: `${colors.maroon}15`,
+        color: colors.maroon,
         padding: '6px 14px',
         borderRadius: '20px',
         fontSize: '0.8rem',
         fontWeight: '600'
     },
     levelTag: {
-        background: `${colors.accentBlue}15`,
-        color: colors.accentBlue,
+        background: `${colors.darkBlue}15`,
+        color: colors.darkBlue,
         padding: '6px 14px',
         borderRadius: '20px',
         fontSize: '0.8rem',
@@ -556,7 +617,7 @@ const styles = {
     },
     cardTitle: {
         margin: 0,
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '1.2rem',
         fontWeight: '700',
         lineHeight: 1.3
@@ -565,7 +626,7 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '0.9rem'
     },
     uniLogo: {
@@ -573,7 +634,7 @@ const styles = {
         height: '32px',
         borderRadius: '8px',
         objectFit: 'contain',
-        background: colors.bgLight,
+        background: colors.lightGray,
         padding: '2px'
     },
     cardMeta: {
@@ -584,53 +645,93 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '0.9rem'
     },
-    cardFooter: {
+    feeSection: {
+        background: colors.lightGray,
+        padding: '15px',
+        borderRadius: '12px',
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingTop: '15px',
-        borderTop: '1px solid #E2E8F0',
-        marginTop: 'auto'
+        alignItems: 'center'
     },
     fee: {
         display: 'flex',
         flexDirection: 'column'
     },
     feeLabel: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '0.8rem',
         marginBottom: '2px'
     },
     feeValue: {
-        color: colors.primaryMaroon,
-        fontSize: '1.25rem',
+        color: colors.maroon,
+        fontSize: '1.3rem',
         fontWeight: '700'
     },
-    viewLink: {
-        color: colors.accentBlue,
+    emiTag: {
+        background: '#DCFCE7',
+        color: '#15803D',
+        padding: '6px 12px',
+        borderRadius: '8px',
+        fontSize: '0.75rem',
         fontWeight: '600',
         display: 'flex',
         alignItems: 'center',
-        gap: '6px',
-        fontSize: '0.9rem'
+        gap: '5px'
+    },
+    cardFooter: {
+        display: 'flex',
+        gap: '10px',
+        marginTop: 'auto',
+        paddingTop: '15px',
+        borderTop: `1px solid ${colors.lightGray}`
+    },
+    viewBtn: {
+        flex: 1,
+        padding: '12px',
+        background: colors.lightGray,
+        color: colors.textDark,
+        border: 'none',
+        borderRadius: '10px',
+        fontWeight: '600',
+        fontSize: '0.9rem',
+        textDecoration: 'none',
+        textAlign: 'center',
+        transition: 'all 0.3s ease'
+    },
+    enrollBtn: {
+        flex: 1,
+        padding: '12px',
+        background: `linear-gradient(135deg, ${colors.maroon} 0%, ${colors.pink} 100%)`,
+        color: colors.white,
+        border: 'none',
+        borderRadius: '10px',
+        fontWeight: '600',
+        fontSize: '0.9rem',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px',
+        transition: 'all 0.3s ease',
+        boxShadow: `0 4px 15px ${colors.maroon}30`
     },
 
     // Empty State
     emptyState: {
         textAlign: 'center',
         padding: '80px 20px',
-        background: '#fff',
+        background: colors.white,
         borderRadius: '20px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)'
     },
     emptyIconWrapper: {
         width: '100px',
         height: '100px',
         borderRadius: '50%',
-        background: colors.bgLight,
+        background: `${colors.maroon}10`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -638,23 +739,23 @@ const styles = {
     },
     emptyIcon: {
         fontSize: '3rem',
-        color: '#CBD5E1'
+        color: colors.maroon
     },
     emptyTitle: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '1.5rem',
         fontWeight: '700',
         marginBottom: '10px'
     },
     emptyText: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '1rem',
         marginBottom: '25px'
     },
     clearFiltersBtn: {
         padding: '14px 28px',
-        background: `linear-gradient(135deg, ${colors.primaryMaroon} 0%, ${colors.accentPink} 100%)`,
-        color: '#fff',
+        background: colors.darkBlue,
+        color: colors.white,
         border: 'none',
         borderRadius: '12px',
         cursor: 'pointer',
@@ -663,92 +764,107 @@ const styles = {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '10px',
-        boxShadow: '0 4px 15px rgba(139, 35, 70, 0.3)'
+        boxShadow: `0 4px 15px ${colors.darkBlue}30`,
+        transition: 'all 0.3s ease'
     },
 
-    // CTA Section
+    // CTA Section - Blue Background
     ctaSection: {
-        padding: '40px 20px',
-        background: '#fff',
-        borderTop: '1px solid #E2E8F0'
+        padding: '60px 20px',
+        background: `linear-gradient(135deg, ${colors.darkBlue} 0%, #003D7A 100%)`,
+        position: 'relative',
+        overflow: 'hidden'
+    },
+    ctaPattern: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        opacity: 0.5
     },
     ctaContent: {
-        background: `linear-gradient(135deg, ${colors.primaryDark} 0%, ${colors.bgDark} 100%)`,
+        background: 'rgba(255, 255, 255, 0.1)',
         borderRadius: '20px',
         padding: '30px 40px',
         display: 'flex',
         alignItems: 'center',
         gap: '25px',
-        flexWrap: 'wrap'
+        flexWrap: 'wrap',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        position: 'relative',
+        zIndex: 1
     },
     ctaIcon: {
-        width: '60px',
-        height: '60px',
+        width: '70px',
+        height: '70px',
         borderRadius: '50%',
-        background: `rgba(139, 35, 70, 0.3)`,
+        background: `rgba(0, 153, 214, 0.2)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: colors.accentPink,
-        fontSize: '1.5rem',
+        color: colors.lightBlue,
+        fontSize: '1.8rem',
         flexShrink: 0
     },
     ctaText: {
         flex: 1
     },
     ctaTitle: {
-        color: '#fff',
-        fontSize: '1.3rem',
+        color: colors.white,
+        fontSize: '1.4rem',
         fontWeight: '700',
         marginBottom: '5px'
     },
     ctaDesc: {
-        color: colors.textLight,
-        fontSize: '0.95rem',
+        color: 'rgba(255, 255, 255, 0.8)',
+        fontSize: '1rem',
         margin: 0
     },
     ctaBtn: {
-        padding: '14px 28px',
-        background: `linear-gradient(135deg, ${colors.primaryMaroon} 0%, ${colors.accentPink} 100%)`,
-        color: '#fff',
+        padding: '16px 32px',
+        background: colors.lightBlue,
+        color: colors.white,
         borderRadius: '12px',
         textDecoration: 'none',
         fontWeight: '600',
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
-        boxShadow: '0 4px 15px rgba(139, 35, 70, 0.3)'
+        fontSize: '1rem',
+        boxShadow: `0 4px 20px ${colors.lightBlue}40`,
+        transition: 'all 0.3s ease'
     }
 };
 
-// Add keyframes for spinner
+// Add keyframes for spinner and hover effects
 if (typeof document !== 'undefined') {
     const styleSheet = document.createElement('style');
     styleSheet.textContent = `
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
         
-        .program-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        
-        .search-input:focus {
-            border-color: #8B2346 !important;
-        }
-        
-        .filter-select:focus {
-            border-color: #8B2346 !important;
+        body {
+            font-family: 'Poppins', sans-serif;
         }
         
         .active-tag button {
             background: none;
             border: none;
-            color: #8B2346;
+            color: #00529D;
             cursor: pointer;
             padding: 0;
             font-size: 0.75rem;
+            transition: color 0.3s ease;
+        }
+        
+        .active-tag button:hover {
+            color: #8B2346;
         }
         
         @media (max-width: 768px) {
