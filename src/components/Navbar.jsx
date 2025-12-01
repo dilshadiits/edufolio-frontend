@@ -25,7 +25,6 @@ const Navbar = () => {
         window.addEventListener('scroll', handleScroll);
         window.addEventListener('resize', handleResize);
 
-        // Check initial scroll position
         handleScroll();
 
         return () => {
@@ -34,7 +33,6 @@ const Navbar = () => {
         };
     }, []);
 
-    // Lock body scroll when mobile menu is open
     useEffect(() => {
         if (isMobileMenuOpen) {
             document.body.style.overflow = 'hidden';
@@ -75,106 +73,100 @@ const Navbar = () => {
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
-                /* ==================== NAVBAR RESET & BASE ==================== */
                 .navbar,
                 .navbar *,
                 .navbar *::before,
-                .navbar *::after {
-                    margin: 0;
-                    padding: 0;
-                    box-sizing: border-box;
+                .navbar *::after,
+                .mobile-menu,
+                .mobile-menu *,
+                .mobile-menu *::before,
+                .mobile-menu *::after {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    box-sizing: border-box !important;
                 }
 
                 .navbar {
-                    --nav-height: 70px;
-                    --nav-light-blue: #0099D6;
-                    --nav-dark-blue: #00529D;
-                    --nav-maroon: #8B2346;
-                    --nav-dark-maroon: #6B1D3A;
-                    --nav-pink: #C4567A;
-                    --nav-white: #FFFFFF;
-                    --nav-light-gray: #F5F7FA;
-                    --nav-gray: #64748B;
-                    --nav-text-dark: #2D1B4E;
-                    --nav-transition: 0.3s ease;
-                    --nav-radius: 10px;
-                    --nav-radius-lg: 12px;
-
                     position: fixed !important;
                     top: 0 !important;
                     left: 0 !important;
                     right: 0 !important;
-                    z-index: 9999 !important;
-                    height: var(--nav-height) !important;
-                    min-height: var(--nav-height) !important;
-                    max-height: var(--nav-height) !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    transition: background 0.3s ease, box-shadow 0.3s ease !important;
-                    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-                    background: transparent !important;
                     width: 100% !important;
+                    height: 70px !important;
+                    z-index: 99999 !important;
+                    background: transparent !important;
+                    transition: background 0.3s ease, box-shadow 0.3s ease !important;
+                    font-family: 'Poppins', sans-serif !important;
+                    display: block !important;
                 }
 
                 .navbar.scrolled,
                 .navbar.menu-open {
-                    background: var(--nav-white) !important;
+                    background: #FFFFFF !important;
                     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
                 }
 
                 .navbar-container {
                     width: 100% !important;
                     max-width: 1200px !important;
+                    height: 70px !important;
                     margin: 0 auto !important;
                     padding: 0 20px !important;
                     display: flex !important;
+                    flex-direction: row !important;
                     justify-content: space-between !important;
                     align-items: center !important;
-                    height: 100% !important;
                     position: relative !important;
                 }
 
-                /* ==================== LOGO STYLES ==================== */
+                /* ==================== LOGO ==================== */
                 .navbar-logo {
                     display: flex !important;
                     align-items: center !important;
+                    justify-content: flex-start !important;
                     text-decoration: none !important;
+                    height: 70px !important;
                     flex-shrink: 0 !important;
-                    height: 45px !important;
                     position: relative !important;
                     z-index: 10 !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
                 }
 
                 .logo-wrapper {
                     position: relative !important;
                     display: flex !important;
                     align-items: center !important;
-                    height: 50px !important;
-                    width: auto !important;
-                    transition: transform 0.3s ease !important;
+                    justify-content: flex-start !important;
+                    height: 45px !important;
+                    width: 180px !important;
+                    flex-shrink: 0 !important;
                 }
 
                 .logo-white,
                 .logo-black {
-                    height: 180px !important;
+                    height: 45px !important;
                     width: auto !important;
                     max-width: 180px !important;
-                    transition: opacity 0.3s ease !important;
                     object-fit: contain !important;
                     display: block !important;
+                    transition: opacity 0.3s ease !important;
                 }
 
                 .logo-white {
                     opacity: 1 !important;
-                    position: relative !important;
+                    position: absolute !important;
+                    left: 0 !important;
+                    top: 50% !important;
+                    transform: translateY(-50%) !important;
                 }
 
                 .logo-black {
+                    opacity: 0 !important;
                     position: absolute !important;
                     left: 0 !important;
-                    top: 0 !important;
-                    height: 45px !important;
-                    opacity: 0 !important;
+                    top: 50% !important;
+                    transform: translateY(-50%) !important;
                 }
 
                 .navbar.scrolled .logo-white,
@@ -187,36 +179,38 @@ const Navbar = () => {
                     opacity: 1 !important;
                 }
 
-                .navbar-logo:hover .logo-wrapper {
-                    transform: scale(1.02) !important;
-                }
-
-                /* ==================== NAV LINKS ==================== */
+                /* ==================== NAV LINKS - CENTER ==================== */
                 .nav-links {
-                    display: flex !important;
-                    gap: 8px !important;
-                    align-items: center !important;
-                    height: auto !important;
                     position: absolute !important;
                     left: 50% !important;
-                    transform: translateX(-50%) !important;
+                    top: 50% !important;
+                    transform: translate(-50%, -50%) !important;
+                    display: flex !important;
+                    flex-direction: row !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 8px !important;
+                    height: auto !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
                 }
 
                 .nav-link {
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 8px !important;
                     text-decoration: none !important;
                     font-size: 0.9rem !important;
                     font-weight: 600 !important;
-                    position: relative !important;
-                    transition: all 0.3s ease !important;
                     padding: 10px 16px !important;
-                    color: var(--nav-white) !important;
-                    border-radius: var(--nav-radius) !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    gap: 8px !important;
+                    margin: 0 !important;
+                    color: #FFFFFF !important;
+                    border-radius: 10px !important;
+                    background: transparent !important;
+                    transition: all 0.3s ease !important;
                     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
                     white-space: nowrap !important;
-                    background: transparent !important;
                 }
 
                 .nav-link .nav-icon {
@@ -225,7 +219,7 @@ const Navbar = () => {
                 }
 
                 .navbar.scrolled .nav-link {
-                    color: var(--nav-text-dark) !important;
+                    color: #2D1B4E !important;
                     text-shadow: none !important;
                 }
 
@@ -234,99 +228,83 @@ const Navbar = () => {
                 }
 
                 .navbar.scrolled .nav-link:hover {
-                    background: var(--nav-light-gray) !important;
+                    background: #F5F7FA !important;
                 }
 
                 .nav-link.active {
-                    color: var(--nav-white) !important;
-                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%) !important;
+                    color: #FFFFFF !important;
+                    background: linear-gradient(135deg, #8B2346 0%, #C4567A 100%) !important;
                     box-shadow: 0 4px 15px rgba(139, 35, 70, 0.3) !important;
                     text-shadow: none !important;
                 }
 
-                .nav-link.active .nav-icon {
-                    opacity: 1 !important;
-                }
-
-                /* ==================== CTA CONTAINER ==================== */
+                /* ==================== CTA BUTTONS - RIGHT ==================== */
                 .cta-container {
                     display: flex !important;
+                    flex-direction: row !important;
                     align-items: center !important;
+                    justify-content: flex-end !important;
                     gap: 12px !important;
                     flex-shrink: 0 !important;
+                    height: 70px !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
                     position: relative !important;
                     z-index: 10 !important;
                 }
 
                 .login-btn {
-                    display: flex !important;
+                    display: inline-flex !important;
                     align-items: center !important;
+                    justify-content: center !important;
                     gap: 8px !important;
                     padding: 10px 18px !important;
+                    margin: 0 !important;
                     border: 2px solid rgba(255, 255, 255, 0.5) !important;
-                    border-radius: var(--nav-radius) !important;
+                    border-radius: 10px !important;
                     text-decoration: none !important;
                     font-weight: 600 !important;
                     font-size: 0.9rem !important;
-                    transition: all 0.3s ease !important;
-                    backdrop-filter: blur(10px) !important;
-                    -webkit-backdrop-filter: blur(10px) !important;
-                    color: var(--nav-white) !important;
+                    color: #FFFFFF !important;
                     background: rgba(255, 255, 255, 0.1) !important;
+                    backdrop-filter: blur(10px) !important;
+                    transition: all 0.3s ease !important;
                     white-space: nowrap !important;
                 }
 
                 .navbar.scrolled .login-btn {
-                    color: var(--nav-dark-blue) !important;
-                    border-color: var(--nav-dark-blue) !important;
+                    color: #00529D !important;
+                    border-color: #00529D !important;
                     background: rgba(0, 82, 157, 0.1) !important;
                 }
 
                 .login-btn:hover {
-                    background: var(--nav-dark-blue) !important;
-                    color: var(--nav-white) !important;
-                    border-color: var(--nav-dark-blue) !important;
+                    background: #00529D !important;
+                    color: #FFFFFF !important;
+                    border-color: #00529D !important;
                     transform: translateY(-2px) !important;
                     box-shadow: 0 4px 15px rgba(0, 82, 157, 0.3) !important;
                 }
 
                 .cta-btn {
-                    display: flex !important;
+                    display: inline-flex !important;
                     align-items: center !important;
+                    justify-content: center !important;
                     gap: 8px !important;
                     padding: 12px 22px !important;
-                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%) !important;
-                    color: var(--nav-white) !important;
-                    border-radius: var(--nav-radius) !important;
+                    margin: 0 !important;
+                    background: linear-gradient(135deg, #8B2346 0%, #C4567A 100%) !important;
+                    color: #FFFFFF !important;
+                    border: none !important;
+                    border-radius: 10px !important;
                     text-decoration: none !important;
                     font-weight: 600 !important;
                     font-size: 0.9rem !important;
                     box-shadow: 0 4px 15px rgba(139, 35, 70, 0.4) !important;
                     transition: all 0.3s ease !important;
+                    white-space: nowrap !important;
                     position: relative !important;
                     overflow: hidden !important;
-                    white-space: nowrap !important;
-                    border: none !important;
-                }
-
-                .cta-btn::before {
-                    content: '' !important;
-                    position: absolute !important;
-                    top: 0 !important;
-                    left: -100% !important;
-                    width: 100% !important;
-                    height: 100% !important;
-                    background: linear-gradient(
-                        90deg,
-                        transparent,
-                        rgba(255, 255, 255, 0.2),
-                        transparent
-                    ) !important;
-                    transition: left 0.5s ease !important;
-                }
-
-                .cta-btn:hover::before {
-                    left: 100% !important;
                 }
 
                 .cta-btn:hover {
@@ -337,54 +315,51 @@ const Navbar = () => {
                 /* ==================== MOBILE MENU BUTTON ==================== */
                 .mobile-menu-btn {
                     display: none !important;
+                    align-items: center !important;
+                    justify-content: center !important;
                     background: transparent !important;
                     border: none !important;
                     cursor: pointer !important;
                     padding: 10px !important;
+                    margin: 0 !important;
                     width: 44px !important;
                     height: 44px !important;
-                    border-radius: var(--nav-radius) !important;
+                    border-radius: 10px !important;
                     transition: all 0.2s ease !important;
-                    align-items: center !important;
-                    justify-content: center !important;
                     flex-shrink: 0 !important;
-                }
-
-                .mobile-menu-btn.menu-open {
-                    background: var(--nav-light-gray) !important;
                 }
 
                 .mobile-menu-btn i {
                     font-size: 1.3rem !important;
-                    color: var(--nav-white) !important;
+                    color: #FFFFFF !important;
                     transition: color 0.3s ease !important;
                 }
 
                 .navbar.scrolled .mobile-menu-btn i,
                 .navbar.menu-open .mobile-menu-btn i {
-                    color: var(--nav-maroon) !important;
+                    color: #8B2346 !important;
                 }
 
                 /* ==================== MOBILE MENU ==================== */
                 .mobile-menu {
                     position: fixed !important;
-                    top: var(--nav-height) !important;
+                    top: 70px !important;
                     left: 0 !important;
                     right: 0 !important;
                     bottom: 0 !important;
-                    background: var(--nav-white) !important;
-                    padding: 10px 20px 25px !important;
+                    width: 100% !important;
+                    background: #FFFFFF !important;
+                    padding: 10px 20px 25px 20px !important;
                     display: flex !important;
                     flex-direction: column !important;
                     gap: 5px !important;
-                    border-top: 3px solid var(--nav-maroon) !important;
-                    animation: navSlideDown 0.3s ease !important;
+                    border-top: 3px solid #8B2346 !important;
                     overflow-y: auto !important;
-                    -webkit-overflow-scrolling: touch !important;
-                    z-index: 9998 !important;
+                    z-index: 99998 !important;
+                    animation: slideDown 0.3s ease !important;
                 }
 
-                @keyframes navSlideDown {
+                @keyframes slideDown {
                     from {
                         opacity: 0;
                         transform: translateY(-10px);
@@ -396,13 +371,12 @@ const Navbar = () => {
                 }
 
                 .mobile-menu-header {
-                    padding: 10px 0 15px !important;
-                    border-bottom: 1px solid var(--nav-light-gray) !important;
+                    padding: 10px 0 15px 0 !important;
+                    border-bottom: 1px solid #F5F7FA !important;
                     margin-bottom: 10px !important;
                     display: flex !important;
                     align-items: center !important;
                     gap: 10px !important;
-                    flex-shrink: 0 !important;
                 }
 
                 .mobile-menu-logo {
@@ -412,37 +386,35 @@ const Navbar = () => {
                 }
 
                 .mobile-menu-tagline {
-                    color: var(--nav-light-blue) !important;
+                    color: #0099D6 !important;
                     font-size: 0.9rem !important;
                     font-weight: 600 !important;
                     font-style: italic !important;
                 }
 
                 .mobile-nav-link {
+                    display: flex !important;
+                    flex-direction: row !important;
+                    justify-content: space-between !important;
+                    align-items: center !important;
                     text-decoration: none !important;
                     font-size: 1rem !important;
                     font-weight: 500 !important;
                     padding: 14px 16px !important;
-                    border-radius: var(--nav-radius) !important;
-                    display: flex !important;
-                    justify-content: space-between !important;
-                    align-items: center !important;
-                    transition: all 0.2s ease !important;
-                    color: var(--nav-text-dark) !important;
+                    margin: 0 !important;
+                    border-radius: 10px !important;
+                    color: #2D1B4E !important;
                     background: transparent !important;
-                    border-left: 3px solid transparent !important;
-                    flex-shrink: 0 !important;
+                    transition: all 0.2s ease !important;
                 }
 
                 .mobile-nav-link:hover {
-                    background: var(--nav-light-gray) !important;
+                    background: #F5F7FA !important;
                 }
 
                 .mobile-nav-link.active {
-                    color: var(--nav-white) !important;
-                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%) !important;
-                    border-left-color: transparent !important;
-                    border-radius: var(--nav-radius) !important;
+                    color: #FFFFFF !important;
+                    background: linear-gradient(135deg, #8B2346 0%, #C4567A 100%) !important;
                 }
 
                 .mobile-nav-link-content {
@@ -459,34 +431,31 @@ const Navbar = () => {
                     align-items: center !important;
                     justify-content: center !important;
                     background: rgba(0, 82, 157, 0.1) !important;
-                    color: var(--nav-dark-blue) !important;
+                    color: #00529D !important;
                     font-size: 0.85rem !important;
-                    flex-shrink: 0 !important;
                 }
 
                 .mobile-nav-link.active .mobile-nav-icon {
                     background: rgba(255, 255, 255, 0.2) !important;
-                    color: var(--nav-white) !important;
+                    color: #FFFFFF !important;
                 }
 
                 .mobile-nav-link .chevron {
                     font-size: 0.75rem !important;
-                    color: var(--nav-maroon) !important;
+                    color: #8B2346 !important;
                 }
 
                 .mobile-nav-link.active .chevron {
-                    color: var(--nav-white) !important;
+                    color: #FFFFFF !important;
                 }
 
-                /* ==================== MOBILE BUTTONS ==================== */
                 .mobile-buttons {
                     display: flex !important;
                     flex-direction: column !important;
                     gap: 10px !important;
                     margin-top: 15px !important;
                     padding-top: 15px !important;
-                    border-top: 1px solid var(--nav-light-gray) !important;
-                    flex-shrink: 0 !important;
+                    border-top: 1px solid #F5F7FA !important;
                 }
 
                 .mobile-login-btn {
@@ -495,19 +464,15 @@ const Navbar = () => {
                     justify-content: center !important;
                     gap: 10px !important;
                     padding: 14px 24px !important;
+                    margin: 0 !important;
                     background: rgba(0, 82, 157, 0.1) !important;
-                    color: var(--nav-dark-blue) !important;
-                    border: 2px solid var(--nav-dark-blue) !important;
-                    border-radius: var(--nav-radius-lg) !important;
+                    color: #00529D !important;
+                    border: 2px solid #00529D !important;
+                    border-radius: 12px !important;
                     text-decoration: none !important;
                     font-weight: 600 !important;
                     font-size: 0.95rem !important;
                     transition: all 0.3s ease !important;
-                }
-
-                .mobile-login-btn:hover {
-                    background: var(--nav-dark-blue) !important;
-                    color: var(--nav-white) !important;
                 }
 
                 .mobile-cta-btn {
@@ -516,46 +481,36 @@ const Navbar = () => {
                     justify-content: center !important;
                     gap: 10px !important;
                     padding: 16px 24px !important;
-                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%) !important;
-                    color: var(--nav-white) !important;
-                    border-radius: var(--nav-radius-lg) !important;
+                    margin: 0 !important;
+                    background: linear-gradient(135deg, #8B2346 0%, #C4567A 100%) !important;
+                    color: #FFFFFF !important;
+                    border: none !important;
+                    border-radius: 12px !important;
                     text-decoration: none !important;
                     font-weight: 600 !important;
                     font-size: 0.95rem !important;
                     box-shadow: 0 4px 15px rgba(139, 35, 70, 0.3) !important;
                     transition: all 0.3s ease !important;
-                    border: none !important;
                 }
 
-                .mobile-cta-btn:hover {
-                    transform: translateY(-2px) !important;
-                    box-shadow: 0 6px 25px rgba(139, 35, 70, 0.4) !important;
-                }
-
-                /* ==================== MOBILE CONTACT ==================== */
                 .mobile-contact {
                     display: flex !important;
                     flex-direction: column !important;
                     gap: 10px !important;
                     margin-top: 15px !important;
                     padding-top: 15px !important;
-                    border-top: 1px solid var(--nav-light-gray) !important;
-                    flex-shrink: 0 !important;
+                    border-top: 1px solid #F5F7FA !important;
                 }
 
                 .mobile-contact-link {
                     display: flex !important;
                     align-items: center !important;
                     gap: 10px !important;
-                    color: var(--nav-gray) !important;
+                    color: #64748B !important;
                     text-decoration: none !important;
                     font-size: 0.9rem !important;
                     padding: 8px 0 !important;
-                    transition: color 0.3s ease !important;
-                }
-
-                .mobile-contact-link:hover {
-                    color: var(--nav-maroon) !important;
+                    margin: 0 !important;
                 }
 
                 .mobile-contact-link i {
@@ -576,10 +531,6 @@ const Navbar = () => {
 
                     .nav-link .nav-icon {
                         display: none !important;
-                    }
-
-                    .cta-container {
-                        gap: 8px !important;
                     }
 
                     .login-btn {
@@ -608,23 +559,37 @@ const Navbar = () => {
 
                 @media screen and (max-width: 768px) {
                     .navbar {
-                        --nav-height: 65px !important;
+                        height: 65px !important;
                     }
 
-                    .nav-links,
+                    .navbar-container {
+                        height: 65px !important;
+                    }
+
+                    .navbar-logo {
+                        height: 65px !important;
+                    }
+
+                    .logo-wrapper {
+                        height: 38px !important;
+                        width: 150px !important;
+                    }
+
+                    .logo-white,
+                    .logo-black {
+                        height: 38px !important;
+                    }
+
+                    .nav-links {
+                        display: none !important;
+                    }
+
                     .cta-container {
                         display: none !important;
                     }
 
                     .mobile-menu-btn {
                         display: flex !important;
-                    }
-
-                    .logo-wrapper,
-                    .logo-white,
-                    .logo-black,
-                    .navbar-logo {
-                        height: 38px !important;
                     }
 
                     .mobile-menu {
@@ -634,94 +599,38 @@ const Navbar = () => {
 
                 @media screen and (max-width: 480px) {
                     .navbar {
-                        --nav-height: 60px !important;
+                        height: 60px !important;
                     }
 
                     .navbar-container {
+                        height: 60px !important;
                         padding: 0 15px !important;
                     }
 
-                    .logo-wrapper,
-                    .logo-white,
-                    .logo-black,
                     .navbar-logo {
+                        height: 60px !important;
+                    }
+
+                    .logo-wrapper {
+                        height: 32px !important;
+                        width: 130px !important;
+                    }
+
+                    .logo-white,
+                    .logo-black {
                         height: 32px !important;
                     }
 
                     .mobile-menu {
-                        padding: 10px 15px 20px !important;
                         top: 60px !important;
+                        padding: 10px 15px 20px 15px !important;
                     }
-
-                    .mobile-menu-logo {
-                        height: 25px !important;
-                    }
-
-                    .mobile-nav-link {
-                        padding: 12px 14px !important;
-                    }
-
-                    .mobile-login-btn,
-                    .mobile-cta-btn {
-                        padding: 14px 20px !important;
-                    }
-                }
-
-                /* ==================== TOUCH & ACCESSIBILITY ==================== */
-                @media (hover: none) and (pointer: coarse) {
-                    .login-btn:hover,
-                    .cta-btn:hover,
-                    .mobile-login-btn:hover,
-                    .mobile-cta-btn:hover {
-                        transform: none !important;
-                    }
-
-                    .login-btn:active,
-                    .cta-btn:active,
-                    .mobile-login-btn:active,
-                    .mobile-cta-btn:active {
-                        transform: scale(0.98) !important;
-                        opacity: 0.9 !important;
-                    }
-
-                    .mobile-menu-btn,
-                    .mobile-nav-link,
-                    .mobile-login-btn,
-                    .mobile-cta-btn {
-                        min-height: 48px !important;
-                    }
-                }
-
-                @media (prefers-reduced-motion: reduce) {
-                    .navbar,
-                    .nav-link,
-                    .login-btn,
-                    .cta-btn,
-                    .mobile-menu,
-                    .logo-white,
-                    .logo-black,
-                    .cta-btn::before {
-                        animation: none !important;
-                        transition-duration: 0.01ms !important;
-                    }
-                }
-
-                .nav-link:focus,
-                .login-btn:focus,
-                .cta-btn:focus,
-                .mobile-nav-link:focus,
-                .mobile-login-btn:focus,
-                .mobile-cta-btn:focus,
-                .mobile-menu-btn:focus,
-                .navbar-logo:focus {
-                    outline: 3px solid var(--nav-light-blue) !important;
-                    outline-offset: 2px !important;
                 }
             `}</style>
 
             <nav className={navbarClass}>
                 <div className="navbar-container">
-                    {/* Logo */}
+                    {/* Logo - Left */}
                     <a 
                         href="/" 
                         className="navbar-logo"
@@ -741,7 +650,7 @@ const Navbar = () => {
                         </div>
                     </a>
 
-                    {/* Desktop Nav Links - Centered */}
+                    {/* Nav Links - Center (Absolute positioned) */}
                     <div className="nav-links">
                         {navLinks.map((link) => (
                             <a
@@ -751,12 +660,12 @@ const Navbar = () => {
                                 onClick={(e) => handleNavClick(e, link.path)}
                             >
                                 <i className={`fa-solid ${link.icon} nav-icon`}></i>
-                                <span className="nav-text">{link.name}</span>
+                                <span>{link.name}</span>
                             </a>
                         ))}
                     </div>
 
-                    {/* CTA Buttons - Desktop */}
+                    {/* CTA Buttons - Right */}
                     <div className="cta-container">
                         <a 
                             href="/admin/login" 
@@ -778,7 +687,7 @@ const Navbar = () => {
 
                     {/* Mobile Menu Button */}
                     <button
-                        className={`mobile-menu-btn ${isMobileMenuOpen ? 'menu-open' : ''}`}
+                        className="mobile-menu-btn"
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         aria-label="Toggle menu"
                         aria-expanded={isMobileMenuOpen}
@@ -788,7 +697,7 @@ const Navbar = () => {
                 </div>
             </nav>
 
-            {/* Mobile Menu - Outside navbar for proper positioning */}
+            {/* Mobile Menu */}
             {isMobileMenuOpen && (
                 <div className="mobile-menu">
                     <div className="mobile-menu-header">
