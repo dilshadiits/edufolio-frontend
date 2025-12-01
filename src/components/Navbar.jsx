@@ -25,11 +25,26 @@ const Navbar = () => {
         window.addEventListener('scroll', handleScroll);
         window.addEventListener('resize', handleResize);
 
+        // Check initial scroll position
+        handleScroll();
+
         return () => {
             window.removeEventListener('scroll', handleScroll);
             window.removeEventListener('resize', handleResize);
         };
     }, []);
+
+    // Lock body scroll when mobile menu is open
+    useEffect(() => {
+        if (isMobileMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isMobileMenuOpen]);
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' });
@@ -60,7 +75,9 @@ const Navbar = () => {
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
-                :root {
+                /* ==================== CSS VARIABLES ==================== */
+                .navbar-wrapper {
+                    --nav-height: 70px;
                     --nav-light-blue: #0099D6;
                     --nav-dark-blue: #00529D;
                     --nav-maroon: #8B2346;
@@ -75,13 +92,16 @@ const Navbar = () => {
                     --nav-radius-lg: 12px;
                 }
 
+                /* ==================== NAVBAR BASE ==================== */
                 .navbar {
                     position: fixed;
                     top: 0;
                     left: 0;
                     right: 0;
                     z-index: 1000;
-                    padding: 12px 0;
+                    height: var(--nav-height);
+                    display: flex;
+                    align-items: center;
                     transition: all var(--nav-transition);
                     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                     background: transparent;
@@ -94,12 +114,14 @@ const Navbar = () => {
                 }
 
                 .navbar-container {
+                    width: 100%;
                     max-width: 1200px;
                     margin: 0 auto;
                     padding: 0 20px;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
+                    height: 100%;
                 }
 
                 /* ==================== LOGO STYLES ==================== */
@@ -107,19 +129,23 @@ const Navbar = () => {
                     display: flex;
                     align-items: center;
                     text-decoration: none;
+                    flex-shrink: 0;
+                    height: 100%;
                 }
 
                 .logo-wrapper {
                     position: relative;
                     display: flex;
                     align-items: center;
-                    height: 60px;
+                    height: 45px;
+                    transition: transform 0.3s ease;
                 }
 
                 .logo-white,
                 .logo-black {
-                    height: 220px;
+                    height: 100%;
                     width: auto;
+                    max-width: 180px;
                     transition: opacity var(--nav-transition);
                     object-fit: contain;
                 }
@@ -131,8 +157,8 @@ const Navbar = () => {
                 .logo-black {
                     position: absolute;
                     left: 0;
-                    top: 50%;
-                    transform: translateY(-50%);
+                    top: 0;
+                    height: 100%;
                     opacity: 0;
                 }
 
@@ -148,7 +174,6 @@ const Navbar = () => {
 
                 .navbar-logo:hover .logo-wrapper {
                     transform: scale(1.02);
-                    transition: transform 0.3s ease;
                 }
 
                 /* ==================== NAV LINKS ==================== */
@@ -156,6 +181,7 @@ const Navbar = () => {
                     display: flex;
                     gap: 8px;
                     align-items: center;
+                    height: 100%;
                 }
 
                 .nav-link {
@@ -171,6 +197,7 @@ const Navbar = () => {
                     align-items: center;
                     gap: 8px;
                     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                    white-space: nowrap;
                 }
 
                 .nav-link .nav-icon {
@@ -207,6 +234,7 @@ const Navbar = () => {
                     display: flex;
                     align-items: center;
                     gap: 12px;
+                    flex-shrink: 0;
                 }
 
                 .login-btn {
@@ -224,6 +252,7 @@ const Navbar = () => {
                     -webkit-backdrop-filter: blur(10px);
                     color: var(--nav-white);
                     background: rgba(255, 255, 255, 0.1);
+                    white-space: nowrap;
                 }
 
                 .navbar.scrolled .login-btn {
@@ -255,6 +284,7 @@ const Navbar = () => {
                     transition: all var(--nav-transition);
                     position: relative;
                     overflow: hidden;
+                    white-space: nowrap;
                 }
 
                 .cta-btn::before {
@@ -295,6 +325,7 @@ const Navbar = () => {
                     transition: all 0.2s ease;
                     align-items: center;
                     justify-content: center;
+                    flex-shrink: 0;
                 }
 
                 .mobile-menu-btn.menu-open {
@@ -314,18 +345,21 @@ const Navbar = () => {
 
                 /* ==================== MOBILE MENU ==================== */
                 .mobile-menu {
-                    position: absolute;
-                    top: 100%;
+                    position: fixed;
+                    top: var(--nav-height);
                     left: 0;
                     right: 0;
+                    bottom: 0;
                     background: var(--nav-white);
                     padding: 10px 20px 25px;
-                    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
                     display: flex;
                     flex-direction: column;
                     gap: 5px;
                     border-top: 3px solid var(--nav-maroon);
                     animation: slideDown 0.3s ease;
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
+                    z-index: 999;
                 }
 
                 @keyframes slideDown {
@@ -346,6 +380,7 @@ const Navbar = () => {
                     display: flex;
                     align-items: center;
                     gap: 10px;
+                    flex-shrink: 0;
                 }
 
                 .mobile-menu-logo {
@@ -374,6 +409,7 @@ const Navbar = () => {
                     color: var(--nav-text-dark);
                     background: transparent;
                     border-left: 3px solid transparent;
+                    flex-shrink: 0;
                 }
 
                 .mobile-nav-link:hover {
@@ -403,6 +439,7 @@ const Navbar = () => {
                     background: rgba(0, 82, 157, 0.1);
                     color: var(--nav-dark-blue);
                     font-size: 0.85rem;
+                    flex-shrink: 0;
                 }
 
                 .mobile-nav-link.active .mobile-nav-icon {
@@ -427,6 +464,7 @@ const Navbar = () => {
                     margin-top: 15px;
                     padding-top: 15px;
                     border-top: 1px solid var(--nav-light-gray);
+                    flex-shrink: 0;
                 }
 
                 .mobile-login-btn {
@@ -479,6 +517,7 @@ const Navbar = () => {
                     margin-top: 15px;
                     padding-top: 15px;
                     border-top: 1px solid var(--nav-light-gray);
+                    flex-shrink: 0;
                 }
 
                 .mobile-contact-link {
@@ -503,25 +542,17 @@ const Navbar = () => {
 
                 /* ==================== OVERLAY ==================== */
                 .navbar-overlay {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.4);
-                    z-index: 999;
-                    backdrop-filter: blur(4px);
-                    -webkit-backdrop-filter: blur(4px);
-                    animation: fadeIn 0.3s ease;
+                    display: none;
                 }
 
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
+                /* ==================== SPACER ==================== */
+                .navbar-spacer {
+                    height: var(--nav-height);
+                    flex-shrink: 0;
                 }
 
                 /* ==================== RESPONSIVE ==================== */
-                @media screen and (max-width: 1024px) {
+                @media screen and (max-width: 1100px) {
                     .nav-links {
                         gap: 4px;
                     }
@@ -534,9 +565,44 @@ const Navbar = () => {
                     .nav-link .nav-icon {
                         display: none;
                     }
+
+                    .cta-container {
+                        gap: 8px;
+                    }
+
+                    .login-btn {
+                        padding: 8px 14px;
+                        font-size: 0.85rem;
+                    }
+
+                    .cta-btn {
+                        padding: 10px 16px;
+                        font-size: 0.85rem;
+                    }
+                }
+
+                @media screen and (max-width: 900px) {
+                    .login-btn span,
+                    .cta-btn span {
+                        display: none;
+                    }
+
+                    .login-btn,
+                    .cta-btn {
+                        padding: 10px 12px;
+                    }
+
+                    .login-btn i,
+                    .cta-btn i {
+                        margin: 0;
+                    }
                 }
 
                 @media screen and (max-width: 768px) {
+                    .navbar-wrapper {
+                        --nav-height: 65px;
+                    }
+
                     .nav-links,
                     .cta-container {
                         display: none !important;
@@ -549,24 +615,18 @@ const Navbar = () => {
                     .logo-wrapper {
                         height: 38px;
                     }
-
-                    .logo-white,
-                    .logo-black {
-                        height: 38px;
-                    }
                 }
 
                 @media screen and (max-width: 480px) {
+                    .navbar-wrapper {
+                        --nav-height: 60px;
+                    }
+
                     .navbar-container {
                         padding: 0 15px;
                     }
 
                     .logo-wrapper {
-                        height: 32px;
-                    }
-
-                    .logo-white,
-                    .logo-black {
                         height: 32px;
                     }
 
@@ -576,6 +636,15 @@ const Navbar = () => {
 
                     .mobile-menu-logo {
                         height: 25px;
+                    }
+
+                    .mobile-nav-link {
+                        padding: 12px 14px;
+                    }
+
+                    .mobile-login-btn,
+                    .mobile-cta-btn {
+                        padding: 14px 20px;
                     }
                 }
 
@@ -610,7 +679,6 @@ const Navbar = () => {
                     .login-btn,
                     .cta-btn,
                     .mobile-menu,
-                    .navbar-overlay,
                     .logo-white,
                     .logo-black,
                     .cta-btn::before {
@@ -632,143 +700,140 @@ const Navbar = () => {
                 }
             `}</style>
 
-            <nav className={navbarClass}>
-                <div className="navbar-container">
-                    {/* Logo */}
-                    <a 
-                        href="/" 
-                        className="navbar-logo"
-                        onClick={(e) => handleNavClick(e, '/')}
-                    >
-                        <div className="logo-wrapper">
-                            <img 
-                                src={logoWhite} 
-                                alt="EduFolio" 
-                                className="logo-white"
-                            />
-                            <img 
-                                src={logoBlack} 
-                                alt="EduFolio" 
-                                className="logo-black"
-                            />
-                        </div>
-                    </a>
-
-                    {/* Desktop Nav Links */}
-                    <div className="nav-links">
-                        {navLinks.map((link) => (
-                            <a
-                                key={link.path}
-                                href={link.path}
-                                className={`nav-link ${isActive(link.path) ? 'active' : ''}`}
-                                onClick={(e) => handleNavClick(e, link.path)}
-                            >
-                                <i className={`fa-solid ${link.icon} nav-icon`}></i>
-                                <span className="nav-text">{link.name}</span>
-                            </a>
-                        ))}
-                    </div>
-
-                    {/* CTA Buttons - Desktop */}
-                    <div className="cta-container">
+            <div className="navbar-wrapper">
+                {/* Spacer to prevent content from going under fixed navbar */}
+                <div className="navbar-spacer"></div>
+                
+                <nav className={navbarClass}>
+                    <div className="navbar-container">
+                        {/* Logo */}
                         <a 
-                            href="/admin/login" 
-                            className="login-btn"
-                            onClick={(e) => handleNavClick(e, '/admin/login')}
+                            href="/" 
+                            className="navbar-logo"
+                            onClick={(e) => handleNavClick(e, '/')}
                         >
-                            <i className="fa-solid fa-user"></i>
-                            Login
+                            <div className="logo-wrapper">
+                                <img 
+                                    src={logoWhite} 
+                                    alt="EduFolio" 
+                                    className="logo-white"
+                                />
+                                <img 
+                                    src={logoBlack} 
+                                    alt="EduFolio" 
+                                    className="logo-black"
+                                />
+                            </div>
                         </a>
-                        <a 
-                            href="/contact" 
-                            className="cta-btn"
-                            onClick={(e) => handleNavClick(e, '/contact')}
-                        >
-                            <i className="fa-solid fa-paper-plane"></i>
-                            Get Started
-                        </a>
-                    </div>
 
-                    {/* Mobile Menu Button */}
-                    <button
-                        className={`mobile-menu-btn ${isMobileMenuOpen ? 'menu-open' : ''}`}
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        aria-label="Toggle menu"
-                        aria-expanded={isMobileMenuOpen}
-                    >
-                        <i className={`fa-solid ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
-                    </button>
-                </div>
-
-                {/* Mobile Menu */}
-                {isMobileMenuOpen && (
-                    <div className="mobile-menu">
-                        <div className="mobile-menu-header">
-                            <img 
-                                src={logoBlack} 
-                                alt="EduFolio" 
-                                className="mobile-menu-logo"
-                            />
-                            <span className="mobile-menu-tagline">learn. grow. succeed.</span>
+                        {/* Desktop Nav Links */}
+                        <div className="nav-links">
+                            {navLinks.map((link) => (
+                                <a
+                                    key={link.path}
+                                    href={link.path}
+                                    className={`nav-link ${isActive(link.path) ? 'active' : ''}`}
+                                    onClick={(e) => handleNavClick(e, link.path)}
+                                >
+                                    <i className={`fa-solid ${link.icon} nav-icon`}></i>
+                                    <span className="nav-text">{link.name}</span>
+                                </a>
+                            ))}
                         </div>
 
-                        {navLinks.map((link) => (
-                            <a
-                                key={link.path}
-                                href={link.path}
-                                className={`mobile-nav-link ${isActive(link.path) ? 'active' : ''}`}
-                                onClick={(e) => handleNavClick(e, link.path)}
-                            >
-                                <div className="mobile-nav-link-content">
-                                    <div className="mobile-nav-icon">
-                                        <i className={`fa-solid ${link.icon}`}></i>
-                                    </div>
-                                    <span>{link.name}</span>
-                                </div>
-                                <i className="fa-solid fa-chevron-right chevron"></i>
-                            </a>
-                        ))}
-                        
-                        <div className="mobile-buttons">
+                        {/* CTA Buttons - Desktop */}
+                        <div className="cta-container">
                             <a 
                                 href="/admin/login" 
-                                className="mobile-login-btn"
+                                className="login-btn"
                                 onClick={(e) => handleNavClick(e, '/admin/login')}
                             >
                                 <i className="fa-solid fa-user"></i>
-                                Login to Dashboard
+                                <span>Login</span>
                             </a>
                             <a 
                                 href="/contact" 
-                                className="mobile-cta-btn"
+                                className="cta-btn"
                                 onClick={(e) => handleNavClick(e, '/contact')}
                             >
                                 <i className="fa-solid fa-paper-plane"></i>
-                                Get Started Free
+                                <span>Get Started</span>
                             </a>
                         </div>
 
-                        <div className="mobile-contact">
-                            <a href="tel:+919876543210" className="mobile-contact-link">
-                                <i className="fa-solid fa-phone"></i>
-                                +91 98765 43210
-                            </a>
-                            <a href="mailto:info@edufolio.com" className="mobile-contact-link">
-                                <i className="fa-solid fa-envelope"></i>
-                                info@edufolio.com
-                            </a>
-                        </div>
+                        {/* Mobile Menu Button */}
+                        <button
+                            className={`mobile-menu-btn ${isMobileMenuOpen ? 'menu-open' : ''}`}
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            aria-label="Toggle menu"
+                            aria-expanded={isMobileMenuOpen}
+                        >
+                            <i className={`fa-solid ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
+                        </button>
                     </div>
-                )}
-            </nav>
 
-            {isMobileMenuOpen && (
-                <div 
-                    className="navbar-overlay"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    aria-hidden="true"
-                ></div>
-            )}
+                    {/* Mobile Menu */}
+                    {isMobileMenuOpen && (
+                        <div className="mobile-menu">
+                            <div className="mobile-menu-header">
+                                <img 
+                                    src={logoBlack} 
+                                    alt="EduFolio" 
+                                    className="mobile-menu-logo"
+                                />
+                                <span className="mobile-menu-tagline">learn. grow. succeed.</span>
+                            </div>
+
+                            {navLinks.map((link) => (
+                                <a
+                                    key={link.path}
+                                    href={link.path}
+                                    className={`mobile-nav-link ${isActive(link.path) ? 'active' : ''}`}
+                                    onClick={(e) => handleNavClick(e, link.path)}
+                                >
+                                    <div className="mobile-nav-link-content">
+                                        <div className="mobile-nav-icon">
+                                            <i className={`fa-solid ${link.icon}`}></i>
+                                        </div>
+                                        <span>{link.name}</span>
+                                    </div>
+                                    <i className="fa-solid fa-chevron-right chevron"></i>
+                                </a>
+                            ))}
+                            
+                            <div className="mobile-buttons">
+                                <a 
+                                    href="/admin/login" 
+                                    className="mobile-login-btn"
+                                    onClick={(e) => handleNavClick(e, '/admin/login')}
+                                >
+                                    <i className="fa-solid fa-user"></i>
+                                    Login to Dashboard
+                                </a>
+                                <a 
+                                    href="/contact" 
+                                    className="mobile-cta-btn"
+                                    onClick={(e) => handleNavClick(e, '/contact')}
+                                >
+                                    <i className="fa-solid fa-paper-plane"></i>
+                                    Get Started Free
+                                </a>
+                            </div>
+
+                            <div className="mobile-contact">
+                                <a href="tel:+919876543210" className="mobile-contact-link">
+                                    <i className="fa-solid fa-phone"></i>
+                                    +91 98765 43210
+                                </a>
+                                <a href="mailto:info@edufolio.com" className="mobile-contact-link">
+                                    <i className="fa-solid fa-envelope"></i>
+                                    info@edufolio.com
+                                </a>
+                            </div>
+                        </div>
+                    )}
+                </nav>
+            </div>
         </>
     );
 };
