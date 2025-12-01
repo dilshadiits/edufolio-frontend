@@ -44,146 +44,599 @@ const Navbar = () => {
 
     const isActive = (path) => location.pathname === path;
 
+    // Dynamic classes based on state
+    const navbarClass = `navbar ${isScrolled ? 'scrolled' : ''} ${isMobileMenuOpen ? 'menu-open' : ''}`;
+
     return (
         <>
-            <nav style={{
-                ...styles.navbar,
-                background: isScrolled || isMobileMenuOpen ? colors.white : 'transparent',
-                boxShadow: isScrolled || isMobileMenuOpen ? '0 4px 20px rgba(0, 0, 0, 0.1)' : 'none'
-            }}>
-                <div style={styles.container}>
+            <style>{`
+                /* ==================== NAVBAR STYLES ==================== */
+                @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+                /* ==================== CSS VARIABLES ==================== */
+                :root {
+                    --nav-light-blue: #0099D6;
+                    --nav-dark-blue: #00529D;
+                    --nav-maroon: #8B2346;
+                    --nav-dark-maroon: #6B1D3A;
+                    --nav-pink: #C4567A;
+                    --nav-white: #FFFFFF;
+                    --nav-light-gray: #F5F7FA;
+                    --nav-gray: #64748B;
+                    --nav-text-dark: #2D1B4E;
+                    --nav-transition: 0.3s ease;
+                    --nav-radius: 10px;
+                    --nav-radius-lg: 12px;
+                }
+
+                /* ==================== BASE NAVBAR ==================== */
+                .navbar {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    z-index: 1000;
+                    padding: 12px 0;
+                    transition: all var(--nav-transition);
+                    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    background: transparent;
+                }
+
+                .navbar.scrolled,
+                .navbar.menu-open {
+                    background: var(--nav-white);
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                }
+
+                .navbar-container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 0 20px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                /* ==================== LOGO ==================== */
+                .navbar-logo {
+                    display: flex;
+                    align-items: center;
+                    text-decoration: none;
+                    gap: 10px;
+                }
+
+                .logo-icon {
+                    width: 44px;
+                    height: 44px;
+                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
+                    border-radius: var(--nav-radius-lg);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 4px 15px rgba(139, 35, 70, 0.4);
+                    flex-shrink: 0;
+                }
+
+                .logo-text {
+                    display: flex;
+                    font-size: 1.6rem;
+                    font-weight: 700;
+                    letter-spacing: -0.5px;
+                }
+
+                .logo-edu {
+                    font-weight: 800;
+                    transition: color var(--nav-transition);
+                    color: var(--nav-white);
+                }
+
+                .logo-folio {
+                    font-weight: 400;
+                    transition: color var(--nav-transition);
+                    color: var(--nav-light-blue);
+                }
+
+                .navbar.scrolled .logo-edu,
+                .navbar.menu-open .logo-edu {
+                    color: var(--nav-maroon);
+                }
+
+                .navbar.scrolled .logo-folio,
+                .navbar.menu-open .logo-folio {
+                    color: var(--nav-dark-blue);
+                }
+
+                /* ==================== NAV LINKS ==================== */
+                .nav-links {
+                    display: flex;
+                    gap: 32px;
+                    align-items: center;
+                }
+
+                .nav-link {
+                    text-decoration: none;
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                    position: relative;
+                    transition: color var(--nav-transition);
+                    padding: 8px 0;
+                    color: var(--nav-white);
+                }
+
+                .navbar.scrolled .nav-link {
+                    color: var(--nav-text-dark);
+                }
+
+                .nav-link:hover {
+                    opacity: 0.85;
+                }
+
+                .nav-link.active {
+                    color: var(--nav-maroon) !important;
+                }
+
+                .active-indicator {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 3px;
+                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
+                    border-radius: 2px;
+                }
+
+                /* ==================== CTA CONTAINER ==================== */
+                .cta-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                .login-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 10px 18px;
+                    border: 2px solid rgba(255, 255, 255, 0.5);
+                    border-radius: var(--nav-radius);
+                    text-decoration: none;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    transition: all var(--nav-transition);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    color: var(--nav-white);
+                    background: rgba(255, 255, 255, 0.1);
+                }
+
+                .navbar.scrolled .login-btn {
+                    color: var(--nav-dark-blue);
+                    border-color: var(--nav-dark-blue);
+                    background: rgba(0, 82, 157, 0.1);
+                }
+
+                .login-btn:hover {
+                    background: var(--nav-dark-blue) !important;
+                    color: var(--nav-white) !important;
+                    border-color: var(--nav-dark-blue) !important;
+                    transform: translateY(-1px);
+                }
+
+                .cta-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 12px 22px;
+                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
+                    color: var(--nav-white);
+                    border-radius: var(--nav-radius);
+                    text-decoration: none;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    box-shadow: 0 4px 15px rgba(139, 35, 70, 0.4);
+                    transition: all var(--nav-transition);
+                }
+
+                .cta-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 25px rgba(139, 35, 70, 0.45);
+                }
+
+                /* ==================== MOBILE MENU BUTTON ==================== */
+                .mobile-menu-btn {
+                    display: none;
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                    padding: 10px;
+                    width: 44px;
+                    height: 44px;
+                    border-radius: var(--nav-radius);
+                    transition: all 0.2s ease;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .mobile-menu-btn.menu-open {
+                    background: var(--nav-light-gray);
+                }
+
+                .mobile-menu-btn i {
+                    font-size: 1.3rem;
+                    color: var(--nav-white);
+                    transition: color var(--nav-transition);
+                }
+
+                .navbar.scrolled .mobile-menu-btn i,
+                .navbar.menu-open .mobile-menu-btn i {
+                    color: var(--nav-maroon);
+                }
+
+                /* ==================== MOBILE MENU ==================== */
+                .mobile-menu {
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    right: 0;
+                    background: var(--nav-white);
+                    padding: 10px 20px 25px;
+                    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                    border-top: 3px solid var(--nav-maroon);
+                    animation: slideDown 0.3s ease;
+                }
+
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .mobile-menu-header {
+                    padding: 10px 0 15px;
+                    border-bottom: 1px solid var(--nav-light-gray);
+                    margin-bottom: 10px;
+                }
+
+                .mobile-menu-tagline {
+                    color: var(--nav-light-blue);
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    font-style: italic;
+                }
+
+                .mobile-nav-link {
+                    text-decoration: none;
+                    font-size: 1rem;
+                    font-weight: 500;
+                    padding: 14px 16px;
+                    border-radius: var(--nav-radius);
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    transition: all 0.2s ease;
+                    color: var(--nav-text-dark);
+                    background: transparent;
+                    border-left: 3px solid transparent;
+                }
+
+                .mobile-nav-link:hover {
+                    background: var(--nav-light-gray);
+                }
+
+                .mobile-nav-link.active {
+                    color: var(--nav-maroon);
+                    background: rgba(139, 35, 70, 0.1);
+                    border-left-color: var(--nav-maroon);
+                }
+
+                .mobile-nav-link-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                .mobile-nav-link-content i {
+                    color: var(--nav-dark-blue);
+                    width: 20px;
+                    text-align: center;
+                }
+
+                .mobile-nav-link.active .mobile-nav-link-content i {
+                    color: var(--nav-maroon);
+                }
+
+                .mobile-nav-link .chevron {
+                    font-size: 0.75rem;
+                    color: var(--nav-maroon);
+                }
+
+                /* ==================== MOBILE BUTTONS ==================== */
+                .mobile-buttons {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    margin-top: 15px;
+                    padding-top: 15px;
+                    border-top: 1px solid var(--nav-light-gray);
+                }
+
+                .mobile-login-btn {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                    padding: 14px 24px;
+                    background: rgba(0, 82, 157, 0.1);
+                    color: var(--nav-dark-blue);
+                    border: 2px solid var(--nav-dark-blue);
+                    border-radius: var(--nav-radius-lg);
+                    text-decoration: none;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    transition: all var(--nav-transition);
+                }
+
+                .mobile-login-btn:hover {
+                    background: var(--nav-dark-blue);
+                    color: var(--nav-white);
+                }
+
+                .mobile-cta-btn {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                    padding: 16px 24px;
+                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
+                    color: var(--nav-white);
+                    border-radius: var(--nav-radius-lg);
+                    text-decoration: none;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    box-shadow: 0 4px 15px rgba(139, 35, 70, 0.3);
+                    transition: all var(--nav-transition);
+                }
+
+                .mobile-cta-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 25px rgba(139, 35, 70, 0.4);
+                }
+
+                /* ==================== MOBILE CONTACT ==================== */
+                .mobile-contact {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    margin-top: 15px;
+                    padding-top: 15px;
+                    border-top: 1px solid var(--nav-light-gray);
+                }
+
+                .mobile-contact-link {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    color: var(--nav-gray);
+                    text-decoration: none;
+                    font-size: 0.9rem;
+                    padding: 8px 0;
+                    transition: color var(--nav-transition);
+                }
+
+                .mobile-contact-link:hover {
+                    color: var(--nav-maroon);
+                }
+
+                .mobile-contact-link i {
+                    width: 20px;
+                    text-align: center;
+                }
+
+                /* ==================== OVERLAY ==================== */
+                .navbar-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.4);
+                    z-index: 999;
+                    backdrop-filter: blur(4px);
+                    -webkit-backdrop-filter: blur(4px);
+                    animation: fadeIn 0.3s ease;
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+
+                /* ==================== RESPONSIVE ==================== */
+                @media screen and (max-width: 1024px) {
+                    .nav-links {
+                        gap: 24px;
+                    }
+                }
+
+                @media screen and (max-width: 768px) {
+                    .nav-links,
+                    .cta-container {
+                        display: none !important;
+                    }
+
+                    .mobile-menu-btn {
+                        display: flex !important;
+                    }
+                }
+
+                @media screen and (max-width: 480px) {
+                    .navbar-container {
+                        padding: 0 15px;
+                    }
+
+                    .logo-text {
+                        font-size: 1.4rem;
+                    }
+
+                    .logo-icon {
+                        width: 40px;
+                        height: 40px;
+                    }
+
+                    .mobile-menu {
+                        padding: 10px 15px 20px;
+                    }
+                }
+
+                /* ==================== TOUCH DEVICES ==================== */
+                @media (hover: none) and (pointer: coarse) {
+                    .login-btn:hover,
+                    .cta-btn:hover,
+                    .mobile-login-btn:hover,
+                    .mobile-cta-btn:hover {
+                        transform: none;
+                    }
+
+                    .login-btn:active,
+                    .cta-btn:active,
+                    .mobile-login-btn:active,
+                    .mobile-cta-btn:active {
+                        transform: scale(0.98);
+                        opacity: 0.9;
+                    }
+
+                    .mobile-menu-btn,
+                    .mobile-nav-link,
+                    .mobile-login-btn,
+                    .mobile-cta-btn {
+                        min-height: 48px;
+                    }
+                }
+
+                /* ==================== REDUCED MOTION ==================== */
+                @media (prefers-reduced-motion: reduce) {
+                    .navbar,
+                    .nav-link,
+                    .login-btn,
+                    .cta-btn,
+                    .mobile-menu,
+                    .navbar-overlay {
+                        animation: none !important;
+                        transition-duration: 0.01ms !important;
+                    }
+                }
+
+                /* ==================== FOCUS STATES ==================== */
+                .nav-link:focus,
+                .login-btn:focus,
+                .cta-btn:focus,
+                .mobile-nav-link:focus,
+                .mobile-login-btn:focus,
+                .mobile-cta-btn:focus,
+                .mobile-menu-btn:focus,
+                .navbar-logo:focus {
+                    outline: 3px solid var(--nav-light-blue);
+                    outline-offset: 2px;
+                }
+
+                .mobile-menu-btn:focus {
+                    outline-offset: 0;
+                }
+            `}</style>
+
+            <nav className={navbarClass}>
+                <div className="navbar-container">
                     {/* Logo */}
-                    <Link to="/" style={styles.logo}>
-                        <div style={styles.logoIcon}>
+                    <Link to="/" className="navbar-logo">
+                        <div className="logo-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 3L20 7.5V9H4V7.5L12 3Z" fill="white"/>
-                                <path d="M6 10H18V11L12 14L6 11V10Z" fill={colors.lightBlue}/>
+                                <path d="M6 10H18V11L12 14L6 11V10Z" fill="#0099D6"/>
                                 <path d="M8 12V16L12 18L16 16V12" stroke="white" strokeWidth="1.5" fill="none"/>
-                                <circle cx="12" cy="6" r="1.5" fill={colors.lightBlue}/>
+                                <circle cx="12" cy="6" r="1.5" fill="#0099D6"/>
                                 <line x1="12" y1="18" x2="12" y2="21" stroke="white" strokeWidth="1.5"/>
                                 <circle cx="12" cy="21" r="1" fill="white"/>
                             </svg>
                         </div>
-                        <div style={styles.logoText}>
-                            <span style={{
-                                ...styles.logoEdu,
-                                color: isScrolled || isMobileMenuOpen ? colors.maroon : colors.white
-                            }}>edu</span>
-                            <span style={{
-                                ...styles.logoFolio,
-                                color: isScrolled || isMobileMenuOpen ? colors.darkBlue : colors.lightBlue
-                            }}>folio</span>
+                        <div className="logo-text">
+                            <span className="logo-edu">edu</span>
+                            <span className="logo-folio">folio</span>
                         </div>
                     </Link>
 
                     {/* Desktop Nav Links */}
-                    {!isMobile && (
-                        <div style={styles.navLinks}>
-                            {navLinks.map((link) => (
-                                <Link
-                                    key={link.path}
-                                    to={link.path}
-                                    style={{
-                                        ...styles.navLink,
-                                        color: isActive(link.path) 
-                                            ? colors.maroon 
-                                            : isScrolled ? colors.textDark : colors.white
-                                    }}
-                                >
-                                    {link.name}
-                                    {isActive(link.path) && <span style={styles.activeIndicator}></span>}
-                                </Link>
-                            ))}
-                        </div>
-                    )}
+                    <div className="nav-links">
+                        {navLinks.map((link) => (
+                            <Link
+                                key={link.path}
+                                to={link.path}
+                                className={`nav-link ${isActive(link.path) ? 'active' : ''}`}
+                            >
+                                {link.name}
+                                {isActive(link.path) && <span className="active-indicator"></span>}
+                            </Link>
+                        ))}
+                    </div>
 
                     {/* CTA Buttons - Desktop */}
-                    {!isMobile && (
-                        <div style={styles.ctaContainer}>
-                            {/* Login Button */}
-                            <Link 
-                                to="/admin/login" 
-                                style={{
-                                    ...styles.loginButton,
-                                    color: isScrolled ? colors.darkBlue : colors.white,
-                                    borderColor: isScrolled ? colors.darkBlue : 'rgba(255,255,255,0.5)',
-                                    background: isScrolled ? `${colors.darkBlue}10` : 'rgba(255,255,255,0.1)'
-                                }}
-                            >
-                                <i className="fa-solid fa-user"></i>
-                                Login
-                            </Link>
-                            
-                            {/* Get Started Button */}
-                            <Link to="/contact" style={styles.ctaButton}>
-                                <i className="fa-solid fa-paper-plane"></i>
-                                Get Started
-                            </Link>
-                        </div>
-                    )}
+                    <div className="cta-container">
+                        <Link to="/admin/login" className="login-btn">
+                            <i className="fa-solid fa-user"></i>
+                            Login
+                        </Link>
+                        <Link to="/contact" className="cta-btn">
+                            <i className="fa-solid fa-paper-plane"></i>
+                            Get Started
+                        </Link>
+                    </div>
 
                     {/* Mobile Menu Button */}
-                    {isMobile && (
-                        <button
-                            style={{
-                                ...styles.mobileMenuBtn,
-                                background: isMobileMenuOpen ? colors.lightGray : 'transparent'
-                            }}
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            aria-label="Toggle menu"
-                        >
-                            <i 
-                                className={`fa-solid ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}
-                                style={{ 
-                                    color: isScrolled || isMobileMenuOpen ? colors.maroon : colors.white,
-                                    fontSize: '1.3rem'
-                                }}
-                            ></i>
-                        </button>
-                    )}
+                    <button
+                        className={`mobile-menu-btn ${isMobileMenuOpen ? 'menu-open' : ''}`}
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        aria-label="Toggle menu"
+                        aria-expanded={isMobileMenuOpen}
+                    >
+                        <i className={`fa-solid ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
+                    </button>
                 </div>
 
                 {/* Mobile Menu */}
-                {isMobile && isMobileMenuOpen && (
-                    <div style={styles.mobileMenu}>
-                        {/* Mobile Menu Header */}
-                        <div style={styles.mobileMenuHeader}>
-                            <span style={styles.mobileMenuTagline}>learn. grow. succeed.</span>
+                {isMobileMenuOpen && (
+                    <div className="mobile-menu">
+                        <div className="mobile-menu-header">
+                            <span className="mobile-menu-tagline">learn. grow. succeed.</span>
                         </div>
 
                         {navLinks.map((link) => (
                             <Link
                                 key={link.path}
                                 to={link.path}
-                                style={{
-                                    ...styles.mobileNavLink,
-                                    color: isActive(link.path) ? colors.maroon : colors.textDark,
-                                    background: isActive(link.path) ? `${colors.maroon}10` : 'transparent',
-                                    borderLeft: isActive(link.path) ? `3px solid ${colors.maroon}` : '3px solid transparent'
-                                }}
+                                className={`mobile-nav-link ${isActive(link.path) ? 'active' : ''}`}
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
-                                <div style={styles.mobileNavLinkContent}>
-                                    <i className={`fa-solid ${link.icon}`} style={{
-                                        color: isActive(link.path) ? colors.maroon : colors.darkBlue,
-                                        width: '20px'
-                                    }}></i>
+                                <div className="mobile-nav-link-content">
+                                    <i className={`fa-solid ${link.icon}`}></i>
                                     <span>{link.name}</span>
                                 </div>
                                 {isActive(link.path) && (
-                                    <i className="fa-solid fa-chevron-right" style={{ 
-                                        fontSize: '0.75rem',
-                                        color: colors.maroon 
-                                    }}></i>
+                                    <i className="fa-solid fa-chevron-right chevron"></i>
                                 )}
                             </Link>
                         ))}
                         
-                        {/* Mobile Buttons */}
-                        <div style={styles.mobileButtons}>
+                        <div className="mobile-buttons">
                             <Link 
                                 to="/admin/login" 
-                                style={styles.mobileLoginBtn}
+                                className="mobile-login-btn"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 <i className="fa-solid fa-user"></i>
@@ -191,7 +644,7 @@ const Navbar = () => {
                             </Link>
                             <Link 
                                 to="/contact" 
-                                style={styles.mobileCta}
+                                className="mobile-cta-btn"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 <i className="fa-solid fa-paper-plane"></i>
@@ -199,13 +652,12 @@ const Navbar = () => {
                             </Link>
                         </div>
 
-                        {/* Mobile Contact Info */}
-                        <div style={styles.mobileContact}>
-                            <a href="tel:+919876543210" style={styles.mobileContactLink}>
+                        <div className="mobile-contact">
+                            <a href="tel:+919876543210" className="mobile-contact-link">
                                 <i className="fa-solid fa-phone"></i>
                                 +91 98765 43210
                             </a>
-                            <a href="mailto:info@edufolio.com" style={styles.mobileContactLink}>
+                            <a href="mailto:info@edufolio.com" className="mobile-contact-link">
                                 <i className="fa-solid fa-envelope"></i>
                                 info@edufolio.com
                             </a>
@@ -215,317 +667,15 @@ const Navbar = () => {
             </nav>
 
             {/* Overlay for mobile menu */}
-            {isMobile && isMobileMenuOpen && (
+            {isMobileMenuOpen && (
                 <div 
-                    style={styles.overlay}
+                    className="navbar-overlay"
                     onClick={() => setIsMobileMenuOpen(false)}
+                    aria-hidden="true"
                 ></div>
             )}
         </>
     );
 };
-
-// Edufolio Brand Colors from PDF
-const colors = {
-    // Primary Colors
-    lightBlue: '#0099D6',
-    darkBlue: '#00529D',
-    maroon: '#8B2346',
-    darkMaroon: '#6B1D3A',
-    
-    // Supporting Colors
-    pink: '#C4567A',
-    
-    // Neutrals
-    white: '#FFFFFF',
-    lightGray: '#F5F7FA',
-    gray: '#64748B',
-    
-    // Text Colors
-    textDark: '#2D1B4E'
-};
-
-const styles = {
-    navbar: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1000,
-        padding: '12px 0',
-        transition: 'all 0.3s ease'
-    },
-    container: {
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: '0 20px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-    },
-    logo: {
-        display: 'flex',
-        alignItems: 'center',
-        textDecoration: 'none',
-        gap: '10px'
-    },
-    logoIcon: {
-        width: '44px',
-        height: '44px',
-        background: `linear-gradient(135deg, ${colors.maroon} 0%, ${colors.pink} 100%)`,
-        borderRadius: '12px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxShadow: `0 4px 15px ${colors.maroon}40`
-    },
-    logoText: {
-        display: 'flex',
-        fontSize: '1.6rem',
-        fontWeight: '700',
-        letterSpacing: '-0.5px'
-    },
-    logoEdu: {
-        fontWeight: '800',
-        transition: 'color 0.3s ease'
-    },
-    logoFolio: {
-        fontWeight: '400',
-        transition: 'color 0.3s ease'
-    },
-    navLinks: {
-        display: 'flex',
-        gap: '32px',
-        alignItems: 'center'
-    },
-    navLink: {
-        textDecoration: 'none',
-        fontSize: '0.95rem',
-        fontWeight: '500',
-        position: 'relative',
-        transition: 'color 0.3s ease',
-        padding: '8px 0'
-    },
-    activeIndicator: {
-        position: 'absolute',
-        bottom: '0',
-        left: 0,
-        right: 0,
-        height: '3px',
-        background: `linear-gradient(135deg, ${colors.maroon} 0%, ${colors.pink} 100%)`,
-        borderRadius: '2px'
-    },
-    ctaContainer: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px'
-    },
-    loginButton: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '10px 18px',
-        border: '2px solid',
-        borderRadius: '10px',
-        textDecoration: 'none',
-        fontWeight: '600',
-        fontSize: '0.9rem',
-        transition: 'all 0.3s ease',
-        backdropFilter: 'blur(10px)'
-    },
-    ctaButton: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '12px 22px',
-        background: `linear-gradient(135deg, ${colors.maroon} 0%, ${colors.pink} 100%)`,
-        color: colors.white,
-        borderRadius: '10px',
-        textDecoration: 'none',
-        fontWeight: '600',
-        fontSize: '0.9rem',
-        boxShadow: `0 4px 15px ${colors.maroon}40`,
-        transition: 'all 0.3s ease'
-    },
-    mobileMenuBtn: {
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
-        padding: '10px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '44px',
-        height: '44px',
-        borderRadius: '10px',
-        transition: 'all 0.2s ease'
-    },
-    mobileMenu: {
-        position: 'absolute',
-        top: '100%',
-        left: 0,
-        right: 0,
-        background: colors.white,
-        padding: '10px 20px 25px',
-        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.15)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '5px',
-        borderTop: `3px solid ${colors.maroon}`,
-        animation: 'slideDown 0.3s ease'
-    },
-    mobileMenuHeader: {
-        padding: '10px 0 15px',
-        borderBottom: `1px solid ${colors.lightGray}`,
-        marginBottom: '10px'
-    },
-    mobileMenuTagline: {
-        color: colors.lightBlue,
-        fontSize: '0.9rem',
-        fontWeight: '600',
-        fontStyle: 'italic'
-    },
-    mobileNavLink: {
-        textDecoration: 'none',
-        fontSize: '1rem',
-        fontWeight: '500',
-        padding: '14px 16px',
-        borderRadius: '10px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        transition: 'all 0.2s ease'
-    },
-    mobileNavLinkContent: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px'
-    },
-    mobileButtons: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px',
-        marginTop: '15px',
-        paddingTop: '15px',
-        borderTop: `1px solid ${colors.lightGray}`
-    },
-    mobileLoginBtn: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '10px',
-        padding: '14px 24px',
-        background: `${colors.darkBlue}10`,
-        color: colors.darkBlue,
-        border: `2px solid ${colors.darkBlue}`,
-        borderRadius: '12px',
-        textDecoration: 'none',
-        fontWeight: '600',
-        fontSize: '0.95rem',
-        transition: 'all 0.3s ease'
-    },
-    mobileCta: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '10px',
-        padding: '16px 24px',
-        background: `linear-gradient(135deg, ${colors.maroon} 0%, ${colors.pink} 100%)`,
-        color: colors.white,
-        borderRadius: '12px',
-        textDecoration: 'none',
-        fontWeight: '600',
-        fontSize: '0.95rem',
-        boxShadow: `0 4px 15px ${colors.maroon}30`
-    },
-    mobileContact: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px',
-        marginTop: '15px',
-        paddingTop: '15px',
-        borderTop: `1px solid ${colors.lightGray}`
-    },
-    mobileContactLink: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        color: colors.gray,
-        textDecoration: 'none',
-        fontSize: '0.9rem',
-        padding: '8px 0'
-    },
-    overlay: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0, 0, 0, 0.4)',
-        zIndex: 999,
-        backdropFilter: 'blur(4px)'
-    }
-};
-
-// Add CSS animations and hover effects
-if (typeof document !== 'undefined') {
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = `
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        nav {
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        nav a:hover {
-            opacity: 0.9;
-        }
-        
-        nav .nav-link:hover::after {
-            width: 100%;
-        }
-        
-        nav .cta-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(139, 35, 70, 0.45);
-        }
-        
-        nav .login-btn:hover {
-            background: #00529D !important;
-            color: #fff !important;
-            border-color: #00529D !important;
-        }
-        
-        nav .mobile-login-btn:hover {
-            background: #00529D;
-            color: #fff;
-        }
-        
-        nav .mobile-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(139, 35, 70, 0.4);
-        }
-        
-        nav .mobile-nav-link:hover {
-            background: #F5F7FA;
-        }
-        
-        nav .mobile-contact-link:hover {
-            color: #8B2346;
-        }
-    `;
-    document.head.appendChild(styleSheet);
-}
 
 export default Navbar;
