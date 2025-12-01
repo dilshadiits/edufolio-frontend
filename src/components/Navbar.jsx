@@ -113,12 +113,12 @@ const Navbar = () => {
                     position: relative;
                     display: flex;
                     align-items: center;
-                    height: 70px;
+                    height: 60px;
                 }
 
                 .logo-white,
                 .logo-black {
-                    height: 200px;
+                    height: 220px;
                     width: auto;
                     transition: opacity var(--nav-transition);
                     object-fit: contain;
