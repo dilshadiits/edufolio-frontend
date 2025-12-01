@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-// Import your logo images (adjust paths based on your project structure)
-import logoWhite from '../assets/images/edufolio-logo-white.png';
-import logoBlack from '../assets/images/edufolio-logo-black.png';
-
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
     const location = useLocation();
 
     useEffect(() => {
@@ -17,13 +12,10 @@ const Navbar = () => {
         };
 
         const handleResize = () => {
-            setIsMobile(window.innerWidth < 768);
             if (window.innerWidth >= 768) {
                 setIsMobileMenuOpen(false);
             }
         };
-
-        handleResize();
 
         window.addEventListener('scroll', handleScroll);
         window.addEventListener('resize', handleResize);
@@ -102,50 +94,41 @@ const Navbar = () => {
                     display: flex;
                     align-items: center;
                     text-decoration: none;
+                    gap: 10px;
                 }
 
-                .logo-wrapper {
-                    position: relative;
-                    height: 45px;
+                .logo-icon {
+                    width: 40px;
+                    height: 40px;
+                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
+                    border-radius: 10px;
                     display: flex;
                     align-items: center;
+                    justify-content: center;
+                    font-size: 1.2rem;
+                    color: white;
+                    font-weight: 700;
+                    box-shadow: 0 4px 12px rgba(139, 35, 70, 0.3);
                 }
 
-                .logo-img {
-                    height: 45px;
-                    width: auto;
-                    object-fit: contain;
-                    position: absolute;
-                    left: 0;
-                    transition: opacity 0.3s ease;
+                .logo-text {
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    transition: color var(--nav-transition);
+                    color: var(--nav-white);
                 }
 
-                .logo-white {
-                    opacity: 1;
+                .logo-text span {
+                    color: var(--nav-pink);
                 }
 
-                .logo-black {
-                    opacity: 0;
+                .navbar.scrolled .logo-text,
+                .navbar.menu-open .logo-text {
+                    color: var(--nav-text-dark);
                 }
 
-                .navbar.scrolled .logo-white,
-                .navbar.menu-open .logo-white {
-                    opacity: 0;
-                }
-
-                .navbar.scrolled .logo-black,
-                .navbar.menu-open .logo-black {
-                    opacity: 1;
-                }
-
-                .navbar-logo:hover .logo-img {
-                    transform: scale(1.02);
-                }
-
-                /* Placeholder to maintain space */
-                .logo-placeholder {
-                    height: 45px;
-                    width: 180px;
+                .navbar-logo:hover {
+                    opacity: 0.9;
                 }
 
                 /* ==================== NAV LINKS ==================== */
@@ -478,13 +461,14 @@ const Navbar = () => {
                         display: flex !important;
                     }
 
-                    .logo-img {
-                        height: 38px;
+                    .logo-icon {
+                        width: 36px;
+                        height: 36px;
+                        font-size: 1rem;
                     }
 
-                    .logo-placeholder {
-                        height: 38px;
-                        width: 150px;
+                    .logo-text {
+                        font-size: 1.3rem;
                     }
                 }
 
@@ -493,13 +477,14 @@ const Navbar = () => {
                         padding: 0 15px;
                     }
 
-                    .logo-img {
+                    .logo-icon {
+                        width: 32px;
                         height: 32px;
+                        font-size: 0.9rem;
                     }
 
-                    .logo-placeholder {
-                        height: 32px;
-                        width: 130px;
+                    .logo-text {
+                        font-size: 1.1rem;
                     }
 
                     .mobile-menu {
@@ -538,8 +523,7 @@ const Navbar = () => {
                     .login-btn,
                     .cta-btn,
                     .mobile-menu,
-                    .navbar-overlay,
-                    .logo-img {
+                    .navbar-overlay {
                         animation: none !important;
                         transition-duration: 0.01ms !important;
                     }
@@ -562,20 +546,10 @@ const Navbar = () => {
                 <div className="navbar-container">
                     {/* Logo */}
                     <Link to="/" className="navbar-logo">
-                        <div className="logo-wrapper">
-                            <img 
-                                src={logoWhite} 
-                                alt="EduFolio" 
-                                className="logo-img logo-white"
-                            />
-                            <img 
-                                src={logoBlack} 
-                                alt="EduFolio" 
-                                className="logo-img logo-black"
-                            />
-                            {/* Invisible placeholder to maintain layout */}
-                            <div className="logo-placeholder" aria-hidden="true"></div>
+                        <div className="logo-icon">
+                            <i className="fa-solid fa-graduation-cap"></i>
                         </div>
+                        <span className="logo-text">Edu<span>Folio</span></span>
                     </Link>
 
                     {/* Desktop Nav Links */}
