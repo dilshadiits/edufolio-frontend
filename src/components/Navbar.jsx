@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+// Import logo images with correct file names
+import logoWhite from '../assets/images/edufolio-logo-white.png.png';
+import logoBlack from '../assets/images/edufolio-logo-black.png.png';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -27,7 +31,6 @@ const Navbar = () => {
         };
     }, []);
 
-    // Scroll to top on route change
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' });
         setIsMobileMenuOpen(false);
@@ -104,85 +107,47 @@ const Navbar = () => {
                     display: flex;
                     align-items: center;
                     text-decoration: none;
-                    gap: 12px;
                 }
 
-                .logo-icon {
-                    width: 45px;
-                    height: 45px;
-                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
-                    border-radius: 12px;
+                .logo-wrapper {
+                    position: relative;
                     display: flex;
                     align-items: center;
-                    justify-content: center;
-                    font-size: 1.3rem;
-                    color: white;
-                    font-weight: 700;
-                    box-shadow: 0 4px 15px rgba(139, 35, 70, 0.35);
-                    position: relative;
-                    overflow: hidden;
+                    height: 45px;
                 }
 
-                .logo-icon::before {
-                    content: '';
+                .logo-white,
+                .logo-black {
+                    height: 45px;
+                    width: auto;
+                    transition: opacity var(--nav-transition);
+                    object-fit: contain;
+                }
+
+                .logo-white {
+                    opacity: 1;
+                }
+
+                .logo-black {
                     position: absolute;
-                    top: -50%;
-                    left: -50%;
-                    width: 200%;
-                    height: 200%;
-                    background: linear-gradient(
-                        45deg,
-                        transparent,
-                        rgba(255, 255, 255, 0.1),
-                        transparent
-                    );
-                    transform: rotate(45deg);
-                    animation: logoShine 3s ease-in-out infinite;
+                    left: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    opacity: 0;
                 }
 
-                @keyframes logoShine {
-                    0%, 100% { transform: translateX(-100%) rotate(45deg); }
-                    50% { transform: translateX(100%) rotate(45deg); }
+                .navbar.scrolled .logo-white,
+                .navbar.menu-open .logo-white {
+                    opacity: 0;
                 }
 
-                .logo-text {
-                    font-size: 1.6rem;
-                    font-weight: 800;
-                    transition: all var(--nav-transition);
-                    color: var(--nav-white);
-                    letter-spacing: 0.5px;
-                    text-shadow: 
-                        -1px -1px 0 rgba(0, 0, 0, 0.3),
-                        1px -1px 0 rgba(0, 0, 0, 0.3),
-                        -1px 1px 0 rgba(0, 0, 0, 0.3),
-                        1px 1px 0 rgba(0, 0, 0, 0.3);
+                .navbar.scrolled .logo-black,
+                .navbar.menu-open .logo-black {
+                    opacity: 1;
                 }
 
-                .logo-text span {
-                    color: var(--nav-pink);
-                    text-shadow: 
-                        -1px -1px 0 rgba(139, 35, 70, 0.5),
-                        1px -1px 0 rgba(139, 35, 70, 0.5),
-                        -1px 1px 0 rgba(139, 35, 70, 0.5),
-                        1px 1px 0 rgba(139, 35, 70, 0.5);
-                }
-
-                .navbar.scrolled .logo-text,
-                .navbar.menu-open .logo-text {
-                    color: var(--nav-text-dark);
-                    text-shadow: 
-                        -1px -1px 0 rgba(139, 35, 70, 0.2),
-                        1px -1px 0 rgba(139, 35, 70, 0.2),
-                        -1px 1px 0 rgba(139, 35, 70, 0.2),
-                        1px 1px 0 rgba(139, 35, 70, 0.2);
-                }
-
-                .navbar-logo:hover {
-                    opacity: 0.9;
-                }
-
-                .navbar-logo:hover .logo-icon {
-                    transform: scale(1.05);
+                .navbar-logo:hover .logo-wrapper {
+                    transform: scale(1.02);
                     transition: transform 0.3s ease;
                 }
 
@@ -205,8 +170,7 @@ const Navbar = () => {
                     display: flex;
                     align-items: center;
                     gap: 8px;
-                    text-shadow: 
-                        0 1px 2px rgba(0, 0, 0, 0.3);
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
                 }
 
                 .nav-link .nav-icon {
@@ -385,15 +349,9 @@ const Navbar = () => {
                 }
 
                 .mobile-menu-logo {
-                    width: 35px;
-                    height: 35px;
-                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
-                    border-radius: 8px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: white;
-                    font-size: 1rem;
+                    height: 30px;
+                    width: auto;
+                    object-fit: contain;
                 }
 
                 .mobile-menu-tagline {
@@ -578,12 +536,6 @@ const Navbar = () => {
                     }
                 }
 
-                @media screen and (max-width: 900px) {
-                    .nav-link .nav-text {
-                        display: block;
-                    }
-                }
-
                 @media screen and (max-width: 768px) {
                     .nav-links,
                     .cta-container {
@@ -594,14 +546,13 @@ const Navbar = () => {
                         display: flex !important;
                     }
 
-                    .logo-icon {
-                        width: 40px;
-                        height: 40px;
-                        font-size: 1.1rem;
+                    .logo-wrapper {
+                        height: 38px;
                     }
 
-                    .logo-text {
-                        font-size: 1.4rem;
+                    .logo-white,
+                    .logo-black {
+                        height: 38px;
                     }
                 }
 
@@ -610,18 +561,21 @@ const Navbar = () => {
                         padding: 0 15px;
                     }
 
-                    .logo-icon {
-                        width: 36px;
-                        height: 36px;
-                        font-size: 1rem;
+                    .logo-wrapper {
+                        height: 32px;
                     }
 
-                    .logo-text {
-                        font-size: 1.2rem;
+                    .logo-white,
+                    .logo-black {
+                        height: 32px;
                     }
 
                     .mobile-menu {
                         padding: 10px 15px 20px;
+                    }
+
+                    .mobile-menu-logo {
+                        height: 25px;
                     }
                 }
 
@@ -657,7 +611,8 @@ const Navbar = () => {
                     .cta-btn,
                     .mobile-menu,
                     .navbar-overlay,
-                    .logo-icon::before,
+                    .logo-white,
+                    .logo-black,
                     .cta-btn::before {
                         animation: none !important;
                         transition-duration: 0.01ms !important;
@@ -685,10 +640,18 @@ const Navbar = () => {
                         className="navbar-logo"
                         onClick={(e) => handleNavClick(e, '/')}
                     >
-                        <div className="logo-icon">
-                            <i className="fa-solid fa-graduation-cap"></i>
+                        <div className="logo-wrapper">
+                            <img 
+                                src={logoWhite} 
+                                alt="EduFolio" 
+                                className="logo-white"
+                            />
+                            <img 
+                                src={logoBlack} 
+                                alt="EduFolio" 
+                                className="logo-black"
+                            />
                         </div>
-                        <span className="logo-text">Edu<span>Folio</span></span>
                     </a>
 
                     {/* Desktop Nav Links */}
@@ -741,9 +704,11 @@ const Navbar = () => {
                 {isMobileMenuOpen && (
                     <div className="mobile-menu">
                         <div className="mobile-menu-header">
-                            <div className="mobile-menu-logo">
-                                <i className="fa-solid fa-graduation-cap"></i>
-                            </div>
+                            <img 
+                                src={logoBlack} 
+                                alt="EduFolio" 
+                                className="mobile-menu-logo"
+                            />
                             <span className="mobile-menu-tagline">learn. grow. succeed.</span>
                         </div>
 
