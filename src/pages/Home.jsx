@@ -96,37 +96,124 @@ const Home = () => {
         <>
             <Navbar />
 
-            {/* Hero Section */}
+            {/* Hero Section with Images */}
             <section style={styles.hero}>
-                <div style={styles.heroBackground}></div>
-                <div style={styles.heroContent}>
-                    <span style={styles.heroBadge}>
-                        <i className="fa-solid fa-star"></i> India's #1 Online Education Platform
-                    </span>
-                    <h1 style={styles.heroTitle}>
-                        Transform Your Career with{' '}
-                        <span style={styles.highlight}>Online Degrees</span>
-                    </h1>
-                    <p style={styles.heroSubtitle}>
-                        Get UGC-approved degrees from India's top universities. 
-                        Study at your own pace, from anywhere in the world.
-                    </p>
-                    <div style={styles.heroButtons}>
-                        <Link to="/programs" style={styles.primaryBtn}>
-                            <i className="fa-solid fa-graduation-cap"></i>
-                            Explore Programs
-                        </Link>
-                        <Link to="/universities" style={styles.secondaryBtn}>
-                            <i className="fa-solid fa-building-columns"></i>
-                            View Universities
-                        </Link>
+                <div style={styles.heroPattern}></div>
+                
+                <div style={styles.heroContainer}>
+                    {/* Left Content */}
+                    <div style={styles.heroContent}>
+                        <span style={styles.heroBadge}>
+                            <i className="fa-solid fa-star"></i> India's #1 Online Education Platform
+                        </span>
+                        <h1 style={styles.heroTitle}>
+                            Transform Your Career with{' '}
+                            <span style={styles.highlight}>Online Degrees</span>
+                        </h1>
+                        <p style={styles.heroSubtitle}>
+                            Get UGC-approved degrees from India's top universities. 
+                            Study at your own pace, from anywhere in the world.
+                        </p>
+                        <div style={styles.tagline}>
+                            <span style={styles.taglineItem}>learn.</span>
+                            <span style={styles.taglineItem}>grow.</span>
+                            <span style={styles.taglineItem}>succeed.</span>
+                        </div>
+                        <div style={styles.heroButtons}>
+                            <Link to="/programs" style={styles.primaryBtn}>
+                                <i className="fa-solid fa-graduation-cap"></i>
+                                Explore Programs
+                            </Link>
+                            <Link to="/universities" style={styles.secondaryBtn}>
+                                <i className="fa-solid fa-building-columns"></i>
+                                View Universities
+                            </Link>
+                        </div>
+
+                        {/* Trust Badges */}
+                        <div style={styles.trustBadges}>
+                            <div style={styles.trustBadge}>
+                                <i className="fa-solid fa-shield-check"></i>
+                                <span>UGC-DEB Approved</span>
+                            </div>
+                            <div style={styles.trustBadge}>
+                                <i className="fa-solid fa-award"></i>
+                                <span>NAAC Accredited</span>
+                            </div>
+                            <div style={styles.trustBadge}>
+                                <i className="fa-solid fa-medal"></i>
+                                <span>AICTE Recognized</span>
+                            </div>
+                        </div>
                     </div>
-                    
-                    {/* Stats */}
+
+                    {/* Right Images Section */}
+                    <div style={styles.heroImages}>
+                        {/* Main Image */}
+                        <div style={styles.mainImageContainer}>
+                            <img 
+                                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&h=700&fit=crop" 
+                                alt="Students studying online"
+                                style={styles.mainImage}
+                            />
+                            <div style={styles.mainImageOverlay}></div>
+                        </div>
+
+                        {/* Floating Image 1 - Top Right */}
+                        <div style={styles.floatingImage1}>
+                            <img 
+                                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=300&h=200&fit=crop" 
+                                alt="Team collaboration"
+                                style={styles.floatingImg}
+                            />
+                        </div>
+
+                        {/* Floating Image 2 - Bottom Left */}
+                        <div style={styles.floatingImage2}>
+                            <img 
+                                src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=300&h=200&fit=crop" 
+                                alt="Online learning"
+                                style={styles.floatingImg}
+                            />
+                        </div>
+
+                        {/* Stats Card - Floating */}
+                        <div style={styles.floatingStatsCard}>
+                            <div style={styles.floatingStatsIcon}>
+                                <i className="fa-solid fa-users"></i>
+                            </div>
+                            <div style={styles.floatingStatsContent}>
+                                <span style={styles.floatingStatsNumber}>15,000+</span>
+                                <span style={styles.floatingStatsLabel}>Active Students</span>
+                            </div>
+                        </div>
+
+                        {/* Success Card - Floating */}
+                        <div style={styles.floatingSuccessCard}>
+                            <div style={styles.floatingSuccessIcon}>
+                                <i className="fa-solid fa-trophy"></i>
+                            </div>
+                            <div style={styles.floatingSuccessContent}>
+                                <span style={styles.floatingSuccessNumber}>95%</span>
+                                <span style={styles.floatingSuccessLabel}>Placement Rate</span>
+                            </div>
+                        </div>
+
+                        {/* Decorative Elements */}
+                        <div style={styles.decorCircle1}></div>
+                        <div style={styles.decorCircle2}></div>
+                        <div style={styles.decorDots}></div>
+                    </div>
+                </div>
+
+                {/* Stats Section at Bottom of Hero */}
+                <div style={styles.heroStats}>
                     <div style={styles.statsContainer}>
                         {stats.map((stat, index) => (
                             <div key={index} style={styles.statItem}>
-                                <i className={`fa-solid ${stat.icon}`} style={styles.statIcon}></i>
+                                <div style={styles.statIconWrapper}>
+                                    <i className={`fa-solid ${stat.icon}`} style={styles.statIcon}></i>
+                                </div>
                                 <span style={styles.statNumber}>{stat.number}</span>
                                 <span style={styles.statLabel}>{stat.label}</span>
                             </div>
@@ -245,20 +332,21 @@ const Home = () => {
 
             {/* Featured Universities Section */}
             <section style={styles.universitiesSection}>
+                <div style={styles.universitiesPattern}></div>
                 <div style={styles.container}>
-                    <div style={styles.sectionHeader}>
-                        <span style={styles.sectionBadge}>
+                    <div style={styles.sectionHeaderLight}>
+                        <span style={styles.sectionBadgeLight}>
                             <i className="fa-solid fa-award"></i> Top Rated
                         </span>
-                        <h2 style={styles.sectionTitle}>Partner Universities</h2>
-                        <p style={styles.sectionSubtitle}>
+                        <h2 style={styles.sectionTitleLight}>Partner Universities</h2>
+                        <p style={styles.sectionSubtitleLight}>
                             Learn from India's most prestigious institutions
                         </p>
                     </div>
 
                     {loading ? (
-                        <div style={styles.loading}>
-                            <div style={styles.spinner}></div>
+                        <div style={styles.loadingLight}>
+                            <div style={styles.spinnerLight}></div>
                             <span>Loading universities...</span>
                         </div>
                     ) : universities.length > 0 ? (
@@ -302,14 +390,14 @@ const Home = () => {
                             ))}
                         </div>
                     ) : (
-                        <div style={styles.noData}>
+                        <div style={styles.noDataLight}>
                             <i className="fa-solid fa-building-columns" style={styles.noDataIcon}></i>
                             <p>No universities available</p>
                         </div>
                     )}
 
                     <div style={styles.viewAllContainer}>
-                        <Link to="/universities" style={styles.viewAllBtn}>
+                        <Link to="/universities" style={styles.viewAllBtnLight}>
                             View All Universities <i className="fa-solid fa-arrow-right"></i>
                         </Link>
                     </div>
@@ -321,7 +409,7 @@ const Home = () => {
                 <div style={styles.container}>
                     <div style={styles.whyContent}>
                         <div style={styles.whyLeft}>
-                            <span style={styles.sectionBadgeAlt}>
+                            <span style={styles.sectionBadgeBlue}>
                                 <i className="fa-solid fa-question"></i> Why Edufolio
                             </span>
                             <h2 style={styles.whyTitle}>
@@ -429,6 +517,7 @@ const Home = () => {
 
             {/* CTA Section */}
             <section style={styles.ctaSection}>
+                <div style={styles.ctaPattern}></div>
                 <div style={styles.container}>
                     <div style={styles.ctaContent}>
                         <h2 style={styles.ctaTitle}>Ready to Start Your Journey?</h2>
@@ -436,6 +525,11 @@ const Home = () => {
                             Take the first step towards your dream career. 
                             Our counselors are here to help you choose the right path.
                         </p>
+                        <div style={styles.ctaTagline}>
+                            <span>learn.</span>
+                            <span>grow.</span>
+                            <span>succeed.</span>
+                        </div>
                         <div style={styles.ctaButtons}>
                             <Link to="/programs" style={styles.ctaPrimaryBtn}>
                                 <i className="fa-solid fa-graduation-cap"></i>
@@ -466,94 +560,123 @@ const Home = () => {
     );
 };
 
-// Edufolio Brand Colors
+// Edufolio Brand Colors from PDF
 const colors = {
-    primaryDark: '#1E3A5F',
-    primaryMaroon: '#8B2346',
-    accentBlue: '#4A90A4',
-    accentPink: '#C4567A',
-    textLight: '#A8C5E2',
-    bgLight: '#F5F7FA',
-    bgDark: '#152A45'
+    // Primary Colors
+    lightBlue: '#0099D6',
+    darkBlue: '#00529D',
+    maroon: '#8B2346',
+    darkMaroon: '#6B1D3A',
+    
+    // Supporting Colors
+    pink: '#C4567A',
+    lightPink: '#E8B4C4',
+    
+    // Neutrals
+    white: '#FFFFFF',
+    lightGray: '#F5F7FA',
+    gray: '#64748B',
+    darkGray: '#1E293B',
+    
+    // Text Colors
+    textDark: '#2D1B4E',
+    textLight: '#FFFFFF',
+    textMuted: '#94A3B8'
 };
 
 const styles = {
-    // Hero Section
+    // Hero Section - Maroon Background with Images
     hero: {
-        background: `linear-gradient(135deg, ${colors.primaryDark} 0%, ${colors.bgDark} 100%)`,
-        padding: '120px 20px 80px',
+        background: `linear-gradient(135deg, ${colors.darkMaroon} 0%, ${colors.maroon} 100%)`,
+        minHeight: '100vh',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column'
     },
-    heroBackground: {
+    heroPattern: {
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        opacity: 0.5
     },
-    heroContent: {
+    heroContainer: {
         maxWidth: '1200px',
         margin: '0 auto',
-        textAlign: 'center',
+        padding: '140px 20px 60px',
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '60px',
+        alignItems: 'center',
         position: 'relative',
-        zIndex: 1
+        zIndex: 2,
+        flex: 1
+    },
+    heroContent: {
+        maxWidth: '600px'
     },
     heroBadge: {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '8px',
-        background: `rgba(139, 35, 70, 0.3)`,
-        color: colors.accentPink,
+        background: 'rgba(255, 255, 255, 0.15)',
+        color: colors.white,
         padding: '10px 20px',
         borderRadius: '30px',
         fontSize: '0.9rem',
         fontWeight: '600',
-        marginBottom: '25px'
+        marginBottom: '25px',
+        backdropFilter: 'blur(10px)'
     },
     heroTitle: {
-        color: '#fff',
+        color: colors.white,
         fontSize: '3.2rem',
         fontWeight: '800',
         lineHeight: 1.2,
-        marginBottom: '20px',
-        maxWidth: '900px',
-        margin: '0 auto 20px'
+        marginBottom: '20px'
     },
     highlight: {
-        background: `linear-gradient(135deg, ${colors.accentPink}, ${colors.accentBlue})`,
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text'
+        color: colors.lightBlue
     },
     heroSubtitle: {
-        color: colors.textLight,
-        fontSize: '1.2rem',
+        color: 'rgba(255, 255, 255, 0.85)',
+        fontSize: '1.15rem',
         lineHeight: 1.7,
-        maxWidth: '700px',
-        margin: '0 auto 35px'
+        marginBottom: '20px'
+    },
+    tagline: {
+        display: 'flex',
+        gap: '15px',
+        marginBottom: '30px'
+    },
+    taglineItem: {
+        color: colors.lightBlue,
+        fontSize: '1.1rem',
+        fontWeight: '600',
+        fontStyle: 'italic'
     },
     heroButtons: {
         display: 'flex',
         gap: '15px',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        marginBottom: '60px'
+        marginBottom: '35px',
+        flexWrap: 'wrap'
     },
     primaryBtn: {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '10px',
         padding: '16px 32px',
-        background: `linear-gradient(135deg, ${colors.primaryMaroon} 0%, ${colors.accentPink} 100%)`,
-        color: '#fff',
+        background: colors.lightBlue,
+        color: colors.white,
         borderRadius: '12px',
         textDecoration: 'none',
         fontWeight: '600',
         fontSize: '1rem',
-        boxShadow: '0 4px 20px rgba(139, 35, 70, 0.4)',
-        transition: 'transform 0.2s ease'
+        boxShadow: `0 4px 20px ${colors.lightBlue}40`,
+        transition: 'all 0.3s ease'
     },
     secondaryBtn: {
         display: 'inline-flex',
@@ -561,49 +684,251 @@ const styles = {
         gap: '10px',
         padding: '16px 32px',
         background: 'rgba(255, 255, 255, 0.1)',
-        color: '#fff',
+        color: colors.white,
         borderRadius: '12px',
         textDecoration: 'none',
         fontWeight: '600',
         fontSize: '1rem',
-        border: '2px solid rgba(255, 255, 255, 0.2)',
-        transition: 'all 0.2s ease'
+        border: '2px solid rgba(255, 255, 255, 0.3)',
+        transition: 'all 0.3s ease',
+        backdropFilter: 'blur(10px)'
+    },
+    trustBadges: {
+        display: 'flex',
+        gap: '20px',
+        flexWrap: 'wrap'
+    },
+    trustBadge: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        color: 'rgba(255, 255, 255, 0.8)',
+        fontSize: '0.85rem',
+        fontWeight: '500'
+    },
+
+    // Hero Images Section
+    heroImages: {
+        position: 'relative',
+        height: '550px'
+    },
+    mainImageContainer: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '380px',
+        height: '480px',
+        borderRadius: '30px',
+        overflow: 'hidden',
+        boxShadow: '0 30px 60px rgba(0, 0, 0, 0.4)',
+        border: '5px solid rgba(255, 255, 255, 0.2)'
+    },
+    mainImage: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover'
+    },
+    mainImageOverlay: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '150px',
+        background: 'linear-gradient(to top, rgba(107, 29, 58, 0.8), transparent)'
+    },
+    floatingImage1: {
+        position: 'absolute',
+        top: '0',
+        right: '0',
+        width: '180px',
+        height: '120px',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.3)',
+        border: '4px solid rgba(255, 255, 255, 0.3)',
+        animation: 'float1 6s ease-in-out infinite'
+    },
+    floatingImage2: {
+        position: 'absolute',
+        bottom: '30px',
+        left: '0',
+        width: '160px',
+        height: '110px',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.3)',
+        border: '4px solid rgba(255, 255, 255, 0.3)',
+        animation: 'float2 6s ease-in-out infinite'
+    },
+    floatingImg: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover'
+    },
+    floatingStatsCard: {
+        position: 'absolute',
+        top: '60px',
+        left: '-20px',
+        background: colors.white,
+        padding: '18px 22px',
+        borderRadius: '16px',
+        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.2)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '15px',
+        animation: 'float1 5s ease-in-out infinite'
+    },
+    floatingStatsIcon: {
+        width: '50px',
+        height: '50px',
+        borderRadius: '12px',
+        background: `${colors.lightBlue}20`,
+        color: colors.darkBlue,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.3rem'
+    },
+    floatingStatsContent: {
+        display: 'flex',
+        flexDirection: 'column'
+    },
+    floatingStatsNumber: {
+        color: colors.darkBlue,
+        fontSize: '1.4rem',
+        fontWeight: '800'
+    },
+    floatingStatsLabel: {
+        color: colors.gray,
+        fontSize: '0.8rem'
+    },
+    floatingSuccessCard: {
+        position: 'absolute',
+        bottom: '80px',
+        right: '-10px',
+        background: colors.white,
+        padding: '18px 22px',
+        borderRadius: '16px',
+        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.2)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '15px',
+        animation: 'float2 5s ease-in-out infinite'
+    },
+    floatingSuccessIcon: {
+        width: '50px',
+        height: '50px',
+        borderRadius: '12px',
+        background: `${colors.maroon}20`,
+        color: colors.maroon,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.3rem'
+    },
+    floatingSuccessContent: {
+        display: 'flex',
+        flexDirection: 'column'
+    },
+    floatingSuccessNumber: {
+        color: colors.maroon,
+        fontSize: '1.4rem',
+        fontWeight: '800'
+    },
+    floatingSuccessLabel: {
+        color: colors.gray,
+        fontSize: '0.8rem'
+    },
+    decorCircle1: {
+        position: 'absolute',
+        top: '20%',
+        right: '15%',
+        width: '80px',
+        height: '80px',
+        borderRadius: '50%',
+        border: '3px solid rgba(0, 153, 214, 0.3)',
+        animation: 'pulse 3s ease-in-out infinite'
+    },
+    decorCircle2: {
+        position: 'absolute',
+        bottom: '25%',
+        left: '10%',
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
+        background: 'rgba(0, 153, 214, 0.1)',
+        animation: 'pulse 4s ease-in-out infinite'
+    },
+    decorDots: {
+        position: 'absolute',
+        top: '40%',
+        right: '5%',
+        width: '60px',
+        height: '60px',
+        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 2px, transparent 2px)',
+        backgroundSize: '12px 12px'
+    },
+
+    // Hero Stats at Bottom
+    heroStats: {
+        background: 'rgba(0, 0, 0, 0.2)',
+        backdropFilter: 'blur(10px)',
+        padding: '30px 0',
+        position: 'relative',
+        zIndex: 2
     },
     statsContainer: {
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '0 20px',
         display: 'flex',
-        justifyContent: 'center',
-        gap: '50px',
-        flexWrap: 'wrap'
+        justifyContent: 'space-around',
+        flexWrap: 'wrap',
+        gap: '30px'
     },
     statItem: {
         textAlign: 'center'
     },
+    statIconWrapper: {
+        width: '50px',
+        height: '50px',
+        borderRadius: '12px',
+        background: 'rgba(0, 153, 214, 0.2)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '0 auto 10px'
+    },
     statIcon: {
-        fontSize: '1.5rem',
-        color: colors.accentPink,
-        marginBottom: '10px',
-        display: 'block'
+        fontSize: '1.3rem',
+        color: colors.lightBlue
     },
     statNumber: {
         display: 'block',
-        color: '#fff',
+        color: colors.white,
         fontSize: '2rem',
         fontWeight: '800',
         marginBottom: '5px'
     },
     statLabel: {
-        color: colors.textLight,
+        color: 'rgba(255, 255, 255, 0.7)',
         fontSize: '0.9rem'
     },
 
+    // Rest of the styles (Features, Programs, Universities, etc.)
+    // ... keep all the other existing styles from before
+    
     // Features Section
     featuresSection: {
         padding: '80px 20px',
-        background: '#fff'
+        background: colors.white
     },
     container: {
         maxWidth: '1200px',
-        margin: '0 auto'
+        margin: '0 auto',
+        position: 'relative',
+        zIndex: 1
     },
     featuresGrid: {
         display: 'grid',
@@ -615,28 +940,29 @@ const styles = {
         padding: '30px 20px',
         borderRadius: '16px',
         transition: 'all 0.3s ease',
-        border: '1px solid transparent'
+        border: `1px solid ${colors.lightGray}`,
+        background: colors.white
     },
     featureIcon: {
         width: '70px',
         height: '70px',
         borderRadius: '20px',
-        background: `linear-gradient(135deg, ${colors.primaryMaroon}15, ${colors.accentPink}15)`,
+        background: `linear-gradient(135deg, ${colors.maroon}15, ${colors.pink}15)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         margin: '0 auto 20px',
         fontSize: '1.5rem',
-        color: colors.primaryMaroon
+        color: colors.maroon
     },
     featureTitle: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '1.1rem',
         fontWeight: '700',
         marginBottom: '10px'
     },
     featureDesc: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '0.95rem',
         lineHeight: 1.6,
         margin: 0
@@ -645,7 +971,7 @@ const styles = {
     // Programs Section
     programsSection: {
         padding: '80px 20px',
-        background: colors.bgLight
+        background: colors.lightGray
     },
     sectionHeader: {
         textAlign: 'center',
@@ -655,20 +981,20 @@ const styles = {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '8px',
-        background: `${colors.primaryMaroon}15`,
-        color: colors.primaryMaroon,
+        background: `${colors.maroon}15`,
+        color: colors.maroon,
         padding: '8px 16px',
         borderRadius: '20px',
         fontSize: '0.85rem',
         fontWeight: '600',
         marginBottom: '15px'
     },
-    sectionBadgeAlt: {
+    sectionBadgeBlue: {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '8px',
-        background: `${colors.accentBlue}15`,
-        color: colors.accentBlue,
+        background: `${colors.darkBlue}15`,
+        color: colors.darkBlue,
         padding: '8px 16px',
         borderRadius: '20px',
         fontSize: '0.85rem',
@@ -676,20 +1002,20 @@ const styles = {
         marginBottom: '15px'
     },
     sectionTitle: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '2.2rem',
         fontWeight: '800',
         marginBottom: '10px'
     },
     sectionSubtitle: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '1.05rem',
         margin: 0
     },
     loading: {
         textAlign: 'center',
         padding: '60px 20px',
-        color: '#64748B',
+        color: colors.gray,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -698,15 +1024,15 @@ const styles = {
     spinner: {
         width: '50px',
         height: '50px',
-        border: '4px solid #E2E8F0',
-        borderTopColor: colors.primaryMaroon,
+        border: `4px solid ${colors.lightGray}`,
+        borderTopColor: colors.maroon,
         borderRadius: '50%',
         animation: 'spin 1s linear infinite'
     },
     noData: {
         textAlign: 'center',
         padding: '60px 20px',
-        color: '#94A3B8'
+        color: colors.gray
     },
     noDataIcon: {
         fontSize: '3rem',
@@ -719,20 +1045,20 @@ const styles = {
         gap: '25px'
     },
     programCard: {
-        background: '#fff',
+        background: colors.white,
         borderRadius: '20px',
         padding: '25px',
-        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.05)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
         position: 'relative',
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-        border: '1px solid #E2E8F0'
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        border: `1px solid ${colors.lightGray}`
     },
     featuredBadge: {
         position: 'absolute',
         top: '15px',
         right: '15px',
-        background: `linear-gradient(135deg, ${colors.primaryMaroon} 0%, ${colors.accentPink} 100%)`,
-        color: '#fff',
+        background: `linear-gradient(135deg, ${colors.maroon} 0%, ${colors.pink} 100%)`,
+        color: colors.white,
         padding: '5px 12px',
         borderRadius: '15px',
         fontSize: '0.75rem',
@@ -747,30 +1073,30 @@ const styles = {
         marginBottom: '15px'
     },
     categoryBadge: {
-        background: `${colors.primaryMaroon}15`,
-        color: colors.primaryMaroon,
+        background: `${colors.maroon}15`,
+        color: colors.maroon,
         padding: '5px 12px',
         borderRadius: '8px',
         fontSize: '0.8rem',
         fontWeight: '600'
     },
     modeBadge: {
-        background: `${colors.accentBlue}15`,
-        color: colors.accentBlue,
+        background: `${colors.darkBlue}15`,
+        color: colors.darkBlue,
         padding: '5px 12px',
         borderRadius: '8px',
         fontSize: '0.8rem',
         fontWeight: '500'
     },
     programTitle: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '1.15rem',
         fontWeight: '700',
         marginBottom: '10px',
         lineHeight: 1.3
     },
     programUniversity: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '0.9rem',
         marginBottom: '15px',
         display: 'flex',
@@ -783,14 +1109,14 @@ const styles = {
         marginBottom: '15px'
     },
     metaItem: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '0.85rem',
         display: 'flex',
         alignItems: 'center',
         gap: '6px'
     },
     programFee: {
-        background: colors.bgLight,
+        background: colors.lightGray,
         padding: '15px',
         borderRadius: '12px',
         marginBottom: '15px',
@@ -800,20 +1126,20 @@ const styles = {
     },
     feeLabel: {
         display: 'block',
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '0.8rem',
         marginBottom: '3px'
     },
     feeAmount: {
-        color: colors.primaryMaroon,
+        color: colors.maroon,
         fontSize: '1.3rem',
         fontWeight: '700'
     },
     emiText: {
         background: '#DCFCE7',
         color: '#15803D',
-        padding: '5px 10px',
-        borderRadius: '6px',
+        padding: '6px 12px',
+        borderRadius: '8px',
         fontSize: '0.75rem',
         fontWeight: '600'
     },
@@ -824,20 +1150,21 @@ const styles = {
     viewDetailsBtn: {
         flex: 1,
         padding: '12px',
-        background: colors.bgLight,
-        color: colors.primaryDark,
+        background: colors.lightGray,
+        color: colors.textDark,
+        border: 'none',
         borderRadius: '10px',
-        textDecoration: 'none',
-        textAlign: 'center',
         fontWeight: '600',
         fontSize: '0.9rem',
-        transition: 'background 0.2s ease'
+        textDecoration: 'none',
+        textAlign: 'center',
+        transition: 'all 0.3s ease'
     },
     enrollNowBtn: {
         flex: 1,
         padding: '12px',
-        background: `linear-gradient(135deg, ${colors.primaryMaroon} 0%, ${colors.accentPink} 100%)`,
-        color: '#fff',
+        background: `linear-gradient(135deg, ${colors.maroon} 0%, ${colors.pink} 100%)`,
+        color: colors.white,
         border: 'none',
         borderRadius: '10px',
         fontWeight: '600',
@@ -846,8 +1173,9 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '6px',
-        transition: 'transform 0.2s ease'
+        gap: '8px',
+        transition: 'all 0.3s ease',
+        boxShadow: `0 4px 15px ${colors.maroon}30`
     },
     viewAllContainer: {
         textAlign: 'center',
@@ -858,19 +1186,79 @@ const styles = {
         alignItems: 'center',
         gap: '10px',
         padding: '16px 32px',
-        background: colors.primaryDark,
-        color: '#fff',
+        background: colors.darkBlue,
+        color: colors.white,
         borderRadius: '12px',
         textDecoration: 'none',
         fontWeight: '600',
         fontSize: '1rem',
-        transition: 'background 0.2s ease'
+        transition: 'all 0.3s ease'
     },
 
     // Universities Section
     universitiesSection: {
         padding: '80px 20px',
-        background: '#fff'
+        background: `linear-gradient(135deg, ${colors.darkBlue} 0%, #003D7A 100%)`,
+        position: 'relative',
+        overflow: 'hidden'
+    },
+    universitiesPattern: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        opacity: 0.5
+    },
+    sectionHeaderLight: {
+        textAlign: 'center',
+        marginBottom: '50px'
+    },
+    sectionBadgeLight: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '8px',
+        background: 'rgba(0, 153, 214, 0.2)',
+        color: colors.lightBlue,
+        padding: '8px 16px',
+        borderRadius: '20px',
+        fontSize: '0.85rem',
+        fontWeight: '600',
+        marginBottom: '15px'
+    },
+    sectionTitleLight: {
+        color: colors.white,
+        fontSize: '2.2rem',
+        fontWeight: '800',
+        marginBottom: '10px'
+    },
+    sectionSubtitleLight: {
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontSize: '1.05rem',
+        margin: 0
+    },
+    loadingLight: {
+        textAlign: 'center',
+        padding: '60px 20px',
+        color: 'rgba(255, 255, 255, 0.7)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '15px'
+    },
+    spinnerLight: {
+        width: '50px',
+        height: '50px',
+        border: '4px solid rgba(255, 255, 255, 0.2)',
+        borderTopColor: colors.lightBlue,
+        borderRadius: '50%',
+        animation: 'spin 1s linear infinite'
+    },
+    noDataLight: {
+        textAlign: 'center',
+        padding: '60px 20px',
+        color: 'rgba(255, 255, 255, 0.6)'
     },
     universitiesGrid: {
         display: 'grid',
@@ -878,21 +1266,20 @@ const styles = {
         gap: '25px'
     },
     universityCard: {
-        background: colors.bgLight,
+        background: colors.white,
         borderRadius: '20px',
         padding: '30px 20px',
         textAlign: 'center',
         textDecoration: 'none',
         position: 'relative',
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-        border: '1px solid #E2E8F0'
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease'
     },
     universityFeaturedBadge: {
         position: 'absolute',
         top: '15px',
         right: '15px',
-        background: `${colors.primaryMaroon}15`,
-        color: colors.primaryMaroon,
+        background: `${colors.lightBlue}20`,
+        color: colors.darkBlue,
         padding: '4px 10px',
         borderRadius: '10px',
         fontSize: '0.7rem',
@@ -902,7 +1289,7 @@ const styles = {
         width: '90px',
         height: '90px',
         borderRadius: '20px',
-        background: '#fff',
+        background: colors.lightGray,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -915,13 +1302,13 @@ const styles = {
         objectFit: 'contain'
     },
     universityName: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '1.05rem',
         fontWeight: '700',
         marginBottom: '8px'
     },
     universityLocation: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '0.85rem',
         marginBottom: '12px',
         display: 'flex',
@@ -948,15 +1335,28 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         gap: '8px',
-        color: colors.primaryMaroon,
+        color: colors.darkBlue,
         fontSize: '0.9rem',
         fontWeight: '600'
+    },
+    viewAllBtnLight: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '16px 32px',
+        background: colors.white,
+        color: colors.darkBlue,
+        borderRadius: '12px',
+        textDecoration: 'none',
+        fontWeight: '600',
+        fontSize: '1rem',
+        transition: 'transform 0.3s ease'
     },
 
     // Why Section
     whySection: {
         padding: '80px 20px',
-        background: colors.bgLight
+        background: colors.lightGray
     },
     whyContent: {
         display: 'grid',
@@ -966,13 +1366,13 @@ const styles = {
     },
     whyLeft: {},
     whyTitle: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '2rem',
         fontWeight: '800',
         marginBottom: '20px'
     },
     whyDesc: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '1.05rem',
         lineHeight: 1.7,
         marginBottom: '35px'
@@ -990,27 +1390,27 @@ const styles = {
         width: '40px',
         height: '40px',
         borderRadius: '10px',
-        background: '#DCFCE7',
-        color: '#15803D',
+        background: `${colors.lightBlue}20`,
+        color: colors.darkBlue,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0
     },
     whyFeatureTitle: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '1rem',
         fontWeight: '600',
         marginBottom: '5px'
     },
     whyFeatureDesc: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '0.9rem',
         margin: 0
     },
     whyRight: {},
     whyCard: {
-        background: `linear-gradient(135deg, ${colors.primaryDark} 0%, ${colors.bgDark} 100%)`,
+        background: `linear-gradient(135deg, ${colors.darkBlue} 0%, #003D7A 100%)`,
         borderRadius: '24px',
         padding: '40px 30px',
         textAlign: 'center'
@@ -1019,8 +1419,8 @@ const styles = {
         width: '70px',
         height: '70px',
         borderRadius: '50%',
-        background: `rgba(139, 35, 70, 0.2)`,
-        color: colors.accentPink,
+        background: 'rgba(0, 153, 214, 0.2)',
+        color: colors.lightBlue,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -1028,13 +1428,13 @@ const styles = {
         fontSize: '1.5rem'
     },
     whyCardTitle: {
-        color: '#fff',
+        color: colors.white,
         fontSize: '1.3rem',
         fontWeight: '700',
         marginBottom: '10px'
     },
     whyCardDesc: {
-        color: colors.textLight,
+        color: 'rgba(255, 255, 255, 0.8)',
         fontSize: '0.95rem',
         marginBottom: '25px'
     },
@@ -1043,8 +1443,8 @@ const styles = {
         alignItems: 'center',
         gap: '10px',
         padding: '14px 25px',
-        background: `linear-gradient(135deg, ${colors.primaryMaroon} 0%, ${colors.accentPink} 100%)`,
-        color: '#fff',
+        background: colors.lightBlue,
+        color: colors.white,
         borderRadius: '12px',
         textDecoration: 'none',
         fontWeight: '600',
@@ -1054,7 +1454,7 @@ const styles = {
     // Testimonials Section
     testimonialsSection: {
         padding: '80px 20px',
-        background: '#fff'
+        background: colors.white
     },
     testimonialsGrid: {
         display: 'grid',
@@ -1062,18 +1462,18 @@ const styles = {
         gap: '25px'
     },
     testimonialCard: {
-        background: colors.bgLight,
+        background: colors.lightGray,
         borderRadius: '20px',
         padding: '30px',
-        border: '1px solid #E2E8F0'
+        border: `1px solid ${colors.lightGray}`
     },
     testimonialQuote: {
-        color: colors.primaryMaroon,
+        color: colors.maroon,
         fontSize: '1.5rem',
         marginBottom: '15px'
     },
     testimonialText: {
-        color: '#475569',
+        color: colors.gray,
         fontSize: '0.95rem',
         lineHeight: 1.7,
         marginBottom: '20px'
@@ -1088,21 +1488,21 @@ const styles = {
         height: '50px',
         borderRadius: '50%',
         objectFit: 'cover',
-        border: `3px solid ${colors.primaryMaroon}20`
+        border: `3px solid ${colors.maroon}20`
     },
     testimonialName: {
-        color: colors.primaryDark,
+        color: colors.textDark,
         fontSize: '1rem',
         fontWeight: '600',
         marginBottom: '3px'
     },
     testimonialProgram: {
-        color: colors.primaryMaroon,
+        color: colors.maroon,
         fontSize: '0.85rem',
         margin: '0 0 2px'
     },
     testimonialUniversity: {
-        color: '#64748B',
+        color: colors.gray,
         fontSize: '0.8rem',
         margin: 0
     },
@@ -1110,15 +1510,28 @@ const styles = {
     // CTA Section
     ctaSection: {
         padding: '80px 20px',
-        background: `linear-gradient(135deg, ${colors.primaryMaroon} 0%, ${colors.accentPink} 100%)`
+        background: `linear-gradient(135deg, ${colors.darkMaroon} 0%, ${colors.maroon} 100%)`,
+        position: 'relative',
+        overflow: 'hidden'
+    },
+    ctaPattern: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        opacity: 0.5
     },
     ctaContent: {
         textAlign: 'center',
         maxWidth: '700px',
-        margin: '0 auto'
+        margin: '0 auto',
+        position: 'relative',
+        zIndex: 1
     },
     ctaTitle: {
-        color: '#fff',
+        color: colors.white,
         fontSize: '2.2rem',
         fontWeight: '800',
         marginBottom: '15px'
@@ -1126,8 +1539,18 @@ const styles = {
     ctaDesc: {
         color: 'rgba(255, 255, 255, 0.9)',
         fontSize: '1.1rem',
-        marginBottom: '30px',
+        marginBottom: '20px',
         lineHeight: 1.6
+    },
+    ctaTagline: {
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '15px',
+        marginBottom: '30px',
+        color: colors.lightBlue,
+        fontSize: '1.1rem',
+        fontWeight: '600',
+        fontStyle: 'italic'
     },
     ctaButtons: {
         display: 'flex',
@@ -1140,13 +1563,13 @@ const styles = {
         alignItems: 'center',
         gap: '10px',
         padding: '16px 32px',
-        background: '#fff',
-        color: colors.primaryMaroon,
+        background: colors.white,
+        color: colors.maroon,
         borderRadius: '12px',
         textDecoration: 'none',
         fontWeight: '600',
         fontSize: '1rem',
-        transition: 'transform 0.2s ease'
+        transition: 'transform 0.3s ease'
     },
     ctaSecondaryBtn: {
         display: 'inline-flex',
@@ -1154,7 +1577,7 @@ const styles = {
         gap: '10px',
         padding: '16px 32px',
         background: 'transparent',
-        color: '#fff',
+        color: colors.white,
         borderRadius: '12px',
         textDecoration: 'none',
         fontWeight: '600',
@@ -1163,29 +1586,109 @@ const styles = {
     }
 };
 
-// Add responsive styles and keyframes
+// Add responsive styles, keyframes, and animations
 if (typeof document !== 'undefined') {
     const styleSheet = document.createElement('style');
     styleSheet.textContent = `
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
         
+        @keyframes float1 {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        @keyframes float2 {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .primary-btn:hover, .secondary-btn:hover {
+            transform: translateY(-3px);
+        }
+        
+        .program-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+        
+        .university-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
         @media (max-width: 1024px) {
-            .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
-            .programs-grid { grid-template-columns: repeat(2, 1fr) !important; }
-            .universities-grid { grid-template-columns: repeat(2, 1fr) !important; }
-            .testimonials-grid { grid-template-columns: repeat(2, 1fr) !important; }
-            .why-content { grid-template-columns: 1fr !important; }
+            .hero-container {
+                grid-template-columns: 1fr !important;
+                text-align: center;
+                padding-top: 120px !important;
+            }
+            .hero-content {
+                max-width: 100% !important;
+            }
+            .hero-images {
+                display: none !important;
+            }
+            .hero-buttons {
+                justify-content: center;
+            }
+            .trust-badges {
+                justify-content: center;
+            }
+            .tagline {
+                justify-content: center;
+            }
+            .features-grid { 
+                grid-template-columns: repeat(2, 1fr) !important; 
+            }
+            .programs-grid { 
+                grid-template-columns: repeat(2, 1fr) !important; 
+            }
+            .universities-grid { 
+                grid-template-columns: repeat(2, 1fr) !important; 
+            }
+            .testimonials-grid { 
+                grid-template-columns: repeat(2, 1fr) !important; 
+            }
+            .why-content { 
+                grid-template-columns: 1fr !important; 
+            }
         }
         
         @media (max-width: 768px) {
-            .hero-title { font-size: 2.2rem !important; }
-            .features-grid { grid-template-columns: 1fr !important; }
-            .programs-grid { grid-template-columns: 1fr !important; }
-            .universities-grid { grid-template-columns: 1fr !important; }
-            .testimonials-grid { grid-template-columns: 1fr !important; }
-            .stats-container { gap: 25px !important; }
+            .hero-title { 
+                font-size: 2.2rem !important; 
+            }
+            .features-grid { 
+                grid-template-columns: 1fr !important; 
+            }
+            .programs-grid { 
+                grid-template-columns: 1fr !important; 
+            }
+            .universities-grid { 
+                grid-template-columns: 1fr !important; 
+            }
+            .testimonials-grid { 
+                grid-template-columns: 1fr !important; 
+            }
+            .stats-container { 
+                gap: 25px !important; 
+            }
+            .stat-item {
+                flex: 0 0 45%;
+            }
         }
     `;
     document.head.appendChild(styleSheet);
