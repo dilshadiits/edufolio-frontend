@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import API_BASE from '../api';
@@ -16,8 +16,31 @@ const CourseFinder = () => {
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showResults, setShowResults] = useState(false);
+    const [animateQuestion, setAnimateQuestion] = useState(true);
 
+    // Prevent body scroll when modal is open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isOpen]);
 
+    // Handle escape key to close modal
+    useEffect(() => {
+        const handleEscape = (e) => {
+            if (e.key === 'Escape' && isOpen) {
+                setIsOpen(false);
+                resetFinder();
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+        return () => document.removeEventListener('keydown', handleEscape);
+    }, [isOpen]);
 
     const questions = [
         {
@@ -82,29 +105,37 @@ const CourseFinder = () => {
         setAnswers({ ...answers, [field]: value });
         
         if (step < questions.length) {
-            setTimeout(() => setStep(step + 1), 300);
+            setAnimateQuestion(false);
+            setTimeout(() => {
+                setStep(step + 1);
+                setAnimateQuestion(true);
+            }, 300);
         }
+    };
+
+    const handleBack = () => {
+        setAnimateQuestion(false);
+        setTimeout(() => {
+            setStep(step - 1);
+            setAnimateQuestion(true);
+        }, 150);
     };
 
     const findCourses = async () => {
         setLoading(true);
         try {
-            // Fetch all programs
             const res = await axios.get(`${API_BASE}/public/programs`);
             let programs = res.data;
 
-            // Filter based on answers
             const interestOption = questions[1].options.find(o => o.value === answers.interest);
             const budgetOption = questions[3].options.find(o => o.value === answers.budget);
 
-            // Filter by education level
             if (answers.education === '12th') {
                 programs = programs.filter(p => p.level === 'Undergraduate');
             } else if (answers.education === 'graduate' || answers.education === 'working') {
                 programs = programs.filter(p => ['Postgraduate', 'Undergraduate'].includes(p.level));
             }
 
-            // Filter by interest/category
             if (interestOption?.categories) {
                 programs = programs.filter(p => 
                     interestOption.categories.some(cat => 
@@ -114,7 +145,6 @@ const CourseFinder = () => {
                 );
             }
 
-            // Filter by budget
             if (budgetOption) {
                 programs = programs.filter(p => {
                     if (budgetOption.max && !budgetOption.min) {
@@ -128,12 +158,10 @@ const CourseFinder = () => {
                 });
             }
 
-            // Filter by mode
             if (answers.mode !== 'any') {
                 programs = programs.filter(p => p.mode === answers.mode);
             }
 
-            // Sort by featured first
             programs.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
 
             setResults(programs.slice(0, 6));
@@ -156,16 +184,953 @@ const CourseFinder = () => {
         });
         setResults([]);
         setShowResults(false);
+        setAnimateQuestion(true);
     };
 
     const currentQuestion = questions[step - 1];
 
     return (
         <>
+            <style>{`
+                /* ==================== COURSE FINDER STYLES ==================== */
+                
+                /* ==================== CSS VARIABLES ==================== */
+                .cf-floating-btn,
+                .cf-overlay {
+                    --cf-primary: #FF6B35;
+                    --cf-primary-light: #FF8B5C;
+                    --cf-primary-shadow: rgba(255, 107, 53, 0.4);
+                    --cf-dark: #0F172A;
+                    --cf-dark-light: #1E293B;
+                    --cf-gray-100: #F1F5F9;
+                    --cf-gray-200: #E2E8F0;
+                    --cf-gray-300: #CBD5E1;
+                    --cf-gray-400: #94A3B8;
+                    --cf-gray-500: #64748B;
+                    --cf-gray-700: #334155;
+                    --cf-gray-800: #F8FAFC;
+                    --cf-white: #FFFFFF;
+                    --cf-success: #10B981;
+                    --cf-success-light: #34D399;
+                    --cf-emerald: #059669;
+                    --cf-radius: 10px;
+                    --cf-radius-lg: 12px;
+                    --cf-radius-xl: 24px;
+                    --cf-radius-full: 50px;
+                    --cf-transition: 0.3s ease;
+                    --cf-transition-fast: 0.2s ease;
+                }
+
+                /* ==================== FLOATING BUTTON ==================== */
+                .cf-floating-btn {
+                    position: fixed;
+                    bottom: 30px;
+                    right: 30px;
+                    background: linear-gradient(135deg, var(--cf-primary) 0%, var(--cf-primary-light) 100%);
+                    color: var(--cf-white);
+                    border: none;
+                    border-radius: var(--cf-radius-full);
+                    padding: 18px 28px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    font-family: inherit;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    box-shadow: 0 8px 30px var(--cf-primary-shadow);
+                    z-index: 1000;
+                    transition: transform var(--cf-transition), box-shadow var(--cf-transition);
+                    animation: cf-float-pulse 3s ease-in-out infinite;
+                }
+
+                @keyframes cf-float-pulse {
+                    0%, 100% {
+                        transform: translateY(0);
+                    }
+                    50% {
+                        transform: translateY(-5px);
+                    }
+                }
+
+                .cf-floating-btn:hover {
+                    transform: translateY(-3px) scale(1.02);
+                    box-shadow: 0 12px 40px var(--cf-primary-shadow);
+                    animation: none;
+                }
+
+                .cf-floating-btn:active {
+                    transform: translateY(0) scale(0.98);
+                }
+
+                .cf-floating-btn:focus {
+                    outline: 3px solid var(--cf-primary);
+                    outline-offset: 3px;
+                }
+
+                .cf-floating-btn i {
+                    font-size: 1.1rem;
+                    animation: cf-sparkle 2s ease-in-out infinite;
+                }
+
+                @keyframes cf-sparkle {
+                    0%, 100% {
+                        transform: rotate(0deg) scale(1);
+                    }
+                    25% {
+                        transform: rotate(-10deg) scale(1.1);
+                    }
+                    75% {
+                        transform: rotate(10deg) scale(1.1);
+                    }
+                }
+
+                /* ==================== OVERLAY ==================== */
+                .cf-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    padding: 20px;
+                    backdrop-filter: blur(5px);
+                    -webkit-backdrop-filter: blur(5px);
+                    animation: cf-overlay-fade-in 0.2s ease;
+                }
+
+                @keyframes cf-overlay-fade-in {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+
+                /* ==================== MODAL ==================== */
+                .cf-modal {
+                    background: var(--cf-white);
+                    border-radius: var(--cf-radius-xl);
+                    max-width: 600px;
+                    width: 100%;
+                    max-height: 90vh;
+                    overflow: auto;
+                    position: relative;
+                    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+                    animation: cf-modal-slide-up 0.3s ease;
+                }
+
+                @keyframes cf-modal-slide-up {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px) scale(0.97);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+
+                .cf-modal::-webkit-scrollbar {
+                    width: 6px;
+                }
+
+                .cf-modal::-webkit-scrollbar-track {
+                    background: var(--cf-gray-100);
+                }
+
+                .cf-modal::-webkit-scrollbar-thumb {
+                    background: var(--cf-gray-400);
+                    border-radius: 3px;
+                }
+
+                /* ==================== CLOSE BUTTON ==================== */
+                .cf-close-btn {
+                    position: absolute;
+                    top: 15px;
+                    right: 15px;
+                    background: rgba(255, 255, 255, 0.2);
+                    border: none;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.1rem;
+                    color: var(--cf-white);
+                    z-index: 1;
+                    transition: all var(--cf-transition-fast);
+                }
+
+                .cf-close-btn:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                    transform: rotate(90deg);
+                }
+
+                .cf-close-btn:focus {
+                    outline: 3px solid var(--cf-primary);
+                    outline-offset: 2px;
+                }
+
+                /* ==================== HEADER ==================== */
+                .cf-header {
+                    text-align: center;
+                    padding: 40px 30px 30px;
+                    background: linear-gradient(135deg, var(--cf-dark) 0%, var(--cf-dark-light) 100%);
+                    border-radius: var(--cf-radius-xl) var(--cf-radius-xl) 0 0;
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .cf-header::before {
+                    content: '';
+                    position: absolute;
+                    top: -50%;
+                    right: -20%;
+                    width: 250px;
+                    height: 250px;
+                    background: rgba(255, 107, 53, 0.1);
+                    border-radius: 50%;
+                    pointer-events: none;
+                }
+
+                .cf-header-icon {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, var(--cf-primary) 0%, var(--cf-primary-light) 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 20px;
+                    font-size: 2rem;
+                    color: var(--cf-white);
+                    box-shadow: 0 10px 30px var(--cf-primary-shadow);
+                    position: relative;
+                    animation: cf-icon-pulse 2s ease-in-out infinite;
+                }
+
+                @keyframes cf-icon-pulse {
+                    0%, 100% {
+                        box-shadow: 0 10px 30px var(--cf-primary-shadow);
+                    }
+                    50% {
+                        box-shadow: 0 15px 40px var(--cf-primary-shadow);
+                    }
+                }
+
+                .cf-title {
+                    color: var(--cf-white);
+                    font-size: 1.8rem;
+                    font-weight: 700;
+                    margin: 0 0 10px;
+                    position: relative;
+                }
+
+                .cf-subtitle {
+                    color: var(--cf-gray-400);
+                    font-size: 1rem;
+                    margin: 0;
+                    position: relative;
+                }
+
+                /* ==================== PROGRESS ==================== */
+                .cf-progress-container {
+                    padding: 20px 30px;
+                    border-bottom: 1px solid var(--cf-gray-200);
+                }
+
+                .cf-progress-bar {
+                    height: 8px;
+                    background: var(--cf-gray-200);
+                    border-radius: 4px;
+                    overflow: hidden;
+                    margin-bottom: 10px;
+                }
+
+                .cf-progress-fill {
+                    height: 100%;
+                    background: linear-gradient(135deg, var(--cf-primary) 0%, var(--cf-primary-light) 100%);
+                    border-radius: 4px;
+                    transition: width 0.4s ease;
+                    position: relative;
+                }
+
+                .cf-progress-fill::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(
+                        90deg,
+                        transparent,
+                        rgba(255, 255, 255, 0.3),
+                        transparent
+                    );
+                    animation: cf-progress-shine 1.5s infinite;
+                }
+
+                @keyframes cf-progress-shine {
+                    from { transform: translateX(-100%); }
+                    to { transform: translateX(100%); }
+                }
+
+                .cf-progress-text {
+                    color: var(--cf-gray-500);
+                    font-size: 0.85rem;
+                    font-weight: 500;
+                }
+
+                /* ==================== QUESTION ==================== */
+                .cf-question-container {
+                    padding: 30px;
+                }
+
+                .cf-question-container.animate {
+                    animation: cf-question-fade-in 0.3s ease;
+                }
+
+                @keyframes cf-question-fade-in {
+                    from {
+                        opacity: 0;
+                        transform: translateX(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+
+                .cf-question {
+                    color: var(--cf-dark);
+                    font-size: 1.3rem;
+                    font-weight: 600;
+                    margin-bottom: 25px;
+                    text-align: center;
+                    line-height: 1.4;
+                }
+
+                /* ==================== OPTIONS GRID ==================== */
+                .cf-options-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 12px;
+                }
+
+                .cf-option-btn {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 20px 15px;
+                    background: var(--cf-gray-800);
+                    border: 2px solid var(--cf-gray-200);
+                    border-radius: var(--cf-radius-lg);
+                    cursor: pointer;
+                    transition: all var(--cf-transition-fast);
+                    text-align: center;
+                    font-size: 0.9rem;
+                    color: var(--cf-gray-700);
+                    font-weight: 500;
+                    font-family: inherit;
+                }
+
+                .cf-option-btn:hover {
+                    border-color: var(--cf-primary);
+                    background: #FFF7ED;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.15);
+                }
+
+                .cf-option-btn:focus {
+                    outline: 3px solid var(--cf-primary);
+                    outline-offset: 2px;
+                }
+
+                .cf-option-btn.selected {
+                    background: #FFF7ED;
+                    border-color: var(--cf-primary);
+                    color: var(--cf-primary);
+                }
+
+                .cf-option-btn.selected .cf-option-icon {
+                    color: var(--cf-primary);
+                    transform: scale(1.1);
+                }
+
+                .cf-option-icon {
+                    font-size: 1.5rem;
+                    transition: all var(--cf-transition-fast);
+                }
+
+                /* ==================== NAVIGATION ==================== */
+                .cf-navigation {
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 0 30px 30px;
+                    gap: 15px;
+                }
+
+                .cf-back-btn {
+                    padding: 12px 24px;
+                    background: var(--cf-gray-100);
+                    color: var(--cf-gray-500);
+                    border: none;
+                    border-radius: var(--cf-radius);
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    font-family: inherit;
+                    transition: all var(--cf-transition-fast);
+                }
+
+                .cf-back-btn:hover {
+                    background: var(--cf-gray-200);
+                    color: var(--cf-gray-700);
+                }
+
+                .cf-back-btn:focus {
+                    outline: 3px solid var(--cf-gray-400);
+                    outline-offset: 2px;
+                }
+
+                .cf-find-btn {
+                    padding: 14px 30px;
+                    background: linear-gradient(135deg, var(--cf-primary) 0%, var(--cf-primary-light) 100%);
+                    color: var(--cf-white);
+                    border: none;
+                    border-radius: var(--cf-radius);
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    font-family: inherit;
+                    margin-left: auto;
+                    box-shadow: 0 4px 15px var(--cf-primary-shadow);
+                    transition: all var(--cf-transition-fast);
+                }
+
+                .cf-find-btn:hover:not(:disabled) {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 25px var(--cf-primary-shadow);
+                }
+
+                .cf-find-btn:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                }
+
+                .cf-find-btn:focus {
+                    outline: 3px solid var(--cf-primary);
+                    outline-offset: 2px;
+                }
+
+                /* ==================== RESULTS HEADER ==================== */
+                .cf-results-header {
+                    text-align: center;
+                    padding: 40px 30px 20px;
+                    background: linear-gradient(135deg, var(--cf-dark) 0%, var(--cf-dark-light) 100%);
+                    border-radius: var(--cf-radius-xl) var(--cf-radius-xl) 0 0;
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .cf-results-icon {
+                    width: 70px;
+                    height: 70px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, var(--cf-success) 0%, var(--cf-success-light) 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 20px;
+                    font-size: 1.8rem;
+                    color: var(--cf-white);
+                    animation: cf-results-icon-bounce 0.6s ease;
+                }
+
+                @keyframes cf-results-icon-bounce {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.15); }
+                }
+
+                .cf-results-title {
+                    color: var(--cf-white);
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    margin: 0 0 10px;
+                }
+
+                .cf-results-subtitle {
+                    color: var(--cf-gray-400);
+                    font-size: 0.95rem;
+                    margin: 0;
+                }
+
+                /* ==================== RESULTS LIST ==================== */
+                .cf-results-list {
+                    padding: 20px;
+                    max-height: 350px;
+                    overflow: auto;
+                }
+
+                .cf-results-list::-webkit-scrollbar {
+                    width: 5px;
+                }
+
+                .cf-results-list::-webkit-scrollbar-track {
+                    background: var(--cf-gray-100);
+                    border-radius: 3px;
+                }
+
+                .cf-results-list::-webkit-scrollbar-thumb {
+                    background: var(--cf-gray-300);
+                    border-radius: 3px;
+                }
+
+                .cf-result-card {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 18px;
+                    background: var(--cf-gray-800);
+                    border-radius: var(--cf-radius-lg);
+                    margin-bottom: 12px;
+                    text-decoration: none;
+                    transition: all var(--cf-transition-fast);
+                    border: 2px solid transparent;
+                    animation: cf-result-card-fade-in 0.3s ease backwards;
+                }
+
+                .cf-result-card:nth-child(1) { animation-delay: 0.05s; }
+                .cf-result-card:nth-child(2) { animation-delay: 0.1s; }
+                .cf-result-card:nth-child(3) { animation-delay: 0.15s; }
+                .cf-result-card:nth-child(4) { animation-delay: 0.2s; }
+                .cf-result-card:nth-child(5) { animation-delay: 0.25s; }
+                .cf-result-card:nth-child(6) { animation-delay: 0.3s; }
+
+                @keyframes cf-result-card-fade-in {
+                    from {
+                        opacity: 0;
+                        transform: translateY(10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .cf-result-card:hover {
+                    border-color: var(--cf-primary);
+                    background: var(--cf-white);
+                    transform: translateX(5px);
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                }
+
+                .cf-result-card:focus {
+                    outline: 3px solid var(--cf-primary);
+                    outline-offset: 2px;
+                }
+
+                .cf-result-info {
+                    flex: 1;
+                    min-width: 0;
+                }
+
+                .cf-result-name {
+                    color: var(--cf-dark);
+                    font-size: 1.05rem;
+                    font-weight: 600;
+                    margin-bottom: 5px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .cf-result-university {
+                    color: var(--cf-gray-500);
+                    font-size: 0.85rem;
+                    margin-bottom: 8px;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .cf-result-meta {
+                    display: flex;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                }
+
+                .cf-result-badge {
+                    background: var(--cf-gray-200);
+                    color: var(--cf-gray-500);
+                    padding: 4px 10px;
+                    border-radius: 6px;
+                    font-size: 0.75rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                }
+
+                .cf-result-price {
+                    text-align: right;
+                    flex-shrink: 0;
+                    margin-left: 15px;
+                }
+
+                .cf-price-label {
+                    display: block;
+                    color: var(--cf-gray-500);
+                    font-size: 0.8rem;
+                    margin-bottom: 4px;
+                }
+
+                .cf-price-value {
+                    color: var(--cf-emerald);
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                }
+
+                /* ==================== NO RESULTS ==================== */
+                .cf-no-results {
+                    text-align: center;
+                    padding: 40px 20px;
+                    color: var(--cf-gray-500);
+                    animation: cf-no-results-fade-in 0.4s ease;
+                }
+
+                @keyframes cf-no-results-fade-in {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+
+                .cf-no-results-icon {
+                    font-size: 3rem;
+                    margin-bottom: 15px;
+                    color: var(--cf-gray-300);
+                }
+
+                .cf-browse-all-btn {
+                    display: inline-block;
+                    margin-top: 15px;
+                    padding: 12px 24px;
+                    background: var(--cf-primary);
+                    color: var(--cf-white);
+                    border-radius: var(--cf-radius);
+                    text-decoration: none;
+                    font-weight: 600;
+                    transition: all var(--cf-transition-fast);
+                }
+
+                .cf-browse-all-btn:hover {
+                    background: var(--cf-primary-light);
+                    transform: translateY(-2px);
+                }
+
+                /* ==================== RESULTS ACTIONS ==================== */
+                .cf-results-actions {
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 20px 30px 30px;
+                    border-top: 1px solid var(--cf-gray-200);
+                    gap: 15px;
+                }
+
+                .cf-restart-btn {
+                    padding: 12px 20px;
+                    background: var(--cf-gray-100);
+                    color: var(--cf-gray-500);
+                    border: none;
+                    border-radius: var(--cf-radius);
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-weight: 600;
+                    font-family: inherit;
+                    transition: all var(--cf-transition-fast);
+                }
+
+                .cf-restart-btn:hover {
+                    background: var(--cf-gray-200);
+                    color: var(--cf-gray-700);
+                }
+
+                .cf-restart-btn:focus {
+                    outline: 3px solid var(--cf-gray-400);
+                    outline-offset: 2px;
+                }
+
+                .cf-view-all-btn {
+                    padding: 12px 24px;
+                    background: linear-gradient(135deg, var(--cf-dark) 0%, var(--cf-dark-light) 100%);
+                    color: var(--cf-white);
+                    border-radius: var(--cf-radius);
+                    text-decoration: none;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-weight: 600;
+                    transition: all var(--cf-transition-fast);
+                }
+
+                .cf-view-all-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.3);
+                }
+
+                .cf-view-all-btn:focus {
+                    outline: 3px solid var(--cf-dark);
+                    outline-offset: 2px;
+                }
+
+                /* ==================== RESPONSIVE ==================== */
+                @media screen and (max-width: 768px) {
+                    .cf-floating-btn {
+                        bottom: 20px;
+                        right: 20px;
+                        padding: 14px 20px;
+                        font-size: 0.9rem;
+                    }
+
+                    .cf-floating-btn span {
+                        display: none;
+                    }
+
+                    .cf-floating-btn i {
+                        font-size: 1.3rem;
+                    }
+
+                    .cf-overlay {
+                        padding: 15px;
+                        align-items: flex-end;
+                    }
+
+                    .cf-modal {
+                        max-height: 85vh;
+                        border-radius: var(--cf-radius-xl) var(--cf-radius-xl) 0 0;
+                        animation: cf-modal-slide-up-mobile 0.3s ease;
+                    }
+
+                    @keyframes cf-modal-slide-up-mobile {
+                        from {
+                            opacity: 0;
+                            transform: translateY(100%);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+
+                    .cf-header {
+                        padding: 30px 20px 25px;
+                    }
+
+                    .cf-header-icon {
+                        width: 65px;
+                        height: 65px;
+                        font-size: 1.7rem;
+                    }
+
+                    .cf-title {
+                        font-size: 1.5rem;
+                    }
+
+                    .cf-subtitle {
+                        font-size: 0.9rem;
+                    }
+
+                    .cf-progress-container {
+                        padding: 15px 20px;
+                    }
+
+                    .cf-question-container {
+                        padding: 20px;
+                    }
+
+                    .cf-question {
+                        font-size: 1.15rem;
+                        margin-bottom: 20px;
+                    }
+
+                    .cf-options-grid {
+                        grid-template-columns: 1fr;
+                        gap: 10px;
+                    }
+
+                    .cf-option-btn {
+                        flex-direction: row;
+                        padding: 15px;
+                        text-align: left;
+                        justify-content: flex-start;
+                    }
+
+                    .cf-option-icon {
+                        font-size: 1.3rem;
+                        width: 40px;
+                    }
+
+                    .cf-navigation {
+                        padding: 0 20px 20px;
+                    }
+
+                    .cf-back-btn,
+                    .cf-find-btn {
+                        padding: 12px 18px;
+                        font-size: 0.9rem;
+                    }
+
+                    .cf-results-header {
+                        padding: 30px 20px 20px;
+                    }
+
+                    .cf-results-icon {
+                        width: 60px;
+                        height: 60px;
+                        font-size: 1.5rem;
+                    }
+
+                    .cf-results-title {
+                        font-size: 1.3rem;
+                    }
+
+                    .cf-results-list {
+                        padding: 15px;
+                        max-height: 300px;
+                    }
+
+                    .cf-result-card {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        padding: 15px;
+                    }
+
+                    .cf-result-price {
+                        text-align: left;
+                        margin-left: 0;
+                        margin-top: 12px;
+                        padding-top: 12px;
+                        border-top: 1px solid var(--cf-gray-200);
+                        width: 100%;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+
+                    .cf-results-actions {
+                        padding: 15px 20px 25px;
+                        flex-direction: column;
+                    }
+
+                    .cf-restart-btn,
+                    .cf-view-all-btn {
+                        justify-content: center;
+                        width: 100%;
+                    }
+                }
+
+                @media screen and (max-width: 400px) {
+                    .cf-floating-btn {
+                        bottom: 15px;
+                        right: 15px;
+                        padding: 12px;
+                        border-radius: 50%;
+                        width: 56px;
+                        height: 56px;
+                        justify-content: center;
+                    }
+
+                    .cf-option-btn {
+                        font-size: 0.85rem;
+                        padding: 12px;
+                    }
+                }
+
+                /* ==================== REDUCED MOTION ==================== */
+                @media (prefers-reduced-motion: reduce) {
+                    .cf-floating-btn,
+                    .cf-modal,
+                    .cf-option-btn,
+                    .cf-result-card,
+                    .cf-close-btn,
+                    .cf-back-btn,
+                    .cf-find-btn,
+                    .cf-restart-btn,
+                    .cf-view-all-btn,
+                    .cf-progress-fill,
+                    .cf-header-icon,
+                    .cf-question-container {
+                        animation: none !important;
+                        transition-duration: 0.01ms !important;
+                    }
+
+                    .cf-progress-fill::after {
+                        animation: none !important;
+                    }
+                }
+
+                /* ==================== TOUCH DEVICES ==================== */
+                @media (hover: none) and (pointer: coarse) {
+                    .cf-floating-btn:hover,
+                    .cf-option-btn:hover,
+                    .cf-result-card:hover,
+                    .cf-find-btn:hover:not(:disabled),
+                    .cf-view-all-btn:hover {
+                        transform: none;
+                    }
+
+                    .cf-floating-btn:active {
+                        transform: scale(0.95);
+                    }
+
+                    .cf-option-btn:active {
+                        background: #FFF7ED;
+                        border-color: var(--cf-primary);
+                    }
+
+                    .cf-result-card:active {
+                        border-color: var(--cf-primary);
+                    }
+                }
+
+                /* ==================== HIGH CONTRAST ==================== */
+                @media (prefers-contrast: high) {
+                    .cf-option-btn {
+                        border-width: 3px;
+                    }
+
+                    .cf-result-card {
+                        border: 2px solid var(--cf-gray-300);
+                    }
+                }
+            `}</style>
+
             {/* Floating Button */}
             <button 
-                style={styles.floatingBtn}
+                className="cf-floating-btn"
                 onClick={() => setIsOpen(true)}
+                aria-label="Open course finder"
             >
                 <i className="fa-solid fa-wand-magic-sparkles"></i>
                 <span>Find My Course</span>
@@ -173,55 +1138,64 @@ const CourseFinder = () => {
 
             {/* Modal */}
             {isOpen && (
-                <div style={styles.overlay} onClick={() => setIsOpen(false)}>
-                    <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-                        <button style={styles.closeBtn} onClick={() => { setIsOpen(false); resetFinder(); }}>
+                <div 
+                    className="cf-overlay" 
+                    onClick={() => { setIsOpen(false); resetFinder(); }}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="cf-modal-title"
+                >
+                    <div className="cf-modal" onClick={(e) => e.stopPropagation()} role="document">
+                        <button 
+                            className="cf-close-btn" 
+                            onClick={() => { setIsOpen(false); resetFinder(); }}
+                            aria-label="Close course finder"
+                            type="button"
+                        >
                             <i className="fa-solid fa-times"></i>
                         </button>
 
                         {!showResults ? (
                             <>
                                 {/* Header */}
-                                <div style={styles.header}>
-                                    <div style={styles.headerIcon}>
+                                <div className="cf-header">
+                                    <div className="cf-header-icon">
                                         <i className="fa-solid fa-compass"></i>
                                     </div>
-                                    <h2 style={styles.title}>Find Your Perfect Course</h2>
-                                    <p style={styles.subtitle}>
+                                    <h2 id="cf-modal-title" className="cf-title">Find Your Perfect Course</h2>
+                                    <p className="cf-subtitle">
                                         Answer a few questions and we'll recommend the best programs for you
                                     </p>
                                 </div>
 
                                 {/* Progress Bar */}
-                                <div style={styles.progressContainer}>
-                                    <div style={styles.progressBar}>
+                                <div className="cf-progress-container">
+                                    <div className="cf-progress-bar" role="progressbar" aria-valuenow={(step / questions.length) * 100} aria-valuemin="0" aria-valuemax="100">
                                         <div 
-                                            style={{
-                                                ...styles.progressFill,
-                                                width: `${(step / questions.length) * 100}%`
-                                            }}
+                                            className="cf-progress-fill"
+                                            style={{ width: `${(step / questions.length) * 100}%` }}
                                         ></div>
                                     </div>
-                                    <span style={styles.progressText}>
+                                    <span className="cf-progress-text">
                                         Step {step} of {questions.length}
                                     </span>
                                 </div>
 
                                 {/* Question */}
-                                <div style={styles.questionContainer}>
-                                    <h3 style={styles.question}>{currentQuestion.question}</h3>
+                                <div className={`cf-question-container ${animateQuestion ? 'animate' : ''}`}>
+                                    <h3 className="cf-question">{currentQuestion.question}</h3>
                                     
-                                    <div style={styles.optionsGrid}>
+                                    <div className="cf-options-grid" role="radiogroup" aria-label={currentQuestion.question}>
                                         {currentQuestion.options.map((option) => (
                                             <button
                                                 key={option.value}
-                                                style={{
-                                                    ...styles.optionBtn,
-                                                    ...(answers[currentQuestion.field] === option.value ? styles.optionBtnSelected : {})
-                                                }}
+                                                className={`cf-option-btn ${answers[currentQuestion.field] === option.value ? 'selected' : ''}`}
                                                 onClick={() => handleOptionSelect(currentQuestion.field, option.value)}
+                                                role="radio"
+                                                aria-checked={answers[currentQuestion.field] === option.value}
+                                                type="button"
                                             >
-                                                <i className={`fa-solid ${option.icon}`} style={styles.optionIcon}></i>
+                                                <i className={`fa-solid ${option.icon} cf-option-icon`}></i>
                                                 <span>{option.label}</span>
                                             </button>
                                         ))}
@@ -229,11 +1203,12 @@ const CourseFinder = () => {
                                 </div>
 
                                 {/* Navigation */}
-                                <div style={styles.navigation}>
+                                <div className="cf-navigation">
                                     {step > 1 && (
                                         <button 
-                                            style={styles.backBtn}
-                                            onClick={() => setStep(step - 1)}
+                                            className="cf-back-btn"
+                                            onClick={handleBack}
+                                            type="button"
                                         >
                                             <i className="fa-solid fa-arrow-left"></i> Back
                                         </button>
@@ -241,9 +1216,10 @@ const CourseFinder = () => {
                                     
                                     {step === questions.length && answers[currentQuestion.field] && (
                                         <button 
-                                            style={styles.findBtn}
+                                            className="cf-find-btn"
                                             onClick={findCourses}
                                             disabled={loading}
+                                            type="button"
                                         >
                                             {loading ? (
                                                 <>
@@ -261,14 +1237,14 @@ const CourseFinder = () => {
                         ) : (
                             <>
                                 {/* Results Header */}
-                                <div style={styles.resultsHeader}>
-                                    <div style={styles.resultsIcon}>
+                                <div className="cf-results-header">
+                                    <div className="cf-results-icon">
                                         <i className="fa-solid fa-sparkles"></i>
                                     </div>
-                                    <h2 style={styles.resultsTitle}>
+                                    <h2 className="cf-results-title">
                                         {results.length > 0 ? 'Recommended Courses For You!' : 'No Exact Matches Found'}
                                     </h2>
-                                    <p style={styles.resultsSubtitle}>
+                                    <p className="cf-results-subtitle">
                                         {results.length > 0 
                                             ? `We found ${results.length} courses matching your preferences`
                                             : 'Try adjusting your preferences to see more options'
@@ -277,45 +1253,45 @@ const CourseFinder = () => {
                                 </div>
 
                                 {/* Results List */}
-                                <div style={styles.resultsList}>
+                                <div className="cf-results-list">
                                     {results.length > 0 ? (
                                         results.map((program) => (
                                             <Link
                                                 key={program._id}
                                                 to={`/programs/${program.slug}`}
-                                                style={styles.resultCard}
+                                                className="cf-result-card"
                                                 onClick={() => setIsOpen(false)}
                                             >
-                                                <div style={styles.resultInfo}>
-                                                    <h4 style={styles.resultName}>{program.name}</h4>
-                                                    <p style={styles.resultUniversity}>
+                                                <div className="cf-result-info">
+                                                    <h4 className="cf-result-name">{program.name}</h4>
+                                                    <p className="cf-result-university">
                                                         <i className="fa-solid fa-building-columns"></i>
                                                         {program.universityId?.name || 'University'}
                                                     </p>
-                                                    <div style={styles.resultMeta}>
-                                                        <span style={styles.resultBadge}>
+                                                    <div className="cf-result-meta">
+                                                        <span className="cf-result-badge">
                                                             <i className="fa-solid fa-clock"></i> {program.duration}
                                                         </span>
-                                                        <span style={styles.resultBadge}>
+                                                        <span className="cf-result-badge">
                                                             <i className="fa-solid fa-laptop"></i> {program.mode}
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <div style={styles.resultPrice}>
-                                                    <span style={styles.priceLabel}>Fee</span>
-                                                    <span style={styles.priceValue}>
+                                                <div className="cf-result-price">
+                                                    <span className="cf-price-label">Fee</span>
+                                                    <span className="cf-price-value">
                                                         ₹{Number(program.fee).toLocaleString('en-IN')}
                                                     </span>
                                                 </div>
                                             </Link>
                                         ))
                                     ) : (
-                                        <div style={styles.noResults}>
-                                            <i className="fa-solid fa-face-sad-tear" style={styles.noResultsIcon}></i>
+                                        <div className="cf-no-results">
+                                            <i className="fa-solid fa-face-sad-tear cf-no-results-icon"></i>
                                             <p>No programs match your exact criteria.</p>
                                             <Link 
                                                 to="/programs" 
-                                                style={styles.browseAllBtn}
+                                                className="cf-browse-all-btn"
                                                 onClick={() => setIsOpen(false)}
                                             >
                                                 Browse All Programs
@@ -325,13 +1301,13 @@ const CourseFinder = () => {
                                 </div>
 
                                 {/* Actions */}
-                                <div style={styles.resultsActions}>
-                                    <button style={styles.restartBtn} onClick={resetFinder}>
+                                <div className="cf-results-actions">
+                                    <button className="cf-restart-btn" onClick={resetFinder} type="button">
                                         <i className="fa-solid fa-redo"></i> Start Over
                                     </button>
                                     <Link 
                                         to="/programs" 
-                                        style={styles.viewAllBtn}
+                                        className="cf-view-all-btn"
                                         onClick={() => setIsOpen(false)}
                                     >
                                         View All Programs <i className="fa-solid fa-arrow-right"></i>
@@ -344,330 +1320,6 @@ const CourseFinder = () => {
             )}
         </>
     );
-};
-
-const styles = {
-    floatingBtn: {
-        position: 'fixed',
-        bottom: '30px',
-        right: '30px',
-        background: 'linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%)',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '50px',
-        padding: '18px 28px',
-        fontSize: '1rem',
-        fontWeight: '600',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        boxShadow: '0 8px 30px rgba(255, 107, 53, 0.4)',
-        zIndex: 1000,
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-    },
-    overlay: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0, 0, 0, 0.7)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 10000,
-        padding: '20px',
-        backdropFilter: 'blur(5px)'
-    },
-    modal: {
-        background: '#fff',
-        borderRadius: '24px',
-        maxWidth: '600px',
-        width: '100%',
-        maxHeight: '90vh',
-        overflow: 'auto',
-        position: 'relative'
-    },
-    closeBtn: {
-        position: 'absolute',
-        top: '15px',
-        right: '15px',
-        background: 'rgba(255,255,255,0.2)',
-        border: 'none',
-        width: '40px',
-        height: '40px',
-        borderRadius: '50%',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '1.1rem',
-        color: '#fff',
-        zIndex: 1
-    },
-    header: {
-        textAlign: 'center',
-        padding: '40px 30px 30px',
-        background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
-        borderRadius: '24px 24px 0 0'
-    },
-    headerIcon: {
-        width: '80px',
-        height: '80px',
-        borderRadius: '50%',
-        background: 'linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '0 auto 20px',
-        fontSize: '2rem',
-        color: '#fff'
-    },
-    title: {
-        color: '#fff',
-        fontSize: '1.8rem',
-        fontWeight: '700',
-        margin: '0 0 10px'
-    },
-    subtitle: {
-        color: '#94A3B8',
-        fontSize: '1rem',
-        margin: 0
-    },
-    progressContainer: {
-        padding: '20px 30px',
-        borderBottom: '1px solid #E2E8F0'
-    },
-    progressBar: {
-        height: '8px',
-        background: '#E2E8F0',
-        borderRadius: '4px',
-        overflow: 'hidden',
-        marginBottom: '10px'
-    },
-    progressFill: {
-        height: '100%',
-        background: 'linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%)',
-        borderRadius: '4px',
-        transition: 'width 0.3s ease'
-    },
-    progressText: {
-        color: '#64748B',
-        fontSize: '0.85rem'
-    },
-    questionContainer: {
-        padding: '30px'
-    },
-    question: {
-        color: '#0F172A',
-        fontSize: '1.3rem',
-        fontWeight: '600',
-        marginBottom: '25px',
-        textAlign: 'center'
-    },
-    optionsGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '12px'
-    },
-    optionBtn: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '10px',
-        padding: '20px 15px',
-        background: '#F8FAFC',
-        border: '2px solid #E2E8F0',
-        borderRadius: '12px',
-        cursor: 'pointer',
-        transition: 'all 0.2s ease',
-        textAlign: 'center',
-        fontSize: '0.9rem',
-        color: '#334155',
-        fontWeight: '500'
-    },
-    optionBtnSelected: {
-        background: '#FFF7ED',
-        borderColor: '#FF6B35',
-        color: '#FF6B35'
-    },
-    optionIcon: {
-        fontSize: '1.5rem'
-    },
-    navigation: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        padding: '0 30px 30px',
-        gap: '15px'
-    },
-    backBtn: {
-        padding: '12px 24px',
-        background: '#F1F5F9',
-        color: '#64748B',
-        border: 'none',
-        borderRadius: '10px',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        fontWeight: '600',
-        fontSize: '0.95rem'
-    },
-    findBtn: {
-        padding: '14px 30px',
-        background: 'linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%)',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '10px',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        fontWeight: '600',
-        fontSize: '1rem',
-        marginLeft: 'auto'
-    },
-    resultsHeader: {
-        textAlign: 'center',
-        padding: '40px 30px 20px',
-        background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
-        borderRadius: '24px 24px 0 0'
-    },
-    resultsIcon: {
-        width: '70px',
-        height: '70px',
-        borderRadius: '50%',
-        background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '0 auto 20px',
-        fontSize: '1.8rem',
-        color: '#fff'
-    },
-    resultsTitle: {
-        color: '#fff',
-        fontSize: '1.5rem',
-        fontWeight: '700',
-        margin: '0 0 10px'
-    },
-    resultsSubtitle: {
-        color: '#94A3B8',
-        fontSize: '0.95rem',
-        margin: 0
-    },
-    resultsList: {
-        padding: '20px',
-        maxHeight: '350px',
-        overflow: 'auto'
-    },
-    resultCard: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '18px',
-        background: '#F8FAFC',
-        borderRadius: '12px',
-        marginBottom: '12px',
-        textDecoration: 'none',
-        transition: 'all 0.2s ease',
-        border: '2px solid transparent'
-    },
-    resultInfo: {
-        flex: 1
-    },
-    resultName: {
-        color: '#0F172A',
-        fontSize: '1.05rem',
-        fontWeight: '600',
-        marginBottom: '5px'
-    },
-    resultUniversity: {
-        color: '#64748B',
-        fontSize: '0.85rem',
-        marginBottom: '8px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '6px'
-    },
-    resultMeta: {
-        display: 'flex',
-        gap: '10px'
-    },
-    resultBadge: {
-        background: '#E2E8F0',
-        color: '#64748B',
-        padding: '4px 10px',
-        borderRadius: '6px',
-        fontSize: '0.75rem',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '5px'
-    },
-    resultPrice: {
-        textAlign: 'right'
-    },
-    priceLabel: {
-        display: 'block',
-        color: '#64748B',
-        fontSize: '0.8rem',
-        marginBottom: '4px'
-    },
-    priceValue: {
-        color: '#059669',
-        fontSize: '1.1rem',
-        fontWeight: '700'
-    },
-    noResults: {
-        textAlign: 'center',
-        padding: '40px 20px',
-        color: '#64748B'
-    },
-    noResultsIcon: {
-        fontSize: '3rem',
-        marginBottom: '15px',
-        color: '#CBD5E1'
-    },
-    browseAllBtn: {
-        display: 'inline-block',
-        marginTop: '15px',
-        padding: '12px 24px',
-        background: '#FF6B35',
-        color: '#fff',
-        borderRadius: '10px',
-        textDecoration: 'none',
-        fontWeight: '600'
-    },
-    resultsActions: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        padding: '20px 30px 30px',
-        borderTop: '1px solid #E2E8F0'
-    },
-    restartBtn: {
-        padding: '12px 20px',
-        background: '#F1F5F9',
-        color: '#64748B',
-        border: 'none',
-        borderRadius: '10px',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        fontWeight: '600'
-    },
-    viewAllBtn: {
-        padding: '12px 24px',
-        background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
-        color: '#fff',
-        borderRadius: '10px',
-        textDecoration: 'none',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        fontWeight: '600'
-    }
 };
 
 export default CourseFinder;
