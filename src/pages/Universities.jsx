@@ -33,11 +33,9 @@ const Universities = () => {
 
             const res = await axios.get(`${API_BASE}/public/universities?${params.toString()}`);
             
-            // Handle both array and object response
             const data = Array.isArray(res.data) ? res.data : res.data.universities || [];
             setUniversities(data);
             
-            // Set stats
             setStats({
                 total: data.length,
                 programs: data.reduce((acc, uni) => acc + (uni.programCount || 0), 0)
@@ -114,11 +112,14 @@ const Universities = () => {
                     --maroon: #8B2346;
                     --dark-maroon: #6B1D3A;
                     --pink: #C4567A;
+                    --light-pink: #E8B4C4;
                     --white: #FFFFFF;
                     --light-gray: #F5F7FA;
                     --gray: #64748B;
                     --dark-gray: #1E293B;
                     --text-dark: #2D1B4E;
+                    --text-light: #FFFFFF;
+                    --text-muted: #94A3B8;
                     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
                     --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.1);
                     --shadow-lg: 0 15px 40px rgba(0, 0, 0, 0.15);
@@ -140,25 +141,37 @@ const Universities = () => {
                 }
 
                 .universities-page {
-                    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+                    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                     overflow-x: hidden;
                     color: var(--text-dark);
                     line-height: 1.6;
                     min-height: 100vh;
                 }
 
-                /* Hero Section */
+                .container {
+                    max-width: var(--container-max);
+                    margin: 0 auto;
+                    padding: 0 20px;
+                    position: relative;
+                    z-index: 1;
+                    width: 100%;
+                }
+
+                /* ==================== HERO SECTION ==================== */
                 .universities-hero {
                     background: linear-gradient(135deg, var(--dark-blue) 0%, #003D7A 100%);
                     padding: 120px 0 60px;
                     position: relative;
                     overflow: hidden;
-                    min-height: 450px;
+                    min-height: 500px;
                 }
 
                 .hero-pattern {
                     position: absolute;
-                    inset: 0;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
                     background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
                     opacity: 0.5;
                     pointer-events: none;
@@ -192,6 +205,7 @@ const Universities = () => {
                     font-weight: 600;
                     margin-bottom: 20px;
                     backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
                 }
 
                 .hero-title {
@@ -231,6 +245,7 @@ const Universities = () => {
                     padding: 20px 30px;
                     border-radius: var(--radius-lg);
                     backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
                     flex-wrap: wrap;
                     justify-content: center;
                 }
@@ -259,10 +274,10 @@ const Universities = () => {
                     background: rgba(255, 255, 255, 0.2);
                 }
 
-                /* Hero Images */
+                /* ==================== HERO IMAGES ==================== */
                 .hero-images {
                     position: relative;
-                    height: 400px;
+                    height: 450px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -273,8 +288,8 @@ const Universities = () => {
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                    width: 320px;
-                    height: 260px;
+                    width: 340px;
+                    height: 280px;
                     border-radius: var(--radius-2xl);
                     overflow: hidden;
                     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
@@ -292,14 +307,44 @@ const Universities = () => {
                     bottom: 0;
                     left: 0;
                     right: 0;
-                    height: 80px;
+                    height: 100px;
                     background: linear-gradient(to top, rgba(0, 82, 157, 0.6), transparent);
+                }
+
+                .floating-image {
+                    position: absolute;
+                    border-radius: var(--radius-lg);
+                    overflow: hidden;
+                    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+                    border: 4px solid rgba(255, 255, 255, 0.3);
+                }
+
+                .floating-image-1 {
+                    top: 10px;
+                    right: 20px;
+                    width: 150px;
+                    height: 100px;
+                    animation: float1 6s ease-in-out infinite;
+                }
+
+                .floating-image-2 {
+                    bottom: 40px;
+                    left: 10px;
+                    width: 130px;
+                    height: 90px;
+                    animation: float2 6s ease-in-out infinite;
+                }
+
+                .floating-img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
                 }
 
                 .floating-card {
                     position: absolute;
                     background: var(--white);
-                    padding: 14px 18px;
+                    padding: 15px 20px;
                     border-radius: var(--radius-md);
                     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
                     display: flex;
@@ -309,25 +354,25 @@ const Universities = () => {
                 }
 
                 .floating-uni-card {
-                    top: 20px;
+                    top: 30px;
                     left: 0;
                     animation: float1 5s ease-in-out infinite;
                 }
 
                 .floating-accred-card {
-                    bottom: 30px;
+                    bottom: 20px;
                     right: 0;
                     animation: float2 5s ease-in-out infinite;
                 }
 
                 .floating-card-icon {
-                    width: 42px;
-                    height: 42px;
+                    width: 45px;
+                    height: 45px;
                     border-radius: var(--radius-md);
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 1.1rem;
+                    font-size: 1.2rem;
                     flex-shrink: 0;
                 }
 
@@ -348,14 +393,14 @@ const Universities = () => {
 
                 .floating-card-number {
                     color: var(--text-dark);
-                    font-size: 1rem;
+                    font-size: 1.1rem;
                     font-weight: 800;
                     white-space: nowrap;
                 }
 
                 .floating-card-label {
                     color: var(--gray);
-                    font-size: 0.7rem;
+                    font-size: 0.75rem;
                 }
 
                 .decor-circle {
@@ -367,8 +412,8 @@ const Universities = () => {
                 .decor-circle-1 {
                     top: 15%;
                     right: 10%;
-                    width: 60px;
-                    height: 60px;
+                    width: 70px;
+                    height: 70px;
                     border: 3px solid rgba(0, 153, 214, 0.25);
                     animation: pulse 3s ease-in-out infinite;
                 }
@@ -376,17 +421,28 @@ const Universities = () => {
                 .decor-circle-2 {
                     bottom: 20%;
                     left: 5%;
-                    width: 45px;
-                    height: 45px;
+                    width: 50px;
+                    height: 50px;
                     background: rgba(0, 153, 214, 0.15);
                     animation: pulse 4s ease-in-out infinite;
                 }
 
-                /* Filter Section */
+                .decor-dots {
+                    position: absolute;
+                    top: 60%;
+                    right: 5%;
+                    width: 60px;
+                    height: 60px;
+                    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 2px, transparent 2px);
+                    background-size: 12px 12px;
+                    pointer-events: none;
+                }
+
+                /* ==================== FILTER SECTION ==================== */
                 .filter-section {
                     background: var(--white);
                     padding: 25px 0;
-                    border-bottom: 2px solid var(--light-gray);
+                    border-bottom: 3px solid var(--light-gray);
                     position: sticky;
                     top: 0;
                     z-index: 100;
@@ -425,7 +481,7 @@ const Universities = () => {
 
                 .search-input {
                     width: 100%;
-                    padding: 14px 50px;
+                    padding: 16px 50px;
                     border-radius: var(--radius-md);
                     border: 2px solid var(--light-gray);
                     font-size: 1rem;
@@ -449,15 +505,15 @@ const Universities = () => {
                     transform: translateY(-50%);
                     background: var(--gray);
                     border: none;
-                    width: 26px;
-                    height: 26px;
+                    width: 28px;
+                    height: 28px;
                     border-radius: var(--radius-full);
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     color: var(--white);
-                    font-size: 0.75rem;
+                    font-size: 0.8rem;
                     transition: all var(--transition-fast);
                 }
 
@@ -466,7 +522,7 @@ const Universities = () => {
                 }
 
                 .search-btn {
-                    padding: 14px 28px;
+                    padding: 16px 30px;
                     background: var(--dark-blue);
                     color: var(--white);
                     border: none;
@@ -506,12 +562,12 @@ const Universities = () => {
                 }
 
                 .filter-select {
-                    padding: 12px 18px;
+                    padding: 12px 20px;
                     border-radius: var(--radius-sm);
                     border: 2px solid var(--light-gray);
                     font-size: 0.9rem;
                     cursor: pointer;
-                    min-width: 150px;
+                    min-width: 160px;
                     background: var(--light-gray);
                     color: var(--text-dark);
                     font-weight: 500;
@@ -526,7 +582,7 @@ const Universities = () => {
                 }
 
                 .clear-filters-btn {
-                    padding: 12px 18px;
+                    padding: 12px 20px;
                     background: rgba(139, 35, 70, 0.1);
                     color: var(--maroon);
                     border: none;
@@ -546,7 +602,7 @@ const Universities = () => {
                     background: rgba(139, 35, 70, 0.15);
                 }
 
-                /* Main Section */
+                /* ==================== MAIN SECTION ==================== */
                 .main-section {
                     padding: 50px 0;
                     background: var(--light-gray);
@@ -559,10 +615,10 @@ const Universities = () => {
                     padding: 0 20px;
                 }
 
-                /* Loading & Error States */
-                .loading, .error-state {
+                .loading {
                     text-align: center;
                     padding: 80px 20px;
+                    color: var(--gray);
                 }
 
                 .spinner {
@@ -575,16 +631,14 @@ const Universities = () => {
                     margin: 0 auto 20px;
                 }
 
-                .loading p {
-                    color: var(--gray);
-                    font-size: 1rem;
-                }
-
                 .error-state {
-                    background: var(--white);
-                    border-radius: var(--radius-xl);
+                    text-align: center;
+                    padding: 80px 20px;
                     max-width: 500px;
                     margin: 0 auto;
+                    background: var(--white);
+                    border-radius: var(--radius-xl);
+                    box-shadow: var(--shadow-sm);
                 }
 
                 .error-icon {
@@ -624,9 +678,14 @@ const Universities = () => {
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
+                    transition: all var(--transition-normal);
                 }
 
-                /* Results Header */
+                .retry-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 15px rgba(0, 82, 157, 0.3);
+                }
+
                 .results-header {
                     display: flex;
                     justify-content: space-between;
@@ -664,16 +723,15 @@ const Universities = () => {
                 .sort-select {
                     padding: 10px 15px;
                     border-radius: var(--radius-sm);
-                    border: 2px solid var(--light-gray);
+                    border: 1px solid var(--light-gray);
                     font-size: 0.9rem;
                     cursor: pointer;
                     background: var(--white);
                     color: var(--text-dark);
                     font-family: inherit;
-                    font-weight: 500;
                 }
 
-                /* Universities Grid */
+                /* ==================== UNIVERSITIES GRID ==================== */
                 .universities-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -776,22 +834,22 @@ const Universities = () => {
                     margin-top: 45px;
                     margin-bottom: 5px;
                     color: var(--text-dark);
-                    font-size: 1.15rem;
+                    font-size: 1.2rem;
                     font-weight: 700;
                     line-height: 1.3;
                 }
 
                 .short-name {
                     color: var(--dark-blue);
-                    font-size: 0.85rem;
-                    margin: 0 0 8px 0;
+                    font-size: 0.9rem;
+                    margin: 0 0 10px 0;
                     font-weight: 500;
                 }
 
                 .location {
                     color: var(--gray);
                     font-size: 0.9rem;
-                    margin: 0 0 12px 0;
+                    margin: 0 0 15px 0;
                     display: flex;
                     align-items: center;
                     gap: 6px;
@@ -801,36 +859,36 @@ const Universities = () => {
                     display: flex;
                     gap: 8px;
                     flex-wrap: wrap;
-                    margin-bottom: 12px;
+                    margin-bottom: 15px;
                 }
 
                 .rating-badge {
                     background: #FEF3C7;
                     color: #D97706;
-                    padding: 5px 10px;
+                    padding: 6px 12px;
                     border-radius: var(--radius-sm);
-                    font-size: 0.75rem;
+                    font-size: 0.8rem;
                     font-weight: 600;
                     display: flex;
                     align-items: center;
-                    gap: 4px;
+                    gap: 5px;
                 }
 
                 .acc-badge {
                     background: rgba(0, 82, 157, 0.1);
                     color: var(--dark-blue);
-                    padding: 5px 10px;
+                    padding: 6px 12px;
                     border-radius: var(--radius-sm);
-                    font-size: 0.75rem;
+                    font-size: 0.8rem;
                     font-weight: 500;
                 }
 
                 .approval-badge {
                     background: rgba(22, 163, 74, 0.1);
                     color: #16A34A;
-                    padding: 5px 10px;
+                    padding: 6px 12px;
                     border-radius: var(--radius-sm);
-                    font-size: 0.75rem;
+                    font-size: 0.8rem;
                     font-weight: 500;
                 }
 
@@ -840,14 +898,14 @@ const Universities = () => {
                     display: flex;
                     align-items: center;
                     gap: 6px;
-                    margin: 0 0 12px 0;
+                    margin: 0 0 15px 0;
                 }
 
                 .fee-range {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 14px;
+                    padding: 15px;
                     background: var(--light-gray);
                     border-radius: var(--radius-md);
                     margin-bottom: 15px;
@@ -859,18 +917,18 @@ const Universities = () => {
                 .fee-info {
                     display: flex;
                     flex-direction: column;
-                    gap: 3px;
+                    gap: 4px;
                 }
 
                 .fee-label {
                     color: var(--gray);
-                    font-size: 0.75rem;
+                    font-size: 0.8rem;
                 }
 
                 .fee-value {
                     color: var(--maroon);
                     font-weight: 700;
-                    font-size: 0.9rem;
+                    font-size: 0.95rem;
                 }
 
                 .program-count {
@@ -903,10 +961,10 @@ const Universities = () => {
                     background: linear-gradient(135deg, #003D7A 0%, var(--dark-blue) 100%);
                 }
 
-                /* Empty State */
+                /* ==================== EMPTY STATE ==================== */
                 .empty-state {
                     text-align: center;
-                    padding: 80px 20px;
+                    padding: 100px 20px;
                     max-width: 500px;
                     margin: 0 auto;
                     background: var(--white);
@@ -932,7 +990,7 @@ const Universities = () => {
 
                 .empty-title {
                     color: var(--text-dark);
-                    font-size: 1.4rem;
+                    font-size: 1.5rem;
                     font-weight: 700;
                     margin-bottom: 10px;
                 }
@@ -966,7 +1024,7 @@ const Universities = () => {
                     box-shadow: 0 6px 20px rgba(0, 82, 157, 0.4);
                 }
 
-                /* Why Section */
+                /* ==================== WHY SECTION ==================== */
                 .why-section {
                     padding: 80px 0;
                     background: var(--white);
@@ -1065,7 +1123,7 @@ const Universities = () => {
                     margin: 0;
                 }
 
-                /* CTA Section */
+                /* ==================== CTA SECTION ==================== */
                 .cta-section {
                     padding: 80px 0;
                     background: linear-gradient(135deg, var(--dark-maroon) 0%, var(--maroon) 100%);
@@ -1075,7 +1133,10 @@ const Universities = () => {
 
                 .cta-pattern {
                     position: absolute;
-                    inset: 0;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
                     background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M40 10L50 30H30L40 10zM40 70L30 50H50L40 70zM10 40L30 30V50L10 40zM70 40L50 50V30L70 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
                     opacity: 0.5;
                     pointer-events: none;
@@ -1153,19 +1214,19 @@ const Universities = () => {
                     box-shadow: 0 6px 25px rgba(0, 153, 214, 0.5);
                 }
 
-                /* Animations */
+                /* ==================== ANIMATIONS ==================== */
                 @keyframes spin {
                     to { transform: rotate(360deg); }
                 }
 
                 @keyframes float1 {
                     0%, 100% { transform: translateY(0px); }
-                    50% { transform: translateY(-12px); }
+                    50% { transform: translateY(-15px); }
                 }
 
                 @keyframes float2 {
                     0%, 100% { transform: translateY(0px); }
-                    50% { transform: translateY(-8px); }
+                    50% { transform: translateY(-10px); }
                 }
 
                 @keyframes pulse {
@@ -1173,7 +1234,7 @@ const Universities = () => {
                     50% { transform: scale(1.1); opacity: 0.8; }
                 }
 
-                /* Tablet */
+                /* ==================== TABLET ==================== */
                 @media screen and (max-width: 1024px) {
                     .hero-container {
                         grid-template-columns: 1fr;
@@ -1201,7 +1262,7 @@ const Universities = () => {
                     }
                 }
 
-                /* Mobile */
+                /* ==================== MOBILE ==================== */
                 @media screen and (max-width: 768px) {
                     .universities-hero {
                         padding: 100px 0 50px;
@@ -1281,7 +1342,7 @@ const Universities = () => {
                     }
                 }
 
-                /* Small Mobile */
+                /* ==================== SMALL MOBILE ==================== */
                 @media screen and (max-width: 480px) {
                     .hero-badge {
                         font-size: 0.8rem;
@@ -1314,7 +1375,7 @@ const Universities = () => {
                     }
                 }
 
-                /* Touch Devices */
+                /* ==================== TOUCH DEVICES ==================== */
                 @media (hover: none) and (pointer: coarse) {
                     .university-card:hover,
                     .why-card:hover,
@@ -1323,17 +1384,42 @@ const Universities = () => {
                         transform: none;
                     }
 
+                    .university-card:active,
+                    .search-btn:active,
+                    .cta-btn:active {
+                        transform: scale(0.98);
+                        opacity: 0.9;
+                    }
+
                     .university-card:hover .banner-img {
                         transform: none;
                     }
+
+                    .search-btn,
+                    .cta-btn,
+                    .empty-clear-btn {
+                        min-height: 48px;
+                    }
                 }
 
-                /* Reduced Motion */
+                /* ==================== REDUCED MOTION ==================== */
                 @media (prefers-reduced-motion: reduce) {
-                    *, *::before, *::after {
+                    *,
+                    *::before,
+                    *::after {
                         animation-duration: 0.01ms !important;
+                        animation-iteration-count: 1 !important;
                         transition-duration: 0.01ms !important;
                     }
+                }
+
+                /* ==================== FOCUS STATES ==================== */
+                .search-btn:focus,
+                .cta-btn:focus,
+                .filter-select:focus,
+                .university-card:focus {
+                    outline: 3px solid var(--light-blue);
+                    outline-offset: 2px;
                 }
             `}</style>
 
@@ -1365,12 +1451,12 @@ const Universities = () => {
                             
                             <div className="hero-stats">
                                 <div className="hero-stat">
-                                    <span className="hero-stat-number">{stats.total || '50'}+</span>
+                                    <span className="hero-stat-number">{stats.total > 0 ? `${stats.total}+` : '50+'}</span>
                                     <span className="hero-stat-label">Universities</span>
                                 </div>
                                 <div className="hero-stat-divider"></div>
                                 <div className="hero-stat">
-                                    <span className="hero-stat-number">{stats.programs || '200'}+</span>
+                                    <span className="hero-stat-number">{stats.programs > 0 ? `${stats.programs}+` : '200+'}</span>
                                     <span className="hero-stat-label">Programs</span>
                                 </div>
                                 <div className="hero-stat-divider"></div>
@@ -1382,6 +1468,7 @@ const Universities = () => {
                         </div>
 
                         <div className="hero-images">
+                            {/* Main Image */}
                             <div className="main-image-container">
                                 <img 
                                     src="https://images.unsplash.com/photo-1562774053-701939374585?w=500&h=400&fit=crop" 
@@ -1392,6 +1479,27 @@ const Universities = () => {
                                 <div className="main-image-overlay"></div>
                             </div>
 
+                            {/* Floating Image 1 */}
+                            <div className="floating-image floating-image-1">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=200&h=150&fit=crop"
+                                    alt="Graduation ceremony"
+                                    className="floating-img"
+                                    loading="lazy"
+                                />
+                            </div>
+
+                            {/* Floating Image 2 */}
+                            <div className="floating-image floating-image-2">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=180&h=130&fit=crop"
+                                    alt="Students studying"
+                                    className="floating-img"
+                                    loading="lazy"
+                                />
+                            </div>
+
+                            {/* Floating Card - NAAC Rating */}
                             <div className="floating-card floating-uni-card">
                                 <div className="floating-card-icon gold">
                                     <i className="fa-solid fa-award"></i>
@@ -1402,6 +1510,7 @@ const Universities = () => {
                                 </div>
                             </div>
 
+                            {/* Floating Card - UGC Approved */}
                             <div className="floating-card floating-accred-card">
                                 <div className="floating-card-icon blue">
                                     <i className="fa-solid fa-shield-check"></i>
@@ -1412,8 +1521,10 @@ const Universities = () => {
                                 </div>
                             </div>
 
+                            {/* Decorative Elements */}
                             <div className="decor-circle decor-circle-1"></div>
                             <div className="decor-circle decor-circle-2"></div>
+                            <div className="decor-dots"></div>
                         </div>
                     </div>
                 </section>
@@ -1430,6 +1541,7 @@ const Universities = () => {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="search-input"
+                                    aria-label="Search universities"
                                 />
                                 {search && (
                                     <button 
@@ -1450,7 +1562,7 @@ const Universities = () => {
 
                         <div className="filters">
                             <div className="filter-label">
-                                <i className="fa-solid fa-filter"></i> Filter:
+                                <i className="fa-solid fa-filter"></i> Filter by:
                             </div>
                             <select
                                 value={filter.rating}
@@ -1459,12 +1571,12 @@ const Universities = () => {
                                 aria-label="Filter by rating"
                             >
                                 <option value="">All Ratings</option>
-                                <option value="A++">NAAC A++</option>
-                                <option value="A+">NAAC A+</option>
-                                <option value="A">NAAC A</option>
-                                <option value="B++">NAAC B++</option>
-                                <option value="B+">NAAC B+</option>
-                                <option value="B">NAAC B</option>
+                                <option value="A++">A++ Rating</option>
+                                <option value="A+">A+ Rating</option>
+                                <option value="A">A Rating</option>
+                                <option value="B++">B++ Rating</option>
+                                <option value="B+">B+ Rating</option>
+                                <option value="B">B Rating</option>
                             </select>
 
                             <select
@@ -1516,7 +1628,7 @@ const Universities = () => {
                                     <div className="sort-options">
                                         <span className="sort-label">Sort by:</span>
                                         <select 
-                                            className="sort-select" 
+                                            className="sort-select"
                                             value={sortBy}
                                             onChange={(e) => setSortBy(e.target.value)}
                                             aria-label="Sort universities"
