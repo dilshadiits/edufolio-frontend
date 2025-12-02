@@ -6,35 +6,36 @@ const UniForm = ({ onSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
+    // Match your model schema exactly
     const initialFormState = {
         name: '',
         slug: '',
-        rating: '',
-        city: '',
-        state: '',
-        minFee: '',
-        maxFee: '',
+        shortName: '',
         logo: '',
-        bannerImage: '',
+        banner: '',
         description: '',
-        type: 'Private',
-        naacGrade: '',
         establishedYear: '',
-        ugcApproved: true,
-        aicteApproved: false,
-        highlights: '',
-        facilities: '',
+        location: '',
+        address: '',
         website: '',
         email: '',
         phone: '',
+        rating: 'Not Rated',
+        accreditations: '',
+        approvals: '',
+        facilities: '',
+        highlights: '',
+        minFee: '',
+        maxFee: '',
         featured: false,
+        ranking: '',
         isActive: true
     };
 
     const [form, setForm] = useState(initialFormState);
 
-    const universityTypes = ['Private', 'Government', 'Deemed', 'State', 'Central', 'Autonomous'];
-    const naacGrades = ['A++', 'A+', 'A', 'B++', 'B+', 'B', 'C', 'Not Rated'];
+    // Rating options from your model enum
+    const ratingOptions = ['A++', 'A+', 'A', 'B++', 'B+', 'B', 'C', 'Not Rated'];
 
     // Show toast notification
     const showToast = (message, type = 'success') => {
@@ -47,7 +48,7 @@ const UniForm = ({ onSuccess }) => {
     // Handle Input Changes
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        
+
         setForm(prev => {
             const newForm = {
                 ...prev,
@@ -68,7 +69,7 @@ const UniForm = ({ onSuccess }) => {
         });
     };
 
-    // Validate form
+    // Validate form - match your model's required fields
     const validateForm = () => {
         if (!form.name || !form.name.trim()) {
             showToast('University name is required', 'error');
@@ -78,16 +79,12 @@ const UniForm = ({ onSuccess }) => {
             showToast('University name must be at least 3 characters', 'error');
             return false;
         }
-        if (!form.slug || !form.slug.trim()) {
-            showToast('Slug is required', 'error');
+        if (!form.location || !form.location.trim()) {
+            showToast('Location is required', 'error');
             return false;
         }
-        if (!/^[a-z0-9-]+$/.test(form.slug.trim())) {
-            showToast('Slug can only contain lowercase letters, numbers, and hyphens', 'error');
-            return false;
-        }
-        if (!form.city || !form.city.trim()) {
-            showToast('City is required', 'error');
+        if (!form.description || !form.description.trim()) {
+            showToast('Description is required', 'error');
             return false;
         }
         if (form.email && form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
@@ -97,62 +94,26 @@ const UniForm = ({ onSuccess }) => {
         return true;
     };
 
-    // Prepare data for submission
+    // Prepare data matching your model schema
     const prepareData = () => {
         const data = {
             name: form.name.trim(),
-            slug: form.slug.trim().toLowerCase(),
-            type: form.type || 'Private',
-            city: form.city.trim(),
-            ugcApproved: Boolean(form.ugcApproved),
-            aicteApproved: Boolean(form.aicteApproved),
+            slug: form.slug?.trim().toLowerCase() || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            description: form.description.trim(),
+            location: form.location.trim(),
             featured: Boolean(form.featured),
             isActive: Boolean(form.isActive)
         };
 
         // Optional string fields
-        if (form.state && form.state.trim()) {
-            data.state = form.state.trim();
-        }
-
-        // Build location
-        if (form.city && form.state) {
-            data.location = `${form.city.trim()}, ${form.state.trim()}`;
-        } else {
-            data.location = form.city.trim();
-        }
-
-        if (form.description && form.description.trim()) {
-            data.description = form.description.trim();
-        }
-
-        if (form.rating && form.rating.trim()) {
-            data.rating = form.rating.trim();
-        }
-
-        if (form.naacGrade) {
-            data.naacGrade = form.naacGrade;
-        }
-
-        if (form.logo && form.logo.trim()) {
-            data.logo = form.logo.trim();
-        }
-
-        if (form.bannerImage && form.bannerImage.trim()) {
-            data.bannerImage = form.bannerImage.trim();
-        }
-
-        if (form.website && form.website.trim()) {
-            data.website = form.website.trim();
-        }
-
-        if (form.email && form.email.trim()) {
-            data.email = form.email.trim();
-        }
-
-        if (form.phone && form.phone.trim()) {
-            data.phone = form.phone.trim();
-        }
+        if (form.shortName?.trim()) data.shortName = form.shortName.trim();
+        if (form.logo?.trim()) data.logo = form.logo.trim();
+        if (form.banner?.trim()) data.banner = form.banner.trim();
+        if (form.address?.trim()) data.address = form.address.trim();
+        if (form.website?.trim()) data.website = form.website.trim();
+        if (form.email?.trim()) data.email = form.email.trim();
+        if (form.phone?.trim()) data.phone = form.phone.trim();
+        if (form.rating) data.rating = form.rating;
 
         // Number fields
         if (form.establishedYear) {
@@ -161,43 +122,31 @@ const UniForm = ({ onSuccess }) => {
                 data.establishedYear = year;
             }
         }
-
         if (form.minFee) {
-            const fee = parseInt(form.minFee, 10);
-            if (!isNaN(fee) && fee >= 0) {
-                data.minFee = fee;
-            }
+            data.minFee = parseInt(form.minFee, 10) || 0;
         } else {
             data.minFee = 0;
         }
-
         if (form.maxFee) {
-            const fee = parseInt(form.maxFee, 10);
-            if (!isNaN(fee) && fee >= 0) {
-                data.maxFee = fee;
-            }
+            data.maxFee = parseInt(form.maxFee, 10) || 0;
         } else {
             data.maxFee = 0;
         }
-
-        // Array fields
-        if (form.highlights && form.highlights.trim()) {
-            data.highlights = form.highlights
-                .split(',')
-                .map(s => s.trim())
-                .filter(Boolean);
-        } else {
-            data.highlights = [];
+        if (form.ranking) {
+            const rank = parseInt(form.ranking, 10);
+            if (!isNaN(rank)) data.ranking = rank;
         }
 
-        if (form.facilities && form.facilities.trim()) {
-            data.facilities = form.facilities
-                .split(',')
-                .map(s => s.trim())
-                .filter(Boolean);
-        } else {
-            data.facilities = [];
-        }
+        // Array fields - split by comma
+        const toArray = (str) => {
+            if (!str || !str.trim()) return [];
+            return str.split(',').map(s => s.trim()).filter(Boolean);
+        };
+
+        data.accreditations = toArray(form.accreditations);
+        data.approvals = toArray(form.approvals);
+        data.facilities = toArray(form.facilities);
+        data.highlights = toArray(form.highlights);
 
         return data;
     };
@@ -220,7 +169,7 @@ const UniForm = ({ onSuccess }) => {
             }
 
             const universityData = prepareData();
-            console.log('Submitting university data:', universityData);
+            console.log('Submitting university data:', JSON.stringify(universityData, null, 2));
 
             const response = await axios.post(
                 `${API_BASE}/admin/universities`,
@@ -251,12 +200,12 @@ const UniForm = ({ onSuccess }) => {
 
             if (err.response?.status === 401) {
                 showToast('Session expired. Please login again.', 'error');
-            } else if (err.response?.status === 409 || err.response?.data?.message?.includes('duplicate')) {
+            } else if (err.response?.status === 409) {
                 showToast('A university with this slug already exists', 'error');
             } else if (err.response?.status === 400) {
-                showToast(err.response?.data?.message || 'Invalid data. Please check all fields.', 'error');
+                showToast(err.response?.data?.message || 'Invalid data. Please check required fields.', 'error');
             } else {
-                showToast(err.response?.data?.message || 'Failed to add university. Please try again.', 'error');
+                showToast(err.response?.data?.message || 'Failed to add university', 'error');
             }
         } finally {
             setLoading(false);
@@ -322,9 +271,7 @@ const UniForm = ({ onSuccess }) => {
                             />
                         </div>
                         <div style={styles.inputGroup}>
-                            <label style={styles.label}>
-                                Slug <span style={styles.required}>*</span>
-                            </label>
+                            <label style={styles.label}>Slug</label>
                             <input
                                 name="slug"
                                 placeholder="e.g., amity-university-online"
@@ -336,17 +283,14 @@ const UniForm = ({ onSuccess }) => {
                             <small style={styles.hint}>URL: /universities/{form.slug || 'your-slug'}</small>
                         </div>
                         <div style={styles.inputGroup}>
-                            <label style={styles.label}>University Type</label>
-                            <select
-                                name="type"
-                                value={form.type}
+                            <label style={styles.label}>Short Name</label>
+                            <input
+                                name="shortName"
+                                placeholder="e.g., AU"
+                                value={form.shortName}
                                 onChange={handleChange}
-                                style={styles.select}
-                            >
-                                {universityTypes.map(type => (
-                                    <option key={type} value={type}>{type}</option>
-                                ))}
-                            </select>
+                                style={styles.input}
+                            />
                         </div>
                         <div style={styles.inputGroup}>
                             <label style={styles.label}>Established Year</label>
@@ -364,77 +308,6 @@ const UniForm = ({ onSuccess }) => {
                     </div>
                 </div>
 
-                {/* Ratings & Approvals Section */}
-                <div style={styles.section}>
-                    <h4 style={styles.sectionTitle}>
-                        <i className="fa-solid fa-award" style={styles.sectionIcon}></i>
-                        Ratings & Approvals
-                    </h4>
-                    <div style={styles.grid}>
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>NAAC Grade</label>
-                            <select
-                                name="naacGrade"
-                                value={form.naacGrade}
-                                onChange={handleChange}
-                                style={styles.select}
-                            >
-                                <option value="">Select Grade</option>
-                                {naacGrades.map(grade => (
-                                    <option key={grade} value={grade}>{grade}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>Rating / Ranking</label>
-                            <input
-                                name="rating"
-                                placeholder="e.g., NIRF Rank 25"
-                                value={form.rating}
-                                onChange={handleChange}
-                                style={styles.input}
-                            />
-                        </div>
-                    </div>
-                    <div style={styles.checkboxRow}>
-                        <label style={styles.checkboxLabel}>
-                            <input
-                                type="checkbox"
-                                name="ugcApproved"
-                                checked={form.ugcApproved}
-                                onChange={handleChange}
-                                style={styles.checkbox}
-                            />
-                            <span style={{
-                                ...styles.checkboxCustom,
-                                background: form.ugcApproved ? '#FF6B35' : '#fff',
-                                borderColor: form.ugcApproved ? '#FF6B35' : '#CBD5E1'
-                            }}>
-                                {form.ugcApproved && <i className="fa-solid fa-check" style={{ color: '#fff', fontSize: '0.7rem' }}></i>}
-                            </span>
-                            UGC Approved
-                        </label>
-
-                        <label style={styles.checkboxLabel}>
-                            <input
-                                type="checkbox"
-                                name="aicteApproved"
-                                checked={form.aicteApproved}
-                                onChange={handleChange}
-                                style={styles.checkbox}
-                            />
-                            <span style={{
-                                ...styles.checkboxCustom,
-                                background: form.aicteApproved ? '#FF6B35' : '#fff',
-                                borderColor: form.aicteApproved ? '#FF6B35' : '#CBD5E1'
-                            }}>
-                                {form.aicteApproved && <i className="fa-solid fa-check" style={{ color: '#fff', fontSize: '0.7rem' }}></i>}
-                            </span>
-                            AICTE Approved
-                        </label>
-                    </div>
-                </div>
-
                 {/* Location Section */}
                 <div style={styles.section}>
                     <h4 style={styles.sectionTitle}>
@@ -444,22 +317,99 @@ const UniForm = ({ onSuccess }) => {
                     <div style={styles.grid}>
                         <div style={styles.inputGroup}>
                             <label style={styles.label}>
-                                City <span style={styles.required}>*</span>
+                                Location <span style={styles.required}>*</span>
                             </label>
                             <input
-                                name="city"
-                                placeholder="e.g., Noida"
-                                value={form.city}
+                                name="location"
+                                placeholder="e.g., Noida, Uttar Pradesh"
+                                value={form.location}
                                 onChange={handleChange}
                                 style={styles.input}
                             />
                         </div>
                         <div style={styles.inputGroup}>
-                            <label style={styles.label}>State</label>
+                            <label style={styles.label}>Full Address</label>
                             <input
-                                name="state"
-                                placeholder="e.g., Uttar Pradesh"
-                                value={form.state}
+                                name="address"
+                                placeholder="Complete address"
+                                value={form.address}
+                                onChange={handleChange}
+                                style={styles.input}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Description Section */}
+                <div style={styles.section}>
+                    <h4 style={styles.sectionTitle}>
+                        <i className="fa-solid fa-file-lines" style={styles.sectionIcon}></i>
+                        Description
+                    </h4>
+                    <div style={styles.inputGroup}>
+                        <label style={styles.label}>
+                            About University <span style={styles.required}>*</span>
+                        </label>
+                        <textarea
+                            name="description"
+                            placeholder="Write a detailed description about the university..."
+                            value={form.description}
+                            onChange={handleChange}
+                            style={styles.textarea}
+                            rows="4"
+                        ></textarea>
+                        <small style={styles.hint}>{form.description.length} characters</small>
+                    </div>
+                </div>
+
+                {/* Ratings & Approvals Section */}
+                <div style={styles.section}>
+                    <h4 style={styles.sectionTitle}>
+                        <i className="fa-solid fa-award" style={styles.sectionIcon}></i>
+                        Ratings & Approvals
+                    </h4>
+                    <div style={styles.grid}>
+                        <div style={styles.inputGroup}>
+                            <label style={styles.label}>NAAC Rating</label>
+                            <select
+                                name="rating"
+                                value={form.rating}
+                                onChange={handleChange}
+                                style={styles.select}
+                            >
+                                {ratingOptions.map(r => (
+                                    <option key={r} value={r}>{r}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div style={styles.inputGroup}>
+                            <label style={styles.label}>NIRF Ranking</label>
+                            <input
+                                name="ranking"
+                                type="number"
+                                placeholder="e.g., 25"
+                                value={form.ranking}
+                                onChange={handleChange}
+                                style={styles.input}
+                                min="1"
+                            />
+                        </div>
+                        <div style={styles.inputGroup}>
+                            <label style={styles.label}>Accreditations (comma separated)</label>
+                            <input
+                                name="accreditations"
+                                placeholder="NAAC, NBA, AACSB"
+                                value={form.accreditations}
+                                onChange={handleChange}
+                                style={styles.input}
+                            />
+                        </div>
+                        <div style={styles.inputGroup}>
+                            <label style={styles.label}>Approvals (comma separated)</label>
+                            <input
+                                name="approvals"
+                                placeholder="UGC, AICTE, BCI"
+                                value={form.approvals}
                                 onChange={handleChange}
                                 style={styles.input}
                             />
@@ -507,24 +457,12 @@ const UniForm = ({ onSuccess }) => {
                     </div>
                 </div>
 
-                {/* Description Section */}
+                {/* Features Section */}
                 <div style={styles.section}>
                     <h4 style={styles.sectionTitle}>
-                        <i className="fa-solid fa-file-lines" style={styles.sectionIcon}></i>
-                        Description & Details
+                        <i className="fa-solid fa-star" style={styles.sectionIcon}></i>
+                        Features
                     </h4>
-                    <div style={styles.inputGroup}>
-                        <label style={styles.label}>About University</label>
-                        <textarea
-                            name="description"
-                            placeholder="Write a brief description about the university..."
-                            value={form.description}
-                            onChange={handleChange}
-                            style={styles.textarea}
-                            rows="3"
-                        ></textarea>
-                        <small style={styles.hint}>{form.description.length} characters</small>
-                    </div>
                     <div style={styles.grid}>
                         <div style={styles.inputGroup}>
                             <label style={styles.label}>Highlights (comma separated)</label>
@@ -558,15 +496,12 @@ const UniForm = ({ onSuccess }) => {
                         Media (Image URLs)
                     </h4>
                     <p style={styles.sectionHint}>
-                        Use image hosting services like Imgur, Cloudinary, or Unsplash for image URLs
+                        Use image hosting services like Imgur, Cloudinary, or Unsplash
                     </p>
 
                     <div style={styles.grid}>
                         <div style={styles.inputGroup}>
-                            <label style={styles.label}>
-                                <i className="fa-solid fa-image" style={{ marginRight: '6px', color: '#64748B' }}></i>
-                                Logo URL
-                            </label>
+                            <label style={styles.label}>Logo URL</label>
                             <input
                                 name="logo"
                                 type="url"
@@ -575,60 +510,49 @@ const UniForm = ({ onSuccess }) => {
                                 onChange={handleChange}
                                 style={styles.input}
                             />
-                            <small style={styles.hint}>Recommended: Square image (200x200px)</small>
                             {form.logo && (
                                 <div style={styles.previewContainer}>
-                                    <div style={styles.logoPreview}>
-                                        <img
-                                            src={form.logo}
-                                            alt="Logo Preview"
-                                            style={styles.logoImg}
-                                            onError={(e) => e.target.style.display = 'none'}
-                                            onLoad={(e) => e.target.style.display = 'block'}
-                                        />
-                                    </div>
+                                    <img
+                                        src={form.logo}
+                                        alt="Logo Preview"
+                                        style={styles.logoImg}
+                                        onError={(e) => e.target.style.display = 'none'}
+                                    />
                                     <button
                                         type="button"
                                         onClick={() => setForm(prev => ({ ...prev, logo: '' }))}
                                         style={styles.clearBtn}
                                     >
-                                        <i className="fa-solid fa-times"></i> Clear
+                                        <i className="fa-solid fa-times"></i>
                                     </button>
                                 </div>
                             )}
                         </div>
 
                         <div style={styles.inputGroup}>
-                            <label style={styles.label}>
-                                <i className="fa-solid fa-panorama" style={{ marginRight: '6px', color: '#64748B' }}></i>
-                                Banner Image URL
-                            </label>
+                            <label style={styles.label}>Banner URL</label>
                             <input
-                                name="bannerImage"
+                                name="banner"
                                 type="url"
                                 placeholder="https://example.com/banner.jpg"
-                                value={form.bannerImage}
+                                value={form.banner}
                                 onChange={handleChange}
                                 style={styles.input}
                             />
-                            <small style={styles.hint}>Recommended: Wide image (1200x400px)</small>
-                            {form.bannerImage && (
+                            {form.banner && (
                                 <div style={styles.previewContainer}>
-                                    <div style={styles.bannerPreview}>
-                                        <img
-                                            src={form.bannerImage}
-                                            alt="Banner Preview"
-                                            style={styles.bannerImg}
-                                            onError={(e) => e.target.style.display = 'none'}
-                                            onLoad={(e) => e.target.style.display = 'block'}
-                                        />
-                                    </div>
+                                    <img
+                                        src={form.banner}
+                                        alt="Banner Preview"
+                                        style={styles.bannerImg}
+                                        onError={(e) => e.target.style.display = 'none'}
+                                    />
                                     <button
                                         type="button"
-                                        onClick={() => setForm(prev => ({ ...prev, bannerImage: '' }))}
+                                        onClick={() => setForm(prev => ({ ...prev, banner: '' }))}
                                         style={styles.clearBtn}
                                     >
-                                        <i className="fa-solid fa-times"></i> Clear
+                                        <i className="fa-solid fa-times"></i>
                                     </button>
                                 </div>
                             )}
@@ -638,7 +562,7 @@ const UniForm = ({ onSuccess }) => {
                     <div style={styles.quickLinks}>
                         <span style={{ fontSize: '0.85rem', color: '#64748B' }}>
                             <i className="fa-solid fa-lightbulb" style={{ marginRight: '6px', color: '#F59E0B' }}></i>
-                            Quick image sources:
+                            Quick sources:
                         </span>
                         <a href="https://imgur.com/upload" target="_blank" rel="noreferrer" style={styles.quickLink}>Imgur</a>
                         <a href="https://unsplash.com" target="_blank" rel="noreferrer" style={styles.quickLink}>Unsplash</a>
@@ -669,7 +593,7 @@ const UniForm = ({ onSuccess }) => {
                             <input
                                 name="email"
                                 type="email"
-                                placeholder="admissions@university.edu"
+                                placeholder="info@university.edu"
                                 value={form.email}
                                 onChange={handleChange}
                                 style={styles.input}
@@ -698,7 +622,8 @@ const UniForm = ({ onSuccess }) => {
                     <div style={styles.settingsGrid}>
                         <label style={{
                             ...styles.settingCard,
-                            ...(form.featured ? styles.settingCardActive : {})
+                            background: form.featured ? '#FFF7ED' : '#F8FAFC',
+                            border: form.featured ? '2px solid #FF6B35' : '2px solid transparent'
                         }}>
                             <input
                                 type="checkbox"
@@ -716,13 +641,14 @@ const UniForm = ({ onSuccess }) => {
                             </div>
                             <div>
                                 <strong>Featured</strong>
-                                <small style={{ display: 'block', color: '#64748B', marginTop: '2px' }}>Show on homepage</small>
+                                <small style={{ display: 'block', color: '#64748B' }}>Show on homepage</small>
                             </div>
                         </label>
 
                         <label style={{
                             ...styles.settingCard,
-                            ...(form.isActive ? styles.settingCardActive : {})
+                            background: form.isActive ? '#D1FAE5' : '#F8FAFC',
+                            border: form.isActive ? '2px solid #16A34A' : '2px solid transparent'
                         }}>
                             <input
                                 type="checkbox"
@@ -740,7 +666,7 @@ const UniForm = ({ onSuccess }) => {
                             </div>
                             <div>
                                 <strong>Active</strong>
-                                <small style={{ display: 'block', color: '#64748B', marginTop: '2px' }}>Visible to users</small>
+                                <small style={{ display: 'block', color: '#64748B' }}>Visible to users</small>
                             </div>
                         </label>
                     </div>
@@ -754,7 +680,7 @@ const UniForm = ({ onSuccess }) => {
                         style={styles.resetBtn}
                         disabled={loading}
                     >
-                        <i className="fa-solid fa-rotate-left"></i> Clear Form
+                        <i className="fa-solid fa-rotate-left"></i> Clear
                     </button>
                     <button
                         type="submit"
@@ -766,13 +692,9 @@ const UniForm = ({ onSuccess }) => {
                         }}
                     >
                         {loading ? (
-                            <>
-                                <i className="fa-solid fa-spinner fa-spin"></i> Adding...
-                            </>
+                            <><i className="fa-solid fa-spinner fa-spin"></i> Adding...</>
                         ) : (
-                            <>
-                                <i className="fa-solid fa-plus"></i> Add University
-                            </>
+                            <><i className="fa-solid fa-plus"></i> Add University</>
                         )}
                     </button>
                 </div>
@@ -784,19 +706,18 @@ const UniForm = ({ onSuccess }) => {
 const styles = {
     container: {
         background: '#fff',
-        padding: '30px',
+        padding: '25px',
         borderRadius: '16px',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-        fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif",
+        fontFamily: "'Poppins', sans-serif",
         position: 'relative'
     },
-    // Toast
     toast: {
         position: 'absolute',
-        top: '20px',
-        right: '20px',
-        left: '20px',
-        padding: '14px 20px',
+        top: '15px',
+        right: '15px',
+        left: '15px',
+        padding: '12px 16px',
         borderRadius: '10px',
         display: 'flex',
         alignItems: 'center',
@@ -804,28 +725,26 @@ const styles = {
         fontSize: '0.9rem',
         fontWeight: '500',
         border: '1px solid',
-        zIndex: 100,
-        animation: 'slideIn 0.3s ease'
+        zIndex: 100
     },
     toastClose: {
         marginLeft: 'auto',
         background: 'none',
         border: 'none',
         cursor: 'pointer',
-        opacity: 0.7,
-        fontSize: '1rem',
-        color: 'inherit'
+        color: 'inherit',
+        fontSize: '1rem'
     },
     header: {
-        marginBottom: '25px',
-        paddingBottom: '20px',
+        marginBottom: '20px',
+        paddingBottom: '15px',
         borderBottom: '1px solid #E2E8F0'
     },
     title: {
         margin: 0,
-        marginBottom: '8px',
+        marginBottom: '5px',
         color: '#0F172A',
-        fontSize: '1.4rem',
+        fontSize: '1.3rem',
         fontWeight: '700',
         display: 'flex',
         alignItems: 'center'
@@ -833,66 +752,65 @@ const styles = {
     subtitle: {
         margin: 0,
         color: '#64748B',
-        fontSize: '0.9rem'
+        fontSize: '0.85rem'
     },
     section: {
-        marginBottom: '25px',
-        paddingBottom: '25px',
+        marginBottom: '20px',
+        paddingBottom: '20px',
         borderBottom: '1px solid #F1F5F9'
     },
     sectionTitle: {
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
-        margin: '0 0 18px 0',
+        margin: '0 0 15px 0',
         color: '#334155',
         fontSize: '1rem',
         fontWeight: '600'
     },
     sectionIcon: {
         color: '#FF6B35',
-        fontSize: '0.95rem'
+        fontSize: '0.9rem'
     },
     sectionHint: {
-        margin: '0 0 15px 0',
+        margin: '0 0 12px 0',
         color: '#64748B',
-        fontSize: '0.85rem'
+        fontSize: '0.8rem'
     },
     grid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '18px'
+        gap: '15px'
     },
     inputGroup: {
         display: 'flex',
         flexDirection: 'column'
     },
     label: {
-        marginBottom: '8px',
+        marginBottom: '6px',
         color: '#334155',
-        fontSize: '0.9rem',
+        fontSize: '0.85rem',
         fontWeight: '600'
     },
     required: {
         color: '#DC2626'
     },
     input: {
-        padding: '12px 14px',
-        borderRadius: '10px',
+        padding: '10px 12px',
+        borderRadius: '8px',
         border: '2px solid #E2E8F0',
         outline: 'none',
-        fontSize: '0.95rem',
+        fontSize: '0.9rem',
         fontFamily: 'inherit',
-        transition: 'border-color 0.2s, box-shadow 0.2s',
         width: '100%',
         boxSizing: 'border-box'
     },
     select: {
-        padding: '12px 14px',
-        borderRadius: '10px',
+        padding: '10px 12px',
+        borderRadius: '8px',
         border: '2px solid #E2E8F0',
         outline: 'none',
-        fontSize: '0.95rem',
+        fontSize: '0.9rem',
         fontFamily: 'inherit',
         background: '#fff',
         cursor: 'pointer',
@@ -900,11 +818,11 @@ const styles = {
         boxSizing: 'border-box'
     },
     textarea: {
-        padding: '12px 14px',
-        borderRadius: '10px',
+        padding: '10px 12px',
+        borderRadius: '8px',
         border: '2px solid #E2E8F0',
         outline: 'none',
-        fontSize: '0.95rem',
+        fontSize: '0.9rem',
         fontFamily: 'inherit',
         resize: 'vertical',
         minHeight: '80px',
@@ -912,115 +830,57 @@ const styles = {
         boxSizing: 'border-box'
     },
     hint: {
-        marginTop: '6px',
+        marginTop: '4px',
         color: '#64748B',
-        fontSize: '0.8rem'
+        fontSize: '0.75rem'
     },
-    // Checkbox Styles
-    checkboxRow: {
-        display: 'flex',
-        gap: '25px',
-        flexWrap: 'wrap',
-        marginTop: '15px'
-    },
-    checkboxLabel: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        cursor: 'pointer',
-        fontSize: '0.95rem',
-        color: '#334155',
-        fontWeight: '500'
-    },
-    checkbox: {
-        display: 'none'
-    },
-    checkboxCustom: {
-        width: '20px',
-        height: '20px',
-        borderRadius: '5px',
-        border: '2px solid #CBD5E1',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'all 0.2s',
-        flexShrink: 0
-    },
-    // Image Preview Styles
     previewContainer: {
-        marginTop: '12px',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '12px'
-    },
-    logoPreview: {
-        width: '80px',
-        height: '80px',
-        borderRadius: '10px',
-        border: '2px solid #E2E8F0',
-        overflow: 'hidden',
-        background: '#F8FAFC',
+        marginTop: '10px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0
+        gap: '10px'
     },
     logoImg: {
-        width: '100%',
-        height: '100%',
+        width: '60px',
+        height: '60px',
         objectFit: 'contain',
-        padding: '8px',
-        boxSizing: 'border-box'
-    },
-    bannerPreview: {
-        width: '100%',
-        maxWidth: '200px',
-        height: '70px',
-        borderRadius: '10px',
-        border: '2px solid #E2E8F0',
-        overflow: 'hidden',
-        background: '#F8FAFC'
+        borderRadius: '8px',
+        border: '1px solid #E2E8F0'
     },
     bannerImg: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover'
+        width: '120px',
+        height: '50px',
+        objectFit: 'cover',
+        borderRadius: '8px',
+        border: '1px solid #E2E8F0'
     },
     clearBtn: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '5px',
-        padding: '6px 12px',
+        padding: '5px 10px',
         background: '#FEE2E2',
         color: '#DC2626',
         border: 'none',
         borderRadius: '6px',
         cursor: 'pointer',
-        fontSize: '0.8rem',
-        fontWeight: '500',
-        fontFamily: 'inherit',
-        flexShrink: 0
+        fontSize: '0.75rem'
     },
     quickLinks: {
-        marginTop: '15px',
-        padding: '12px 15px',
+        marginTop: '12px',
+        padding: '10px 12px',
         background: '#F8FAFC',
-        borderRadius: '10px',
+        borderRadius: '8px',
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
+        gap: '10px',
         flexWrap: 'wrap'
     },
     quickLink: {
         color: '#0284C7',
         textDecoration: 'none',
-        fontSize: '0.85rem',
-        fontWeight: '500',
-        padding: '4px 10px',
+        fontSize: '0.8rem',
+        padding: '3px 8px',
         background: '#E0F2FE',
-        borderRadius: '5px'
+        borderRadius: '4px'
     },
-    // Settings Grid
     settingsGrid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(2, 1fr)',
@@ -1030,66 +890,55 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         gap: '12px',
-        padding: '16px',
+        padding: '14px',
         background: '#F8FAFC',
-        borderRadius: '12px',
+        borderRadius: '10px',
         cursor: 'pointer',
-        border: '2px solid transparent',
         transition: 'all 0.2s'
     },
-    settingCardActive: {
-        background: '#FFF7ED',
-        borderColor: '#FF6B35'
-    },
     settingIcon: {
-        width: '40px',
-        height: '40px',
-        borderRadius: '10px',
+        width: '38px',
+        height: '38px',
+        borderRadius: '8px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: '1rem',
-        flexShrink: 0
+        fontSize: '1rem'
     },
-    // Action Buttons
     actions: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: '25px',
-        paddingTop: '20px',
+        marginTop: '20px',
+        paddingTop: '15px',
         borderTop: '1px solid #E2E8F0'
     },
     resetBtn: {
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
-        padding: '12px 20px',
+        gap: '6px',
+        padding: '10px 18px',
         background: '#F1F5F9',
         color: '#64748B',
         border: 'none',
-        borderRadius: '10px',
+        borderRadius: '8px',
         cursor: 'pointer',
         fontSize: '0.9rem',
-        fontWeight: '600',
-        fontFamily: 'inherit',
-        transition: 'background 0.2s'
+        fontWeight: '600'
     },
     submitBtn: {
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
-        padding: '12px 28px',
-        background: 'linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%)',
+        gap: '6px',
+        padding: '10px 22px',
+        background: 'linear-gradient(135deg, #FF6B35, #FF8B5C)',
         color: '#fff',
         border: 'none',
-        borderRadius: '10px',
+        borderRadius: '8px',
         cursor: 'pointer',
-        fontSize: '0.95rem',
+        fontSize: '0.9rem',
         fontWeight: '600',
-        fontFamily: 'inherit',
-        boxShadow: '0 4px 15px rgba(255, 107, 53, 0.35)',
-        transition: 'all 0.2s'
+        boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)'
     }
 };
 
