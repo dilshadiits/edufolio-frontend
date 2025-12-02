@@ -781,8 +781,8 @@ const Footer = () => {
                                     <i className="fa-solid fa-location-dot"></i>
                                 </div>
                                 <div className="footer-contact-text">
-                                    <span>123 Education Street,</span>
-                                    <span>Mumbai, Maharashtra 400001</span>
+                                    <span>123 Kandamkulathy Towers, Opposite Maharajas college ground,</span>
+                                    <span>MG Road, Cochin</span>
                                 </div>
                             </div>
                             <div className="footer-contact-item">
