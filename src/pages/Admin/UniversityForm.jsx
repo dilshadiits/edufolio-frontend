@@ -10,8 +10,6 @@ const UniversityForm = () => {
 
     const [loading, setLoading] = useState(false);
     const [fetchingData, setFetchingData] = useState(false);
-    const [uploadingLogo, setUploadingLogo] = useState(false);
-    const [uploadingBanner, setUploadingBanner] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -139,49 +137,14 @@ const UniversityForm = () => {
         if (success) setSuccess('');
     };
 
-    const handleFileUpload = async (e, field) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-            setError('Please select an image file');
-            return;
-        }
-
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            setError('Image size should be less than 5MB');
-            return;
-        }
-
-        const setUploading = field === 'logo' ? setUploadingLogo : setUploadingBanner;
-        setUploading(true);
-        setError('');
-
-        const formData = new FormData();
-        formData.append('file', file);
-
+    const isValidImageUrl = (url) => {
+        if (!url) return true; // Empty is valid (optional field)
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.post(`${API_BASE}/admin/upload`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            setForm(prev => ({ ...prev, [field]: res.data.url }));
-        } catch (err) {
-            console.error('Image upload failed:', err);
-            setError('Failed to upload image. Please try again.');
-        } finally {
-            setUploading(false);
+            new URL(url);
+            return true;
+        } catch {
+            return false;
         }
-    };
-
-    const removeImage = (field) => {
-        setForm(prev => ({ ...prev, [field]: '' }));
     };
 
     const validateForm = () => {
@@ -201,7 +164,15 @@ const UniversityForm = () => {
             setError('City is required');
             return false;
         }
-        if (form.website && !isValidUrl(form.website)) {
+        if (form.logo && !isValidImageUrl(form.logo)) {
+            setError('Please enter a valid logo URL');
+            return false;
+        }
+        if (form.bannerImage && !isValidImageUrl(form.bannerImage)) {
+            setError('Please enter a valid banner image URL');
+            return false;
+        }
+        if (form.website && !isValidImageUrl(form.website)) {
             setError('Please enter a valid website URL');
             return false;
         }
@@ -210,15 +181,6 @@ const UniversityForm = () => {
             return false;
         }
         return true;
-    };
-
-    const isValidUrl = (url) => {
-        try {
-            new URL(url);
-            return true;
-        } catch {
-            return false;
-        }
     };
 
     const isValidEmail = (email) => {
@@ -245,6 +207,8 @@ const UniversityForm = () => {
                 name: form.name.trim(),
                 slug: form.slug.trim(),
                 description: form.description.trim(),
+                logo: form.logo.trim(),
+                bannerImage: form.bannerImage.trim(),
                 minFee: form.minFee ? Number(form.minFee) : 0,
                 maxFee: form.maxFee ? Number(form.maxFee) : 0,
                 establishedYear: form.establishedYear ? Number(form.establishedYear) : null,
@@ -572,8 +536,12 @@ const UniversityForm = () => {
                                         onChange={handleChange}
                                         style={styles.checkboxInput}
                                     />
-                                    <span style={styles.checkboxCustom}>
-                                        {form.ugcApproved && <i className="fa-solid fa-check"></i>}
+                                    <span style={{
+                                        ...styles.checkboxCustom,
+                                        background: form.ugcApproved ? '#FF6B35' : '#fff',
+                                        borderColor: form.ugcApproved ? '#FF6B35' : '#E2E8F0'
+                                    }}>
+                                        {form.ugcApproved && <i className="fa-solid fa-check" style={{ color: '#fff', fontSize: '0.7rem' }}></i>}
                                     </span>
                                     <span>UGC Approved</span>
                                 </label>
@@ -586,8 +554,12 @@ const UniversityForm = () => {
                                         onChange={handleChange}
                                         style={styles.checkboxInput}
                                     />
-                                    <span style={styles.checkboxCustom}>
-                                        {form.aicteApproved && <i className="fa-solid fa-check"></i>}
+                                    <span style={{
+                                        ...styles.checkboxCustom,
+                                        background: form.aicteApproved ? '#FF6B35' : '#fff',
+                                        borderColor: form.aicteApproved ? '#FF6B35' : '#E2E8F0'
+                                    }}>
+                                        {form.aicteApproved && <i className="fa-solid fa-check" style={{ color: '#fff', fontSize: '0.7rem' }}></i>}
                                     </span>
                                     <span>AICTE Approved</span>
                                 </label>
@@ -762,7 +734,7 @@ const UniversityForm = () => {
                             </div>
                         </div>
 
-                        {/* Section 6: Media */}
+                        {/* Section 6: Media - URL Based */}
                         <div style={styles.section}>
                             <div style={styles.sectionHeader}>
                                 <div style={styles.sectionIcon}>
@@ -770,92 +742,130 @@ const UniversityForm = () => {
                                 </div>
                                 <div>
                                     <h2 style={styles.sectionTitle}>Media</h2>
-                                    <p style={styles.sectionDesc}>Upload logo and banner images</p>
+                                    <p style={styles.sectionDesc}>Add logo and banner image URLs (use external image hosting like Imgur, Cloudinary, etc.)</p>
                                 </div>
                             </div>
 
-                            <div style={styles.mediaGrid}>
-                                {/* Logo Upload */}
-                                <div style={styles.mediaUpload}>
-                                    <label style={styles.label}>University Logo</label>
-                                    <div style={styles.uploadBox}>
-                                        {form.logo ? (
-                                            <div style={styles.imagePreviewBox}>
-                                                <img src={form.logo} alt="Logo" style={styles.logoPreview} />
-                                                <button
-                                                    type="button"
-                                                    style={styles.removeImageBtn}
-                                                    onClick={() => removeImage('logo')}
-                                                >
-                                                    <i className="fa-solid fa-times"></i>
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <label style={styles.uploadLabel}>
-                                                <input
-                                                    type="file"
-                                                    onChange={(e) => handleFileUpload(e, 'logo')}
-                                                    accept="image/*"
-                                                    style={{ display: 'none' }}
-                                                    disabled={uploadingLogo}
+                            <div style={styles.grid}>
+                                {/* Logo URL */}
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>
+                                        <i className="fa-solid fa-image" style={styles.labelIcon}></i>
+                                        Logo Image URL
+                                    </label>
+                                    <input
+                                        type="url"
+                                        name="logo"
+                                        value={form.logo}
+                                        onChange={handleChange}
+                                        placeholder="https://example.com/logo.png"
+                                        style={styles.input}
+                                    />
+                                    <small style={styles.hint}>
+                                        Recommended: Square image (200x200px). Use Imgur, Cloudinary, or direct image links.
+                                    </small>
+                                    
+                                    {/* Logo Preview */}
+                                    {form.logo && (
+                                        <div style={styles.imagePreviewContainer}>
+                                            <div style={styles.logoPreviewBox}>
+                                                <img
+                                                    src={form.logo}
+                                                    alt="Logo Preview"
+                                                    style={styles.logoPreviewImg}
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                        e.target.nextSibling.style.display = 'flex';
+                                                    }}
+                                                    onLoad={(e) => {
+                                                        e.target.style.display = 'block';
+                                                        if (e.target.nextSibling) {
+                                                            e.target.nextSibling.style.display = 'none';
+                                                        }
+                                                    }}
                                                 />
-                                                {uploadingLogo ? (
-                                                    <div style={styles.uploadingState}>
-                                                        <i className="fa-solid fa-spinner fa-spin"></i>
-                                                        <span>Uploading...</span>
-                                                    </div>
-                                                ) : (
-                                                    <div style={styles.uploadPlaceholder}>
-                                                        <i className="fa-solid fa-cloud-upload-alt"></i>
-                                                        <span>Click to upload logo</span>
-                                                        <small>PNG, JPG up to 5MB</small>
-                                                    </div>
-                                                )}
-                                            </label>
-                                        )}
-                                    </div>
+                                                <div style={styles.imageError}>
+                                                    <i className="fa-solid fa-exclamation-triangle"></i>
+                                                    <span>Invalid image URL</span>
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                style={styles.clearUrlBtn}
+                                                onClick={() => setForm(prev => ({ ...prev, logo: '' }))}
+                                            >
+                                                <i className="fa-solid fa-times"></i> Clear
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
 
-                                {/* Banner Upload */}
-                                <div style={styles.mediaUpload}>
-                                    <label style={styles.label}>Banner Image</label>
-                                    <div style={styles.uploadBoxWide}>
-                                        {form.bannerImage ? (
+                                {/* Banner URL */}
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>
+                                        <i className="fa-solid fa-panorama" style={styles.labelIcon}></i>
+                                        Banner Image URL
+                                    </label>
+                                    <input
+                                        type="url"
+                                        name="bannerImage"
+                                        value={form.bannerImage}
+                                        onChange={handleChange}
+                                        placeholder="https://example.com/banner.jpg"
+                                        style={styles.input}
+                                    />
+                                    <small style={styles.hint}>
+                                        Recommended: Wide image (1200x400px). Use Unsplash, Pexels, or image hosting services.
+                                    </small>
+                                    
+                                    {/* Banner Preview */}
+                                    {form.bannerImage && (
+                                        <div style={styles.imagePreviewContainer}>
                                             <div style={styles.bannerPreviewBox}>
-                                                <img src={form.bannerImage} alt="Banner" style={styles.bannerPreview} />
-                                                <button
-                                                    type="button"
-                                                    style={styles.removeImageBtn}
-                                                    onClick={() => removeImage('bannerImage')}
-                                                >
-                                                    <i className="fa-solid fa-times"></i>
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <label style={styles.uploadLabel}>
-                                                <input
-                                                    type="file"
-                                                    onChange={(e) => handleFileUpload(e, 'bannerImage')}
-                                                    accept="image/*"
-                                                    style={{ display: 'none' }}
-                                                    disabled={uploadingBanner}
+                                                <img
+                                                    src={form.bannerImage}
+                                                    alt="Banner Preview"
+                                                    style={styles.bannerPreviewImg}
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                        e.target.nextSibling.style.display = 'flex';
+                                                    }}
+                                                    onLoad={(e) => {
+                                                        e.target.style.display = 'block';
+                                                        if (e.target.nextSibling) {
+                                                            e.target.nextSibling.style.display = 'none';
+                                                        }
+                                                    }}
                                                 />
-                                                {uploadingBanner ? (
-                                                    <div style={styles.uploadingState}>
-                                                        <i className="fa-solid fa-spinner fa-spin"></i>
-                                                        <span>Uploading...</span>
-                                                    </div>
-                                                ) : (
-                                                    <div style={styles.uploadPlaceholder}>
-                                                        <i className="fa-solid fa-image"></i>
-                                                        <span>Click to upload banner</span>
-                                                        <small>Recommended: 1200x400px</small>
-                                                    </div>
-                                                )}
-                                            </label>
-                                        )}
-                                    </div>
+                                                <div style={styles.imageError}>
+                                                    <i className="fa-solid fa-exclamation-triangle"></i>
+                                                    <span>Invalid image URL</span>
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                style={styles.clearUrlBtn}
+                                                onClick={() => setForm(prev => ({ ...prev, bannerImage: '' }))}
+                                            >
+                                                <i className="fa-solid fa-times"></i> Clear
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
+                            </div>
+
+                            {/* Image Hosting Tips */}
+                            <div style={styles.tipBox}>
+                                <div style={styles.tipHeader}>
+                                    <i className="fa-solid fa-lightbulb"></i>
+                                    <strong>Where to host images?</strong>
+                                </div>
+                                <ul style={styles.tipList}>
+                                    <li><strong>Imgur:</strong> Free image hosting - <a href="https://imgur.com/upload" target="_blank" rel="noreferrer" style={styles.tipLink}>imgur.com/upload</a></li>
+                                    <li><strong>Cloudinary:</strong> Professional image hosting - <a href="https://cloudinary.com" target="_blank" rel="noreferrer" style={styles.tipLink}>cloudinary.com</a></li>
+                                    <li><strong>Unsplash:</strong> Free stock photos - <a href="https://unsplash.com" target="_blank" rel="noreferrer" style={styles.tipLink}>unsplash.com</a></li>
+                                    <li><strong>Google Drive:</strong> Use shareable links (make sure "Anyone with link" can view)</li>
+                                </ul>
                             </div>
                         </div>
 
@@ -952,7 +962,7 @@ const UniversityForm = () => {
                                     </div>
                                     <div>
                                         <strong>Featured University</strong>
-                                        <small>Display on homepage and featured sections</small>
+                                        <small style={{ display: 'block', color: '#64748B', marginTop: '4px' }}>Display on homepage and featured sections</small>
                                     </div>
                                 </label>
 
@@ -976,7 +986,7 @@ const UniversityForm = () => {
                                     </div>
                                     <div>
                                         <strong>Active</strong>
-                                        <small>University is visible to students</small>
+                                        <small style={{ display: 'block', color: '#64748B', marginTop: '4px' }}>University is visible to students</small>
                                     </div>
                                 </label>
                             </div>
@@ -1004,10 +1014,10 @@ const UniversityForm = () => {
                                     type="submit"
                                     style={{
                                         ...styles.submitBtn,
-                                        opacity: (loading || uploadingLogo || uploadingBanner) ? 0.7 : 1,
-                                        cursor: (loading || uploadingLogo || uploadingBanner) ? 'not-allowed' : 'pointer'
+                                        opacity: loading ? 0.7 : 1,
+                                        cursor: loading ? 'not-allowed' : 'pointer'
                                     }}
-                                    disabled={loading || uploadingLogo || uploadingBanner}
+                                    disabled={loading}
                                 >
                                     {loading ? (
                                         <>
@@ -1034,7 +1044,8 @@ const styles = {
     wrapper: {
         display: 'flex',
         minHeight: '100vh',
-        background: '#F8FAFC'
+        background: '#F8FAFC',
+        fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     sidebar: {
         width: '260px',
@@ -1081,7 +1092,8 @@ const styles = {
         fontSize: '0.95rem',
         fontWeight: '500',
         borderRadius: '10px',
-        textDecoration: 'none'
+        textDecoration: 'none',
+        transition: 'all 0.2s'
     },
     navItemActive: {
         display: 'flex',
@@ -1109,7 +1121,8 @@ const styles = {
         padding: '12px 18px',
         color: '#94A3B8',
         textDecoration: 'none',
-        fontSize: '0.9rem'
+        fontSize: '0.9rem',
+        transition: 'color 0.2s'
     },
     logoutBtn: {
         display: 'flex',
@@ -1121,7 +1134,8 @@ const styles = {
         color: '#F87171',
         fontSize: '0.9rem',
         borderRadius: '10px',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        transition: 'background 0.2s'
     },
     main: {
         flex: 1,
@@ -1201,7 +1215,8 @@ const styles = {
         borderRadius: '10px',
         cursor: 'pointer',
         fontWeight: '600',
-        fontSize: '0.9rem'
+        fontSize: '0.9rem',
+        transition: 'background 0.2s'
     },
     errorAlert: {
         background: 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)',
@@ -1234,7 +1249,8 @@ const styles = {
         border: 'none',
         color: '#DC2626',
         cursor: 'pointer',
-        fontSize: '1.1rem'
+        fontSize: '1.1rem',
+        padding: '5px'
     },
     form: {
         background: '#fff',
@@ -1306,7 +1322,8 @@ const styles = {
         fontSize: '0.95rem',
         boxSizing: 'border-box',
         outline: 'none',
-        transition: 'border-color 0.2s'
+        transition: 'border-color 0.2s, box-shadow 0.2s',
+        fontFamily: 'inherit'
     },
     inputWithIcon: {
         position: 'relative'
@@ -1328,7 +1345,8 @@ const styles = {
         boxSizing: 'border-box',
         cursor: 'pointer',
         background: '#fff',
-        outline: 'none'
+        outline: 'none',
+        fontFamily: 'inherit'
     },
     textarea: {
         width: '100%',
@@ -1340,7 +1358,8 @@ const styles = {
         resize: 'vertical',
         fontFamily: 'inherit',
         outline: 'none',
-        minHeight: '100px'
+        minHeight: '100px',
+        transition: 'border-color 0.2s'
     },
     hint: {
         display: 'block',
@@ -1372,86 +1391,100 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#fff',
-        color: '#FF6B35',
-        fontSize: '0.75rem'
+        transition: 'all 0.2s'
     },
-    mediaGrid: {
-        display: 'grid',
-        gridTemplateColumns: '200px 1fr',
-        gap: '25px'
+    // Image URL Preview Styles
+    imagePreviewContainer: {
+        marginTop: '15px',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '15px'
     },
-    mediaUpload: {},
-    uploadBox: {
-        width: '180px',
-        height: '180px',
-        border: '2px dashed #E2E8F0',
-        borderRadius: '16px',
-        overflow: 'hidden'
-    },
-    uploadBoxWide: {
-        width: '100%',
-        height: '180px',
-        border: '2px dashed #E2E8F0',
-        borderRadius: '16px',
-        overflow: 'hidden'
-    },
-    uploadLabel: {
-        width: '100%',
-        height: '100%',
+    logoPreviewBox: {
+        width: '120px',
+        height: '120px',
+        borderRadius: '12px',
+        border: '2px solid #E2E8F0',
+        overflow: 'hidden',
+        background: '#F8FAFC',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        background: '#F8FAFC'
+        justifyContent: 'center'
     },
-    uploadPlaceholder: {
-        textAlign: 'center',
-        color: '#94A3B8'
-    },
-    uploadingState: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '10px',
-        color: '#FF6B35'
-    },
-    imagePreviewBox: {
-        width: '100%',
-        height: '100%',
-        position: 'relative'
-    },
-    bannerPreviewBox: {
-        width: '100%',
-        height: '100%',
-        position: 'relative'
-    },
-    logoPreview: {
+    logoPreviewImg: {
         width: '100%',
         height: '100%',
         objectFit: 'contain',
         padding: '10px',
         boxSizing: 'border-box'
     },
-    bannerPreview: {
+    bannerPreviewBox: {
+        width: '100%',
+        maxWidth: '300px',
+        height: '100px',
+        borderRadius: '12px',
+        border: '2px solid #E2E8F0',
+        overflow: 'hidden',
+        background: '#F8FAFC',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    bannerPreviewImg: {
         width: '100%',
         height: '100%',
         objectFit: 'cover'
     },
-    removeImageBtn: {
-        position: 'absolute',
-        top: '10px',
-        right: '10px',
-        width: '30px',
-        height: '30px',
-        borderRadius: '50%',
-        background: '#DC2626',
-        color: '#fff',
-        border: 'none',
-        cursor: 'pointer',
+    imageError: {
+        display: 'none',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '8px',
+        color: '#DC2626',
+        fontSize: '0.8rem',
+        textAlign: 'center',
+        padding: '10px'
+    },
+    clearUrlBtn: {
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        gap: '6px',
+        padding: '8px 16px',
+        background: '#FEE2E2',
+        color: '#DC2626',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        fontSize: '0.85rem',
+        fontWeight: '500',
+        transition: 'background 0.2s'
+    },
+    // Tips Box
+    tipBox: {
+        marginTop: '25px',
+        padding: '20px',
+        background: '#F0F9FF',
+        borderRadius: '12px',
+        border: '1px solid #BAE6FD'
+    },
+    tipHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        color: '#0369A1',
+        marginBottom: '12px',
+        fontSize: '0.95rem'
+    },
+    tipList: {
+        margin: 0,
+        paddingLeft: '20px',
+        color: '#0C4A6E',
+        fontSize: '0.85rem',
+        lineHeight: '1.8'
+    },
+    tipLink: {
+        color: '#0284C7',
+        textDecoration: 'none'
     },
     settingsGrid: {
         display: 'grid',
@@ -1480,7 +1513,8 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: '1.1rem'
+        fontSize: '1.1rem',
+        flexShrink: 0
     },
     actions: {
         display: 'flex',
@@ -1506,7 +1540,9 @@ const styles = {
         borderRadius: '12px',
         cursor: 'pointer',
         fontWeight: '600',
-        fontSize: '0.95rem'
+        fontSize: '0.95rem',
+        fontFamily: 'inherit',
+        transition: 'all 0.2s'
     },
     cancelBtn: {
         padding: '14px 28px',
@@ -1516,7 +1552,9 @@ const styles = {
         borderRadius: '12px',
         cursor: 'pointer',
         fontWeight: '600',
-        fontSize: '0.95rem'
+        fontSize: '0.95rem',
+        fontFamily: 'inherit',
+        transition: 'all 0.2s'
     },
     submitBtn: {
         display: 'flex',
@@ -1530,7 +1568,9 @@ const styles = {
         cursor: 'pointer',
         fontWeight: '600',
         fontSize: '0.95rem',
-        boxShadow: '0 4px 15px rgba(255, 107, 53, 0.35)'
+        fontFamily: 'inherit',
+        boxShadow: '0 4px 15px rgba(255, 107, 53, 0.35)',
+        transition: 'all 0.2s'
     }
 };
 
