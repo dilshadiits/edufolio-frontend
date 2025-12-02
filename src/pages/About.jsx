@@ -8,7 +8,7 @@ const About = () => {
         {
             name: 'Mujeeb T',
             role: 'Director & CEO',
-            image: 'https://randomuser.me/api/portraits/men/32.jpg',
+            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3S2jpqcgDVqagI1IFjq82YJE-GLSMealqZA&s',
             description: 'Education industry veteran with 15+ years of experience'
         },
         {
