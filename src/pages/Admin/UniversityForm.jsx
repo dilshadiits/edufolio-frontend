@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import API_BASE from '../../api';
@@ -9,11 +9,12 @@ const UniversityForm = () => {
     const isEditMode = Boolean(id);
 
     const [loading, setLoading] = useState(false);
-    const [fetchingData, setFetchingData] = useState(false);
+    const [fetchingData, setFetchingData] = useState(isEditMode);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [originalData, setOriginalData] = useState(null);
 
-    const [form, setForm] = useState({
+    const initialFormState = {
         name: '',
         slug: '',
         type: 'Private',
@@ -37,48 +38,51 @@ const UniversityForm = () => {
         facilities: '',
         featured: false,
         isActive: true
-    });
+    };
+
+    const [form, setForm] = useState(initialFormState);
 
     const universityTypes = ['Private', 'Government', 'Deemed', 'State', 'Central', 'Autonomous'];
     const naacGrades = ['A++', 'A+', 'A', 'B++', 'B+', 'B', 'C', 'Not Rated'];
 
+    // Check authentication
     useEffect(() => {
-        checkAuth();
-    }, []);
-
-    useEffect(() => {
-        if (isEditMode) {
-            fetchUniversityData();
-        }
-    }, [id]);
-
-    const checkAuth = () => {
         const token = localStorage.getItem('token');
         if (!token) {
             navigate('/admin/login');
         }
-    };
+    }, [navigate]);
 
-    const fetchUniversityData = async () => {
+    // Fetch university data when in edit mode
+    const fetchUniversityData = useCallback(async () => {
+        if (!id) return;
+
         setFetchingData(true);
+        setError('');
+
         try {
             const token = localStorage.getItem('token');
+            if (!token) {
+                navigate('/admin/login');
+                return;
+            }
+
             const res = await axios.get(`${API_BASE}/admin/universities/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
             const uni = res.data;
-            console.log('Fetched university data:', uni); // Debug log
+            console.log('Fetched university data:', uni);
 
-            setForm({
+            const formData = {
                 name: uni.name || '',
                 slug: uni.slug || '',
                 type: uni.type || 'Private',
                 establishedYear: uni.establishedYear ? String(uni.establishedYear) : '',
                 rating: uni.rating || '',
                 naacGrade: uni.naacGrade || '',
-                ugcApproved: uni.ugcApproved !== undefined ? uni.ugcApproved : true,
-                aicteApproved: uni.aicteApproved || false,
+                ugcApproved: uni.ugcApproved !== undefined ? Boolean(uni.ugcApproved) : true,
+                aicteApproved: Boolean(uni.aicteApproved),
                 city: uni.city || '',
                 state: uni.state || '',
                 location: uni.location || '',
@@ -92,23 +96,35 @@ const UniversityForm = () => {
                 phone: uni.phone || '',
                 highlights: Array.isArray(uni.highlights) ? uni.highlights.join(', ') : (uni.highlights || ''),
                 facilities: Array.isArray(uni.facilities) ? uni.facilities.join(', ') : (uni.facilities || ''),
-                featured: uni.featured || false,
-                isActive: uni.isActive !== undefined ? uni.isActive : true
-            });
+                featured: Boolean(uni.featured),
+                isActive: uni.isActive !== undefined ? Boolean(uni.isActive) : true
+            };
+
+            setForm(formData);
+            setOriginalData(formData); // Store original for reset
+
         } catch (err) {
             console.error('Error fetching university:', err);
             if (err.response?.status === 404) {
                 setError('University not found');
                 setTimeout(() => navigate('/admin/dashboard'), 2000);
             } else if (err.response?.status === 401) {
-                handleLogout();
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                navigate('/admin/login');
             } else {
-                setError('Failed to load university data');
+                setError('Failed to load university data. Please try again.');
             }
         } finally {
             setFetchingData(false);
         }
-    };
+    }, [id, navigate]);
+
+    useEffect(() => {
+        if (isEditMode && id) {
+            fetchUniversityData();
+        }
+    }, [isEditMode, id, fetchUniversityData]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -118,28 +134,34 @@ const UniversityForm = () => {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setForm(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
 
-        // Auto-generate slug from name
-        if (name === 'name') {
-            const slug = value
-                .toLowerCase()
-                .replace(/[^a-z0-9\s-]/g, '')
-                .replace(/\s+/g, '-')
-                .replace(/-+/g, '-')
-                .trim();
-            setForm(prev => ({ ...prev, slug }));
-        }
+        setForm(prev => {
+            const newForm = {
+                ...prev,
+                [name]: type === 'checkbox' ? checked : value
+            };
 
+            // Auto-generate slug from name (only if slug is empty or matches previous auto-generated)
+            if (name === 'name' && !isEditMode) {
+                const newSlug = value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-')
+                    .trim();
+                newForm.slug = newSlug;
+            }
+
+            return newForm;
+        });
+
+        // Clear errors when user starts typing
         if (error) setError('');
         if (success) setSuccess('');
     };
 
     const validateForm = () => {
-        if (!form.name.trim()) {
+        if (!form.name || !form.name.trim()) {
             setError('University name is required');
             return false;
         }
@@ -147,15 +169,124 @@ const UniversityForm = () => {
             setError('University name must be at least 3 characters');
             return false;
         }
-        if (!form.slug.trim()) {
+        if (!form.slug || !form.slug.trim()) {
             setError('Slug is required');
             return false;
         }
-        if (!form.city.trim()) {
+        if (!/^[a-z0-9-]+$/.test(form.slug.trim())) {
+            setError('Slug can only contain lowercase letters, numbers, and hyphens');
+            return false;
+        }
+        if (!form.city || !form.city.trim()) {
             setError('City is required');
             return false;
         }
+        if (form.email && form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+            setError('Please enter a valid email address');
+            return false;
+        }
         return true;
+    };
+
+    const prepareDataForSubmit = () => {
+        const data = {
+            name: form.name.trim(),
+            slug: form.slug.trim().toLowerCase(),
+            type: form.type || 'Private',
+            city: form.city.trim(),
+            ugcApproved: Boolean(form.ugcApproved),
+            aicteApproved: Boolean(form.aicteApproved),
+            featured: Boolean(form.featured),
+            isActive: Boolean(form.isActive)
+        };
+
+        // Optional string fields
+        if (form.state && form.state.trim()) {
+            data.state = form.state.trim();
+        }
+
+        if (form.location && form.location.trim()) {
+            data.location = form.location.trim();
+        } else if (form.city && form.state) {
+            data.location = `${form.city.trim()}, ${form.state.trim()}`;
+        } else {
+            data.location = form.city.trim();
+        }
+
+        if (form.description && form.description.trim()) {
+            data.description = form.description.trim();
+        }
+
+        if (form.rating && form.rating.trim()) {
+            data.rating = form.rating.trim();
+        }
+
+        if (form.naacGrade) {
+            data.naacGrade = form.naacGrade;
+        }
+
+        if (form.logo && form.logo.trim()) {
+            data.logo = form.logo.trim();
+        }
+
+        if (form.bannerImage && form.bannerImage.trim()) {
+            data.bannerImage = form.bannerImage.trim();
+        }
+
+        if (form.website && form.website.trim()) {
+            data.website = form.website.trim();
+        }
+
+        if (form.email && form.email.trim()) {
+            data.email = form.email.trim();
+        }
+
+        if (form.phone && form.phone.trim()) {
+            data.phone = form.phone.trim();
+        }
+
+        // Number fields
+        if (form.establishedYear) {
+            const year = parseInt(form.establishedYear, 10);
+            if (!isNaN(year) && year >= 1800 && year <= new Date().getFullYear()) {
+                data.establishedYear = year;
+            }
+        }
+
+        if (form.minFee) {
+            const fee = parseInt(form.minFee, 10);
+            if (!isNaN(fee) && fee >= 0) {
+                data.minFee = fee;
+            }
+        }
+
+        if (form.maxFee) {
+            const fee = parseInt(form.maxFee, 10);
+            if (!isNaN(fee) && fee >= 0) {
+                data.maxFee = fee;
+            }
+        }
+
+        // Array fields
+        if (form.highlights && form.highlights.trim()) {
+            data.highlights = form.highlights
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean);
+        } else {
+            data.highlights = [];
+        }
+
+        if (form.facilities && form.facilities.trim()) {
+            data.facilities = form.facilities
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean);
+        } else {
+            data.facilities = [];
+        }
+
+        return data;
     };
 
     const handleSubmit = async (e) => {
@@ -172,124 +303,40 @@ const UniversityForm = () => {
 
         try {
             const token = localStorage.getItem('token');
+            if (!token) {
+                navigate('/admin/login');
+                return;
+            }
 
-            // Prepare the data - only send fields that have values
-            const universityData = {
-                name: form.name.trim(),
-                slug: form.slug.trim(),
-                type: form.type || 'Private',
-                city: form.city.trim(),
-                ugcApproved: Boolean(form.ugcApproved),
-                aicteApproved: Boolean(form.aicteApproved),
-                featured: Boolean(form.featured),
-                isActive: Boolean(form.isActive)
+            const universityData = prepareDataForSubmit();
+            console.log('Submitting data:', universityData);
+
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                }
             };
 
-            // Add optional fields only if they have values
-            if (form.state && form.state.trim()) {
-                universityData.state = form.state.trim();
-            }
-
-            if (form.location && form.location.trim()) {
-                universityData.location = form.location.trim();
-            } else if (form.city && form.state) {
-                universityData.location = `${form.city.trim()}, ${form.state.trim()}`;
-            }
-
-            if (form.description && form.description.trim()) {
-                universityData.description = form.description.trim();
-            }
-
-            if (form.rating && form.rating.trim()) {
-                universityData.rating = form.rating.trim();
-            }
-
-            if (form.naacGrade) {
-                universityData.naacGrade = form.naacGrade;
-            }
-
-            if (form.establishedYear) {
-                const year = parseInt(form.establishedYear, 10);
-                if (!isNaN(year) && year > 1800 && year <= new Date().getFullYear()) {
-                    universityData.establishedYear = year;
-                }
-            }
-
-            if (form.minFee) {
-                const fee = parseInt(form.minFee, 10);
-                if (!isNaN(fee) && fee >= 0) {
-                    universityData.minFee = fee;
-                }
-            }
-
-            if (form.maxFee) {
-                const fee = parseInt(form.maxFee, 10);
-                if (!isNaN(fee) && fee >= 0) {
-                    universityData.maxFee = fee;
-                }
-            }
-
-            if (form.logo && form.logo.trim()) {
-                universityData.logo = form.logo.trim();
-            }
-
-            if (form.bannerImage && form.bannerImage.trim()) {
-                universityData.bannerImage = form.bannerImage.trim();
-            }
-
-            if (form.website && form.website.trim()) {
-                universityData.website = form.website.trim();
-            }
-
-            if (form.email && form.email.trim()) {
-                universityData.email = form.email.trim();
-            }
-
-            if (form.phone && form.phone.trim()) {
-                universityData.phone = form.phone.trim();
-            }
-
-            if (form.highlights && form.highlights.trim()) {
-                universityData.highlights = form.highlights
-                    .split(',')
-                    .map(s => s.trim())
-                    .filter(Boolean);
-            }
-
-            if (form.facilities && form.facilities.trim()) {
-                universityData.facilities = form.facilities
-                    .split(',')
-                    .map(s => s.trim())
-                    .filter(Boolean);
-            }
-
-            console.log('Sending data:', universityData); // Debug log
-
+            let response;
             if (isEditMode) {
-                const response = await axios.put(
+                response = await axios.put(
                     `${API_BASE}/admin/universities/${id}`,
                     universityData,
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
+                    config
                 );
-                console.log('Update response:', response.data); // Debug log
+                console.log('Update response:', response.data);
                 setSuccess('University updated successfully! Redirecting...');
+                
+                // Update original data after successful save
+                setOriginalData({ ...form });
             } else {
-                const response = await axios.post(
+                response = await axios.post(
                     `${API_BASE}/admin/universities`,
                     universityData,
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
+                    config
                 );
-                console.log('Create response:', response.data); // Debug log
+                console.log('Create response:', response.data);
                 setSuccess('University created successfully! Redirecting...');
             }
 
@@ -297,21 +344,19 @@ const UniversityForm = () => {
 
         } catch (err) {
             console.error('Error saving university:', err);
-            console.error('Error response:', err.response?.data); // Debug log
+            console.error('Error response:', err.response?.data);
 
             if (err.response?.status === 401) {
                 handleLogout();
-            } else if (err.response?.status === 409) {
-                setError('A university with this slug already exists');
+            } else if (err.response?.status === 409 || err.response?.data?.message?.includes('duplicate')) {
+                setError('A university with this slug already exists. Please use a different slug.');
             } else if (err.response?.status === 400) {
-                // Show the specific validation error from backend
                 const errorMessage = err.response?.data?.message ||
                     err.response?.data?.error ||
-                    (typeof err.response?.data === 'string' ? err.response?.data : null) ||
-                    'Invalid data. Please check all fields.';
+                    'Invalid data. Please check all required fields.';
                 setError(errorMessage);
             } else {
-                setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} university`);
+                setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} university. Please try again.`);
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } finally {
@@ -321,38 +366,14 @@ const UniversityForm = () => {
 
     const handleReset = () => {
         const confirmMsg = isEditMode
-            ? 'Reset all changes? This will reload the original data.'
+            ? 'Reset all changes? This will restore the original data.'
             : 'Clear all fields?';
 
         if (window.confirm(confirmMsg)) {
-            if (isEditMode) {
-                fetchUniversityData();
+            if (isEditMode && originalData) {
+                setForm({ ...originalData });
             } else {
-                setForm({
-                    name: '',
-                    slug: '',
-                    type: 'Private',
-                    establishedYear: '',
-                    rating: '',
-                    naacGrade: '',
-                    ugcApproved: true,
-                    aicteApproved: false,
-                    city: '',
-                    state: '',
-                    location: '',
-                    minFee: '',
-                    maxFee: '',
-                    description: '',
-                    logo: '',
-                    bannerImage: '',
-                    website: '',
-                    email: '',
-                    phone: '',
-                    highlights: '',
-                    facilities: '',
-                    featured: false,
-                    isActive: true
-                });
+                setForm({ ...initialFormState });
             }
             setError('');
             setSuccess('');
@@ -360,7 +381,7 @@ const UniversityForm = () => {
     };
 
     // Loading state for edit mode
-    if (isEditMode && fetchingData) {
+    if (fetchingData) {
         return (
             <div style={styles.wrapper}>
                 <aside style={styles.sidebar}>
@@ -368,6 +389,12 @@ const UniversityForm = () => {
                         <i className="fa-solid fa-graduation-cap" style={styles.sidebarLogo}></i>
                         <span style={styles.sidebarTitle}>EduFolio</span>
                     </div>
+                    <nav style={styles.sidebarNav}>
+                        <Link to="/admin/dashboard" style={styles.navItem}>
+                            <i className="fa-solid fa-chart-pie"></i>
+                            <span>Overview</span>
+                        </Link>
+                    </nav>
                 </aside>
                 <main style={styles.main}>
                     <div style={styles.loadingContainer}>
@@ -396,10 +423,10 @@ const UniversityForm = () => {
                         <i className="fa-solid fa-chart-pie"></i>
                         <span>Overview</span>
                     </Link>
-                    <Link to="/admin/universities/add" style={styles.navItemActive}>
+                    <div style={styles.navItemActive}>
                         <i className="fa-solid fa-building-columns"></i>
                         <span>Universities</span>
-                    </Link>
+                    </div>
                     <Link to="/admin/programs/add" style={styles.navItem}>
                         <i className="fa-solid fa-graduation-cap"></i>
                         <span>Programs</span>
@@ -449,6 +476,7 @@ const UniversityForm = () => {
                             )}
                         </div>
                         <button
+                            type="button"
                             style={styles.backBtn}
                             onClick={() => navigate('/admin/dashboard')}
                         >
@@ -463,7 +491,7 @@ const UniversityForm = () => {
                                 <i className="fa-solid fa-exclamation-circle"></i>
                                 <span>{error}</span>
                             </div>
-                            <button style={styles.alertClose} onClick={() => setError('')}>
+                            <button type="button" style={styles.alertClose} onClick={() => setError('')}>
                                 <i className="fa-solid fa-times"></i>
                             </button>
                         </div>
@@ -505,6 +533,7 @@ const UniversityForm = () => {
                                         onChange={handleChange}
                                         placeholder="e.g., Amity University Online"
                                         style={styles.input}
+                                        autoComplete="off"
                                     />
                                 </div>
 
@@ -519,9 +548,10 @@ const UniversityForm = () => {
                                         onChange={handleChange}
                                         placeholder="e.g., amity-university-online"
                                         style={styles.input}
+                                        autoComplete="off"
                                     />
                                     <small style={styles.hint}>
-                                        Used in URL: /universities/{form.slug || 'your-slug'}
+                                        URL: /universities/{form.slug || 'your-slug'}
                                     </small>
                                 </div>
 
@@ -761,6 +791,9 @@ const UniversityForm = () => {
                                     style={styles.textarea}
                                     rows="4"
                                 ></textarea>
+                                <small style={styles.hint}>
+                                    {form.description.length} characters
+                                </small>
                             </div>
 
                             <div style={styles.grid}>
@@ -819,7 +852,12 @@ const UniversityForm = () => {
                                                 src={form.logo}
                                                 alt="Logo Preview"
                                                 style={styles.logoPreview}
-                                                onError={(e) => e.target.style.display = 'none'}
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
+                                                }}
+                                                onLoad={(e) => {
+                                                    e.target.style.display = 'block';
+                                                }}
                                             />
                                             <button
                                                 type="button"
@@ -848,7 +886,12 @@ const UniversityForm = () => {
                                                 src={form.bannerImage}
                                                 alt="Banner Preview"
                                                 style={styles.bannerPreview}
-                                                onError={(e) => e.target.style.display = 'none'}
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
+                                                }}
+                                                onLoad={(e) => {
+                                                    e.target.style.display = 'block';
+                                                }}
                                             />
                                             <button
                                                 type="button"
@@ -955,7 +998,7 @@ const UniversityForm = () => {
                                     </div>
                                     <div>
                                         <strong>Featured</strong>
-                                        <small style={{ display: 'block', color: '#64748B' }}>Show on homepage</small>
+                                        <small style={{ display: 'block', color: '#64748B', marginTop: '2px' }}>Show on homepage</small>
                                     </div>
                                 </label>
 
@@ -979,7 +1022,7 @@ const UniversityForm = () => {
                                     </div>
                                     <div>
                                         <strong>Active</strong>
-                                        <small style={{ display: 'block', color: '#64748B' }}>Visible to users</small>
+                                        <small style={{ display: 'block', color: '#64748B', marginTop: '2px' }}>Visible to users</small>
                                     </div>
                                 </label>
                             </div>
@@ -989,7 +1032,7 @@ const UniversityForm = () => {
                         <div style={styles.actions}>
                             <button type="button" style={styles.resetBtn} onClick={handleReset}>
                                 <i className="fa-solid fa-rotate-left"></i>
-                                {isEditMode ? 'Reset' : 'Clear'}
+                                {isEditMode ? 'Reset Changes' : 'Clear Form'}
                             </button>
                             <div style={styles.actionRight}>
                                 <button
@@ -1034,7 +1077,7 @@ const styles = {
         display: 'flex',
         minHeight: '100vh',
         background: '#F8FAFC',
-        fontFamily: "'Poppins', sans-serif"
+        fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     sidebar: {
         width: '260px',
@@ -1079,7 +1122,8 @@ const styles = {
         color: '#94A3B8',
         fontSize: '0.95rem',
         borderRadius: '10px',
-        textDecoration: 'none'
+        textDecoration: 'none',
+        transition: 'all 0.2s'
     },
     navItemActive: {
         display: 'flex',
@@ -1119,7 +1163,8 @@ const styles = {
         color: '#F87171',
         fontSize: '0.9rem',
         borderRadius: '10px',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        fontFamily: 'inherit'
     },
     main: {
         flex: 1,
@@ -1198,7 +1243,8 @@ const styles = {
         borderRadius: '10px',
         cursor: 'pointer',
         fontWeight: '600',
-        fontSize: '0.9rem'
+        fontSize: '0.9rem',
+        fontFamily: 'inherit'
     },
     errorAlert: {
         background: '#FEE2E2',
@@ -1231,7 +1277,8 @@ const styles = {
         border: 'none',
         color: '#DC2626',
         cursor: 'pointer',
-        fontSize: '1rem'
+        fontSize: '1rem',
+        padding: '5px'
     },
     form: {
         background: '#fff',
@@ -1265,7 +1312,8 @@ const styles = {
         color: '#0F172A',
         fontSize: '1.05rem',
         fontWeight: '700',
-        marginBottom: '3px'
+        marginBottom: '3px',
+        margin: 0
     },
     sectionDesc: {
         color: '#64748B',
@@ -1298,7 +1346,8 @@ const styles = {
         fontSize: '0.9rem',
         boxSizing: 'border-box',
         outline: 'none',
-        fontFamily: 'inherit'
+        fontFamily: 'inherit',
+        transition: 'border-color 0.2s'
     },
     select: {
         width: '100%',
@@ -1351,7 +1400,8 @@ const styles = {
         border: '2px solid #E2E8F0',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        transition: 'all 0.2s'
     },
     previewBox: {
         marginTop: '10px',
@@ -1364,7 +1414,8 @@ const styles = {
         height: '60px',
         objectFit: 'contain',
         borderRadius: '8px',
-        border: '1px solid #E2E8F0'
+        border: '1px solid #E2E8F0',
+        background: '#F8FAFC'
     },
     bannerPreview: {
         width: '150px',
@@ -1419,7 +1470,8 @@ const styles = {
         background: '#F8FAFC',
         borderRadius: '12px',
         cursor: 'pointer',
-        border: '2px solid transparent'
+        border: '2px solid transparent',
+        transition: 'all 0.2s'
     },
     settingCardActive: {
         background: '#FFF7ED',
@@ -1432,7 +1484,8 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: '1rem'
+        fontSize: '1rem',
+        flexShrink: 0
     },
     actions: {
         display: 'flex',
