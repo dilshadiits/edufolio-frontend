@@ -68,12 +68,13 @@ const UniversityForm = () => {
             });
 
             const uni = res.data;
+            console.log('Fetched university data:', uni); // Debug log
 
             setForm({
                 name: uni.name || '',
                 slug: uni.slug || '',
                 type: uni.type || 'Private',
-                establishedYear: uni.establishedYear || '',
+                establishedYear: uni.establishedYear ? String(uni.establishedYear) : '',
                 rating: uni.rating || '',
                 naacGrade: uni.naacGrade || '',
                 ugcApproved: uni.ugcApproved !== undefined ? uni.ugcApproved : true,
@@ -81,16 +82,16 @@ const UniversityForm = () => {
                 city: uni.city || '',
                 state: uni.state || '',
                 location: uni.location || '',
-                minFee: uni.minFee || '',
-                maxFee: uni.maxFee || '',
+                minFee: uni.minFee ? String(uni.minFee) : '',
+                maxFee: uni.maxFee ? String(uni.maxFee) : '',
                 description: uni.description || '',
                 logo: uni.logo || '',
                 bannerImage: uni.bannerImage || '',
                 website: uni.website || '',
                 email: uni.email || '',
                 phone: uni.phone || '',
-                highlights: Array.isArray(uni.highlights) ? uni.highlights.join(', ') : uni.highlights || '',
-                facilities: Array.isArray(uni.facilities) ? uni.facilities.join(', ') : uni.facilities || '',
+                highlights: Array.isArray(uni.highlights) ? uni.highlights.join(', ') : (uni.highlights || ''),
+                facilities: Array.isArray(uni.facilities) ? uni.facilities.join(', ') : (uni.facilities || ''),
                 featured: uni.featured || false,
                 isActive: uni.isActive !== undefined ? uni.isActive : true
             });
@@ -137,16 +138,6 @@ const UniversityForm = () => {
         if (success) setSuccess('');
     };
 
-    const isValidImageUrl = (url) => {
-        if (!url) return true; // Empty is valid (optional field)
-        try {
-            new URL(url);
-            return true;
-        } catch {
-            return false;
-        }
-    };
-
     const validateForm = () => {
         if (!form.name.trim()) {
             setError('University name is required');
@@ -164,27 +155,7 @@ const UniversityForm = () => {
             setError('City is required');
             return false;
         }
-        if (form.logo && !isValidImageUrl(form.logo)) {
-            setError('Please enter a valid logo URL');
-            return false;
-        }
-        if (form.bannerImage && !isValidImageUrl(form.bannerImage)) {
-            setError('Please enter a valid banner image URL');
-            return false;
-        }
-        if (form.website && !isValidImageUrl(form.website)) {
-            setError('Please enter a valid website URL');
-            return false;
-        }
-        if (form.email && !isValidEmail(form.email)) {
-            setError('Please enter a valid email address');
-            return false;
-        }
         return true;
-    };
-
-    const isValidEmail = (email) => {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     };
 
     const handleSubmit = async (e) => {
@@ -202,34 +173,123 @@ const UniversityForm = () => {
         try {
             const token = localStorage.getItem('token');
 
+            // Prepare the data - only send fields that have values
             const universityData = {
-                ...form,
                 name: form.name.trim(),
                 slug: form.slug.trim(),
-                description: form.description.trim(),
-                logo: form.logo.trim(),
-                bannerImage: form.bannerImage.trim(),
-                minFee: form.minFee ? Number(form.minFee) : 0,
-                maxFee: form.maxFee ? Number(form.maxFee) : 0,
-                establishedYear: form.establishedYear ? Number(form.establishedYear) : null,
-                location: form.location || `${form.city}, ${form.state}`.trim(),
-                highlights: form.highlights
-                    ? form.highlights.split(',').map(s => s.trim()).filter(Boolean)
-                    : [],
-                facilities: form.facilities
-                    ? form.facilities.split(',').map(s => s.trim()).filter(Boolean)
-                    : []
+                type: form.type || 'Private',
+                city: form.city.trim(),
+                ugcApproved: Boolean(form.ugcApproved),
+                aicteApproved: Boolean(form.aicteApproved),
+                featured: Boolean(form.featured),
+                isActive: Boolean(form.isActive)
             };
 
+            // Add optional fields only if they have values
+            if (form.state && form.state.trim()) {
+                universityData.state = form.state.trim();
+            }
+
+            if (form.location && form.location.trim()) {
+                universityData.location = form.location.trim();
+            } else if (form.city && form.state) {
+                universityData.location = `${form.city.trim()}, ${form.state.trim()}`;
+            }
+
+            if (form.description && form.description.trim()) {
+                universityData.description = form.description.trim();
+            }
+
+            if (form.rating && form.rating.trim()) {
+                universityData.rating = form.rating.trim();
+            }
+
+            if (form.naacGrade) {
+                universityData.naacGrade = form.naacGrade;
+            }
+
+            if (form.establishedYear) {
+                const year = parseInt(form.establishedYear, 10);
+                if (!isNaN(year) && year > 1800 && year <= new Date().getFullYear()) {
+                    universityData.establishedYear = year;
+                }
+            }
+
+            if (form.minFee) {
+                const fee = parseInt(form.minFee, 10);
+                if (!isNaN(fee) && fee >= 0) {
+                    universityData.minFee = fee;
+                }
+            }
+
+            if (form.maxFee) {
+                const fee = parseInt(form.maxFee, 10);
+                if (!isNaN(fee) && fee >= 0) {
+                    universityData.maxFee = fee;
+                }
+            }
+
+            if (form.logo && form.logo.trim()) {
+                universityData.logo = form.logo.trim();
+            }
+
+            if (form.bannerImage && form.bannerImage.trim()) {
+                universityData.bannerImage = form.bannerImage.trim();
+            }
+
+            if (form.website && form.website.trim()) {
+                universityData.website = form.website.trim();
+            }
+
+            if (form.email && form.email.trim()) {
+                universityData.email = form.email.trim();
+            }
+
+            if (form.phone && form.phone.trim()) {
+                universityData.phone = form.phone.trim();
+            }
+
+            if (form.highlights && form.highlights.trim()) {
+                universityData.highlights = form.highlights
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean);
+            }
+
+            if (form.facilities && form.facilities.trim()) {
+                universityData.facilities = form.facilities
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean);
+            }
+
+            console.log('Sending data:', universityData); // Debug log
+
             if (isEditMode) {
-                await axios.put(`${API_BASE}/admin/universities/${id}`, universityData, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const response = await axios.put(
+                    `${API_BASE}/admin/universities/${id}`,
+                    universityData,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+                console.log('Update response:', response.data); // Debug log
                 setSuccess('University updated successfully! Redirecting...');
             } else {
-                await axios.post(`${API_BASE}/admin/universities`, universityData, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const response = await axios.post(
+                    `${API_BASE}/admin/universities`,
+                    universityData,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+                console.log('Create response:', response.data); // Debug log
                 setSuccess('University created successfully! Redirecting...');
             }
 
@@ -237,10 +297,19 @@ const UniversityForm = () => {
 
         } catch (err) {
             console.error('Error saving university:', err);
+            console.error('Error response:', err.response?.data); // Debug log
+
             if (err.response?.status === 401) {
                 handleLogout();
             } else if (err.response?.status === 409) {
                 setError('A university with this slug already exists');
+            } else if (err.response?.status === 400) {
+                // Show the specific validation error from backend
+                const errorMessage = err.response?.data?.message ||
+                    err.response?.data?.error ||
+                    (typeof err.response?.data === 'string' ? err.response?.data : null) ||
+                    'Invalid data. Please check all fields.';
+                setError(errorMessage);
             } else {
                 setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} university`);
             }
@@ -634,18 +703,15 @@ const UniversityForm = () => {
                             <div style={styles.grid}>
                                 <div style={styles.inputGroup}>
                                     <label style={styles.label}>Minimum Fee (₹)</label>
-                                    <div style={styles.inputWithIcon}>
-                                        <span style={styles.inputPrefix}>₹</span>
-                                        <input
-                                            type="number"
-                                            name="minFee"
-                                            value={form.minFee}
-                                            onChange={handleChange}
-                                            placeholder="50000"
-                                            style={{ ...styles.input, paddingLeft: '35px' }}
-                                            min="0"
-                                        />
-                                    </div>
+                                    <input
+                                        type="number"
+                                        name="minFee"
+                                        value={form.minFee}
+                                        onChange={handleChange}
+                                        placeholder="e.g., 50000"
+                                        style={styles.input}
+                                        min="0"
+                                    />
                                     {form.minFee && (
                                         <small style={styles.hint}>
                                             ₹{Number(form.minFee).toLocaleString('en-IN')}
@@ -655,18 +721,15 @@ const UniversityForm = () => {
 
                                 <div style={styles.inputGroup}>
                                     <label style={styles.label}>Maximum Fee (₹)</label>
-                                    <div style={styles.inputWithIcon}>
-                                        <span style={styles.inputPrefix}>₹</span>
-                                        <input
-                                            type="number"
-                                            name="maxFee"
-                                            value={form.maxFee}
-                                            onChange={handleChange}
-                                            placeholder="500000"
-                                            style={{ ...styles.input, paddingLeft: '35px' }}
-                                            min="0"
-                                        />
-                                    </div>
+                                    <input
+                                        type="number"
+                                        name="maxFee"
+                                        value={form.maxFee}
+                                        onChange={handleChange}
+                                        placeholder="e.g., 500000"
+                                        style={styles.input}
+                                        min="0"
+                                    />
                                     {form.maxFee && (
                                         <small style={styles.hint}>
                                             ₹{Number(form.maxFee).toLocaleString('en-IN')}
@@ -694,43 +757,36 @@ const UniversityForm = () => {
                                     name="description"
                                     value={form.description}
                                     onChange={handleChange}
-                                    placeholder="Write a detailed description about the university, its history, achievements, and what makes it unique..."
+                                    placeholder="Write a detailed description about the university..."
                                     style={styles.textarea}
-                                    rows="5"
-                                ></textarea>
-                                <small style={styles.hint}>
-                                    {form.description.length}/1000 characters
-                                </small>
-                            </div>
-
-                            <div style={styles.inputGroup}>
-                                <label style={styles.label}>
-                                    <i className="fa-solid fa-star" style={styles.labelIcon}></i>
-                                    Highlights (comma separated)
-                                </label>
-                                <textarea
-                                    name="highlights"
-                                    value={form.highlights}
-                                    onChange={handleChange}
-                                    placeholder="100% Placement Assistance, Industry Partnerships, Flexible Learning, Expert Faculty"
-                                    style={styles.textarea}
-                                    rows="2"
+                                    rows="4"
                                 ></textarea>
                             </div>
 
-                            <div style={styles.inputGroup}>
-                                <label style={styles.label}>
-                                    <i className="fa-solid fa-building" style={styles.labelIcon}></i>
-                                    Facilities (comma separated)
-                                </label>
-                                <textarea
-                                    name="facilities"
-                                    value={form.facilities}
-                                    onChange={handleChange}
-                                    placeholder="Digital Library, Online Labs, Student Portal, Career Services, Alumni Network"
-                                    style={styles.textarea}
-                                    rows="2"
-                                ></textarea>
+                            <div style={styles.grid}>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Highlights (comma separated)</label>
+                                    <textarea
+                                        name="highlights"
+                                        value={form.highlights}
+                                        onChange={handleChange}
+                                        placeholder="100% Placement, Industry Partnerships, Flexible Learning"
+                                        style={styles.textarea}
+                                        rows="2"
+                                    ></textarea>
+                                </div>
+
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Facilities (comma separated)</label>
+                                    <textarea
+                                        name="facilities"
+                                        value={form.facilities}
+                                        onChange={handleChange}
+                                        placeholder="Digital Library, Online Labs, Career Services"
+                                        style={styles.textarea}
+                                        rows="2"
+                                    ></textarea>
+                                </div>
                             </div>
                         </div>
 
@@ -741,18 +797,14 @@ const UniversityForm = () => {
                                     <i className="fa-solid fa-image"></i>
                                 </div>
                                 <div>
-                                    <h2 style={styles.sectionTitle}>Media</h2>
-                                    <p style={styles.sectionDesc}>Add logo and banner image URLs (use external image hosting like Imgur, Cloudinary, etc.)</p>
+                                    <h2 style={styles.sectionTitle}>Media (Image URLs)</h2>
+                                    <p style={styles.sectionDesc}>Paste image URLs from hosting services</p>
                                 </div>
                             </div>
 
                             <div style={styles.grid}>
-                                {/* Logo URL */}
                                 <div style={styles.inputGroup}>
-                                    <label style={styles.label}>
-                                        <i className="fa-solid fa-image" style={styles.labelIcon}></i>
-                                        Logo Image URL
-                                    </label>
+                                    <label style={styles.label}>Logo URL</label>
                                     <input
                                         type="url"
                                         name="logo"
@@ -761,51 +813,27 @@ const UniversityForm = () => {
                                         placeholder="https://example.com/logo.png"
                                         style={styles.input}
                                     />
-                                    <small style={styles.hint}>
-                                        Recommended: Square image (200x200px). Use Imgur, Cloudinary, or direct image links.
-                                    </small>
-                                    
-                                    {/* Logo Preview */}
                                     {form.logo && (
-                                        <div style={styles.imagePreviewContainer}>
-                                            <div style={styles.logoPreviewBox}>
-                                                <img
-                                                    src={form.logo}
-                                                    alt="Logo Preview"
-                                                    style={styles.logoPreviewImg}
-                                                    onError={(e) => {
-                                                        e.target.style.display = 'none';
-                                                        e.target.nextSibling.style.display = 'flex';
-                                                    }}
-                                                    onLoad={(e) => {
-                                                        e.target.style.display = 'block';
-                                                        if (e.target.nextSibling) {
-                                                            e.target.nextSibling.style.display = 'none';
-                                                        }
-                                                    }}
-                                                />
-                                                <div style={styles.imageError}>
-                                                    <i className="fa-solid fa-exclamation-triangle"></i>
-                                                    <span>Invalid image URL</span>
-                                                </div>
-                                            </div>
+                                        <div style={styles.previewBox}>
+                                            <img
+                                                src={form.logo}
+                                                alt="Logo Preview"
+                                                style={styles.logoPreview}
+                                                onError={(e) => e.target.style.display = 'none'}
+                                            />
                                             <button
                                                 type="button"
-                                                style={styles.clearUrlBtn}
                                                 onClick={() => setForm(prev => ({ ...prev, logo: '' }))}
+                                                style={styles.clearBtn}
                                             >
-                                                <i className="fa-solid fa-times"></i> Clear
+                                                <i className="fa-solid fa-times"></i>
                                             </button>
                                         </div>
                                     )}
                                 </div>
 
-                                {/* Banner URL */}
                                 <div style={styles.inputGroup}>
-                                    <label style={styles.label}>
-                                        <i className="fa-solid fa-panorama" style={styles.labelIcon}></i>
-                                        Banner Image URL
-                                    </label>
+                                    <label style={styles.label}>Banner URL</label>
                                     <input
                                         type="url"
                                         name="bannerImage"
@@ -814,58 +842,32 @@ const UniversityForm = () => {
                                         placeholder="https://example.com/banner.jpg"
                                         style={styles.input}
                                     />
-                                    <small style={styles.hint}>
-                                        Recommended: Wide image (1200x400px). Use Unsplash, Pexels, or image hosting services.
-                                    </small>
-                                    
-                                    {/* Banner Preview */}
                                     {form.bannerImage && (
-                                        <div style={styles.imagePreviewContainer}>
-                                            <div style={styles.bannerPreviewBox}>
-                                                <img
-                                                    src={form.bannerImage}
-                                                    alt="Banner Preview"
-                                                    style={styles.bannerPreviewImg}
-                                                    onError={(e) => {
-                                                        e.target.style.display = 'none';
-                                                        e.target.nextSibling.style.display = 'flex';
-                                                    }}
-                                                    onLoad={(e) => {
-                                                        e.target.style.display = 'block';
-                                                        if (e.target.nextSibling) {
-                                                            e.target.nextSibling.style.display = 'none';
-                                                        }
-                                                    }}
-                                                />
-                                                <div style={styles.imageError}>
-                                                    <i className="fa-solid fa-exclamation-triangle"></i>
-                                                    <span>Invalid image URL</span>
-                                                </div>
-                                            </div>
+                                        <div style={styles.previewBox}>
+                                            <img
+                                                src={form.bannerImage}
+                                                alt="Banner Preview"
+                                                style={styles.bannerPreview}
+                                                onError={(e) => e.target.style.display = 'none'}
+                                            />
                                             <button
                                                 type="button"
-                                                style={styles.clearUrlBtn}
                                                 onClick={() => setForm(prev => ({ ...prev, bannerImage: '' }))}
+                                                style={styles.clearBtn}
                                             >
-                                                <i className="fa-solid fa-times"></i> Clear
+                                                <i className="fa-solid fa-times"></i>
                                             </button>
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            {/* Image Hosting Tips */}
                             <div style={styles.tipBox}>
-                                <div style={styles.tipHeader}>
-                                    <i className="fa-solid fa-lightbulb"></i>
-                                    <strong>Where to host images?</strong>
-                                </div>
-                                <ul style={styles.tipList}>
-                                    <li><strong>Imgur:</strong> Free image hosting - <a href="https://imgur.com/upload" target="_blank" rel="noreferrer" style={styles.tipLink}>imgur.com/upload</a></li>
-                                    <li><strong>Cloudinary:</strong> Professional image hosting - <a href="https://cloudinary.com" target="_blank" rel="noreferrer" style={styles.tipLink}>cloudinary.com</a></li>
-                                    <li><strong>Unsplash:</strong> Free stock photos - <a href="https://unsplash.com" target="_blank" rel="noreferrer" style={styles.tipLink}>unsplash.com</a></li>
-                                    <li><strong>Google Drive:</strong> Use shareable links (make sure "Anyone with link" can view)</li>
-                                </ul>
+                                <i className="fa-solid fa-lightbulb" style={{ color: '#F59E0B' }}></i>
+                                <span>Use image hosting: </span>
+                                <a href="https://imgur.com/upload" target="_blank" rel="noreferrer" style={styles.tipLink}>Imgur</a>
+                                <a href="https://unsplash.com" target="_blank" rel="noreferrer" style={styles.tipLink}>Unsplash</a>
+                                <a href="https://cloudinary.com" target="_blank" rel="noreferrer" style={styles.tipLink}>Cloudinary</a>
                             </div>
                         </div>
 
@@ -877,16 +879,13 @@ const UniversityForm = () => {
                                 </div>
                                 <div>
                                     <h2 style={styles.sectionTitle}>Contact Information</h2>
-                                    <p style={styles.sectionDesc}>Add contact details for the university</p>
+                                    <p style={styles.sectionDesc}>Add contact details</p>
                                 </div>
                             </div>
 
                             <div style={styles.grid}>
                                 <div style={styles.inputGroup}>
-                                    <label style={styles.label}>
-                                        <i className="fa-solid fa-globe" style={styles.labelIcon}></i>
-                                        Website
-                                    </label>
+                                    <label style={styles.label}>Website</label>
                                     <input
                                         type="url"
                                         name="website"
@@ -898,10 +897,7 @@ const UniversityForm = () => {
                                 </div>
 
                                 <div style={styles.inputGroup}>
-                                    <label style={styles.label}>
-                                        <i className="fa-solid fa-envelope" style={styles.labelIcon}></i>
-                                        Email
-                                    </label>
+                                    <label style={styles.label}>Email</label>
                                     <input
                                         type="email"
                                         name="email"
@@ -913,10 +909,7 @@ const UniversityForm = () => {
                                 </div>
 
                                 <div style={styles.inputGroup}>
-                                    <label style={styles.label}>
-                                        <i className="fa-solid fa-phone" style={styles.labelIcon}></i>
-                                        Phone
-                                    </label>
+                                    <label style={styles.label}>Phone</label>
                                     <input
                                         type="tel"
                                         name="phone"
@@ -937,7 +930,7 @@ const UniversityForm = () => {
                                 </div>
                                 <div>
                                     <h2 style={styles.sectionTitle}>Settings</h2>
-                                    <p style={styles.sectionDesc}>Configure visibility and featured status</p>
+                                    <p style={styles.sectionDesc}>Configure visibility</p>
                                 </div>
                             </div>
 
@@ -961,8 +954,8 @@ const UniversityForm = () => {
                                         <i className="fa-solid fa-star"></i>
                                     </div>
                                     <div>
-                                        <strong>Featured University</strong>
-                                        <small style={{ display: 'block', color: '#64748B', marginTop: '4px' }}>Display on homepage and featured sections</small>
+                                        <strong>Featured</strong>
+                                        <small style={{ display: 'block', color: '#64748B' }}>Show on homepage</small>
                                     </div>
                                 </label>
 
@@ -986,7 +979,7 @@ const UniversityForm = () => {
                                     </div>
                                     <div>
                                         <strong>Active</strong>
-                                        <small style={{ display: 'block', color: '#64748B', marginTop: '4px' }}>University is visible to students</small>
+                                        <small style={{ display: 'block', color: '#64748B' }}>Visible to users</small>
                                     </div>
                                 </label>
                             </div>
@@ -994,13 +987,9 @@ const UniversityForm = () => {
 
                         {/* Form Actions */}
                         <div style={styles.actions}>
-                            <button
-                                type="button"
-                                style={styles.resetBtn}
-                                onClick={handleReset}
-                            >
+                            <button type="button" style={styles.resetBtn} onClick={handleReset}>
                                 <i className="fa-solid fa-rotate-left"></i>
-                                {isEditMode ? 'Reset Changes' : 'Clear Form'}
+                                {isEditMode ? 'Reset' : 'Clear'}
                             </button>
                             <div style={styles.actionRight}>
                                 <button
@@ -1045,7 +1034,7 @@ const styles = {
         display: 'flex',
         minHeight: '100vh',
         background: '#F8FAFC',
-        fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif"
+        fontFamily: "'Poppins', sans-serif"
     },
     sidebar: {
         width: '260px',
@@ -1087,13 +1076,10 @@ const styles = {
         alignItems: 'center',
         gap: '12px',
         padding: '14px 18px',
-        background: 'transparent',
         color: '#94A3B8',
         fontSize: '0.95rem',
-        fontWeight: '500',
         borderRadius: '10px',
-        textDecoration: 'none',
-        transition: 'all 0.2s'
+        textDecoration: 'none'
     },
     navItemActive: {
         display: 'flex',
@@ -1121,8 +1107,7 @@ const styles = {
         padding: '12px 18px',
         color: '#94A3B8',
         textDecoration: 'none',
-        fontSize: '0.9rem',
-        transition: 'color 0.2s'
+        fontSize: '0.9rem'
     },
     logoutBtn: {
         display: 'flex',
@@ -1134,8 +1119,7 @@ const styles = {
         color: '#F87171',
         fontSize: '0.9rem',
         borderRadius: '10px',
-        cursor: 'pointer',
-        transition: 'background 0.2s'
+        cursor: 'pointer'
     },
     main: {
         flex: 1,
@@ -1162,86 +1146,84 @@ const styles = {
         justifyContent: 'center'
     },
     container: {
-        maxWidth: '1000px',
+        maxWidth: '900px',
         margin: '0 auto'
     },
     header: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: '30px',
+        marginBottom: '25px',
         flexWrap: 'wrap',
-        gap: '20px'
+        gap: '15px'
     },
     headerLeft: {},
     title: {
         color: '#0F172A',
-        fontSize: '1.8rem',
+        fontSize: '1.6rem',
         fontWeight: '700',
-        marginBottom: '8px',
+        marginBottom: '6px',
         display: 'flex',
         alignItems: 'center',
-        gap: '12px'
+        gap: '10px'
     },
     titleIcon: {
         color: '#FF6B35'
     },
     subtitle: {
         color: '#64748B',
-        fontSize: '0.95rem',
+        fontSize: '0.9rem',
         margin: 0
     },
     editBadge: {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '8px',
-        marginTop: '12px',
-        padding: '8px 16px',
+        marginTop: '10px',
+        padding: '6px 14px',
         background: '#FFF7ED',
         color: '#EA580C',
-        borderRadius: '25px',
+        borderRadius: '20px',
         fontSize: '0.85rem',
-        fontWeight: '600',
-        border: '1px solid #FFEDD5'
+        fontWeight: '600'
     },
     backBtn: {
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
-        padding: '12px 24px',
+        padding: '10px 20px',
         background: '#F1F5F9',
         color: '#334155',
         border: 'none',
         borderRadius: '10px',
         cursor: 'pointer',
         fontWeight: '600',
-        fontSize: '0.9rem',
-        transition: 'background 0.2s'
+        fontSize: '0.9rem'
     },
     errorAlert: {
-        background: 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)',
+        background: '#FEE2E2',
         border: '1px solid #FCA5A5',
         color: '#DC2626',
-        padding: '16px 20px',
-        borderRadius: '12px',
-        marginBottom: '25px',
+        padding: '14px 18px',
+        borderRadius: '10px',
+        marginBottom: '20px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center'
     },
     successAlert: {
-        background: 'linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%)',
+        background: '#D1FAE5',
         border: '1px solid #6EE7B7',
         color: '#059669',
-        padding: '16px 20px',
-        borderRadius: '12px',
-        marginBottom: '25px'
+        padding: '14px 18px',
+        borderRadius: '10px',
+        marginBottom: '20px'
     },
     alertContent: {
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
-        fontSize: '0.95rem',
+        gap: '10px',
+        fontSize: '0.9rem',
         fontWeight: '500'
     },
     alertClose: {
@@ -1249,328 +1231,259 @@ const styles = {
         border: 'none',
         color: '#DC2626',
         cursor: 'pointer',
-        fontSize: '1.1rem',
-        padding: '5px'
+        fontSize: '1rem'
     },
     form: {
         background: '#fff',
-        borderRadius: '20px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+        borderRadius: '16px',
+        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.06)',
         overflow: 'hidden'
     },
     section: {
-        padding: '30px',
+        padding: '25px',
         borderBottom: '1px solid #E2E8F0'
     },
     sectionHeader: {
         display: 'flex',
         alignItems: 'flex-start',
-        gap: '15px',
-        marginBottom: '25px'
+        gap: '12px',
+        marginBottom: '20px'
     },
     sectionIcon: {
-        width: '45px',
-        height: '45px',
-        borderRadius: '12px',
-        background: 'linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%)',
+        width: '40px',
+        height: '40px',
+        borderRadius: '10px',
+        background: 'linear-gradient(135deg, #FF6B35, #FF8B5C)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         color: '#fff',
-        fontSize: '1.1rem',
+        fontSize: '1rem',
         flexShrink: 0
     },
     sectionTitle: {
         color: '#0F172A',
-        fontSize: '1.15rem',
+        fontSize: '1.05rem',
         fontWeight: '700',
-        marginBottom: '4px'
+        marginBottom: '3px'
     },
     sectionDesc: {
         color: '#64748B',
-        fontSize: '0.9rem',
+        fontSize: '0.85rem',
         margin: 0
     },
     grid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '20px'
+        gap: '16px'
     },
     inputGroup: {
         marginBottom: '5px'
     },
     label: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
+        display: 'block',
         color: '#334155',
-        fontSize: '0.9rem',
+        fontSize: '0.85rem',
         fontWeight: '600',
-        marginBottom: '10px'
-    },
-    labelIcon: {
-        color: '#64748B'
+        marginBottom: '8px'
     },
     required: {
         color: '#DC2626'
     },
     input: {
         width: '100%',
-        padding: '14px 16px',
+        padding: '12px 14px',
         border: '2px solid #E2E8F0',
-        borderRadius: '12px',
-        fontSize: '0.95rem',
+        borderRadius: '10px',
+        fontSize: '0.9rem',
         boxSizing: 'border-box',
         outline: 'none',
-        transition: 'border-color 0.2s, box-shadow 0.2s',
         fontFamily: 'inherit'
-    },
-    inputWithIcon: {
-        position: 'relative'
-    },
-    inputPrefix: {
-        position: 'absolute',
-        left: '16px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        color: '#64748B',
-        fontWeight: '600'
     },
     select: {
         width: '100%',
-        padding: '14px 16px',
+        padding: '12px 14px',
         border: '2px solid #E2E8F0',
-        borderRadius: '12px',
-        fontSize: '0.95rem',
+        borderRadius: '10px',
+        fontSize: '0.9rem',
         boxSizing: 'border-box',
-        cursor: 'pointer',
         background: '#fff',
-        outline: 'none',
+        cursor: 'pointer',
         fontFamily: 'inherit'
     },
     textarea: {
         width: '100%',
-        padding: '14px 16px',
+        padding: '12px 14px',
         border: '2px solid #E2E8F0',
-        borderRadius: '12px',
-        fontSize: '0.95rem',
+        borderRadius: '10px',
+        fontSize: '0.9rem',
         boxSizing: 'border-box',
         resize: 'vertical',
         fontFamily: 'inherit',
-        outline: 'none',
-        minHeight: '100px',
-        transition: 'border-color 0.2s'
+        minHeight: '80px'
     },
     hint: {
         display: 'block',
         color: '#64748B',
-        fontSize: '0.8rem',
-        marginTop: '8px'
+        fontSize: '0.75rem',
+        marginTop: '6px'
     },
     checkboxRow: {
         display: 'flex',
-        gap: '30px',
-        marginTop: '20px'
+        gap: '25px',
+        marginTop: '15px'
     },
     checkboxLabel: {
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
         cursor: 'pointer',
-        fontSize: '0.95rem',
+        fontSize: '0.9rem',
         color: '#334155'
     },
     checkboxInput: {
         display: 'none'
     },
     checkboxCustom: {
-        width: '22px',
-        height: '22px',
-        borderRadius: '6px',
+        width: '20px',
+        height: '20px',
+        borderRadius: '5px',
         border: '2px solid #E2E8F0',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'all 0.2s'
-    },
-    // Image URL Preview Styles
-    imagePreviewContainer: {
-        marginTop: '15px',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '15px'
-    },
-    logoPreviewBox: {
-        width: '120px',
-        height: '120px',
-        borderRadius: '12px',
-        border: '2px solid #E2E8F0',
-        overflow: 'hidden',
-        background: '#F8FAFC',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
     },
-    logoPreviewImg: {
-        width: '100%',
-        height: '100%',
+    previewBox: {
+        marginTop: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px'
+    },
+    logoPreview: {
+        width: '60px',
+        height: '60px',
         objectFit: 'contain',
-        padding: '10px',
-        boxSizing: 'border-box'
+        borderRadius: '8px',
+        border: '1px solid #E2E8F0'
     },
-    bannerPreviewBox: {
-        width: '100%',
-        maxWidth: '300px',
-        height: '100px',
-        borderRadius: '12px',
-        border: '2px solid #E2E8F0',
-        overflow: 'hidden',
-        background: '#F8FAFC',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
+    bannerPreview: {
+        width: '150px',
+        height: '50px',
+        objectFit: 'cover',
+        borderRadius: '8px',
+        border: '1px solid #E2E8F0'
     },
-    bannerPreviewImg: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover'
-    },
-    imageError: {
-        display: 'none',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '8px',
-        color: '#DC2626',
-        fontSize: '0.8rem',
-        textAlign: 'center',
-        padding: '10px'
-    },
-    clearUrlBtn: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '6px',
-        padding: '8px 16px',
+    clearBtn: {
+        width: '28px',
+        height: '28px',
+        borderRadius: '50%',
         background: '#FEE2E2',
         color: '#DC2626',
         border: 'none',
-        borderRadius: '8px',
         cursor: 'pointer',
-        fontSize: '0.85rem',
-        fontWeight: '500',
-        transition: 'background 0.2s'
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '0.8rem'
     },
-    // Tips Box
     tipBox: {
-        marginTop: '25px',
-        padding: '20px',
-        background: '#F0F9FF',
-        borderRadius: '12px',
-        border: '1px solid #BAE6FD'
-    },
-    tipHeader: {
+        marginTop: '15px',
+        padding: '12px',
+        background: '#FFFBEB',
+        borderRadius: '8px',
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
-        color: '#0369A1',
-        marginBottom: '12px',
-        fontSize: '0.95rem'
-    },
-    tipList: {
-        margin: 0,
-        paddingLeft: '20px',
-        color: '#0C4A6E',
         fontSize: '0.85rem',
-        lineHeight: '1.8'
+        color: '#92400E',
+        flexWrap: 'wrap'
     },
     tipLink: {
         color: '#0284C7',
-        textDecoration: 'none'
+        textDecoration: 'none',
+        padding: '2px 8px',
+        background: '#E0F2FE',
+        borderRadius: '4px',
+        fontSize: '0.8rem'
     },
     settingsGrid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '15px'
+        gap: '12px'
     },
     settingCard: {
         display: 'flex',
         alignItems: 'center',
-        gap: '15px',
-        padding: '20px',
+        gap: '12px',
+        padding: '16px',
         background: '#F8FAFC',
-        borderRadius: '14px',
+        borderRadius: '12px',
         cursor: 'pointer',
-        border: '2px solid transparent',
-        transition: 'all 0.2s'
+        border: '2px solid transparent'
     },
     settingCardActive: {
         background: '#FFF7ED',
         borderColor: '#FF6B35'
     },
     settingIcon: {
-        width: '45px',
-        height: '45px',
-        borderRadius: '12px',
+        width: '40px',
+        height: '40px',
+        borderRadius: '10px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: '1.1rem',
-        flexShrink: 0
+        fontSize: '1rem'
     },
     actions: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '25px 30px',
-        background: '#F8FAFC',
-        flexWrap: 'wrap',
-        gap: '15px'
+        padding: '20px 25px',
+        background: '#F8FAFC'
     },
     actionRight: {
         display: 'flex',
-        gap: '12px'
+        gap: '10px'
     },
     resetBtn: {
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
-        padding: '14px 24px',
+        padding: '12px 20px',
         background: '#fff',
         color: '#64748B',
         border: '2px solid #E2E8F0',
-        borderRadius: '12px',
+        borderRadius: '10px',
         cursor: 'pointer',
         fontWeight: '600',
-        fontSize: '0.95rem',
-        fontFamily: 'inherit',
-        transition: 'all 0.2s'
+        fontSize: '0.9rem',
+        fontFamily: 'inherit'
     },
     cancelBtn: {
-        padding: '14px 28px',
+        padding: '12px 24px',
         background: '#fff',
         color: '#64748B',
         border: '2px solid #E2E8F0',
-        borderRadius: '12px',
+        borderRadius: '10px',
         cursor: 'pointer',
         fontWeight: '600',
-        fontSize: '0.95rem',
-        fontFamily: 'inherit',
-        transition: 'all 0.2s'
+        fontSize: '0.9rem',
+        fontFamily: 'inherit'
     },
     submitBtn: {
         display: 'flex',
         alignItems: 'center',
-        gap: '10px',
-        padding: '14px 32px',
-        background: 'linear-gradient(135deg, #FF6B35 0%, #FF8B5C 100%)',
+        gap: '8px',
+        padding: '12px 28px',
+        background: 'linear-gradient(135deg, #FF6B35, #FF8B5C)',
         color: '#fff',
         border: 'none',
-        borderRadius: '12px',
+        borderRadius: '10px',
         cursor: 'pointer',
         fontWeight: '600',
-        fontSize: '0.95rem',
+        fontSize: '0.9rem',
         fontFamily: 'inherit',
-        boxShadow: '0 4px 15px rgba(255, 107, 53, 0.35)',
-        transition: 'all 0.2s'
+        boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)'
     }
 };
 
