@@ -52,9 +52,9 @@ const Contact = () => {
         {
             icon: 'fa-phone',
             title: 'Call Us',
-            primary: '+91 98765 43210',
+            primary: '+91 73560 04410',
             secondary: '+91 98765 43211',
-            action: 'tel:+919876543210',
+            action: 'tel:+917356004410',
             actionText: 'Call Now',
             colorType: 'maroon'
         },
@@ -70,8 +70,8 @@ const Contact = () => {
         {
             icon: 'fa-location-dot',
             title: 'Visit Us',
-            primary: '123 Education Street',
-            secondary: 'Mumbai, Maharashtra 400001',
+            primary: 'Kandamkulathy Towers Opposite Maharajas college ground',
+            secondary: ' MG Road, Cochin',
             action: 'https://maps.google.com',
             actionText: 'Get Directions',
             colorType: 'maroon'
