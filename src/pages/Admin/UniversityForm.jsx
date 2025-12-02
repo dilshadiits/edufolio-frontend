@@ -14,36 +14,36 @@ const UniversityForm = () => {
     const [success, setSuccess] = useState('');
     const [originalData, setOriginalData] = useState(null);
 
+    // Match your model schema exactly
     const initialFormState = {
         name: '',
         slug: '',
-        type: 'Private',
-        establishedYear: '',
-        rating: '',
-        naacGrade: '',
-        ugcApproved: true,
-        aicteApproved: false,
-        city: '',
-        state: '',
-        location: '',
-        minFee: '',
-        maxFee: '',
-        description: '',
+        shortName: '',
         logo: '',
-        bannerImage: '',
+        banner: '',
+        description: '',
+        establishedYear: '',
+        location: '',
+        address: '',
         website: '',
         email: '',
         phone: '',
-        highlights: '',
+        rating: 'Not Rated',
+        accreditations: '',
+        approvals: '',
         facilities: '',
+        highlights: '',
+        minFee: '',
+        maxFee: '',
         featured: false,
+        ranking: '',
         isActive: true
     };
 
     const [form, setForm] = useState(initialFormState);
 
-    const universityTypes = ['Private', 'Government', 'Deemed', 'State', 'Central', 'Autonomous'];
-    const naacGrades = ['A++', 'A+', 'A', 'B++', 'B+', 'B', 'C', 'Not Rated'];
+    // Rating options from your model enum
+    const ratingOptions = ['A++', 'A+', 'A', 'B++', 'B+', 'B', 'C', 'Not Rated'];
 
     // Check authentication
     useEffect(() => {
@@ -74,34 +74,34 @@ const UniversityForm = () => {
             const uni = res.data;
             console.log('Fetched university data:', uni);
 
+            // Map to form - match your model fields exactly
             const formData = {
                 name: uni.name || '',
                 slug: uni.slug || '',
-                type: uni.type || 'Private',
-                establishedYear: uni.establishedYear ? String(uni.establishedYear) : '',
-                rating: uni.rating || '',
-                naacGrade: uni.naacGrade || '',
-                ugcApproved: uni.ugcApproved !== undefined ? Boolean(uni.ugcApproved) : true,
-                aicteApproved: Boolean(uni.aicteApproved),
-                city: uni.city || '',
-                state: uni.state || '',
-                location: uni.location || '',
-                minFee: uni.minFee ? String(uni.minFee) : '',
-                maxFee: uni.maxFee ? String(uni.maxFee) : '',
-                description: uni.description || '',
+                shortName: uni.shortName || '',
                 logo: uni.logo || '',
-                bannerImage: uni.bannerImage || '',
+                banner: uni.banner || '',
+                description: uni.description || '',
+                establishedYear: uni.establishedYear ? String(uni.establishedYear) : '',
+                location: uni.location || '',
+                address: uni.address || '',
                 website: uni.website || '',
                 email: uni.email || '',
                 phone: uni.phone || '',
-                highlights: Array.isArray(uni.highlights) ? uni.highlights.join(', ') : (uni.highlights || ''),
-                facilities: Array.isArray(uni.facilities) ? uni.facilities.join(', ') : (uni.facilities || ''),
+                rating: uni.rating || 'Not Rated',
+                accreditations: Array.isArray(uni.accreditations) ? uni.accreditations.join(', ') : '',
+                approvals: Array.isArray(uni.approvals) ? uni.approvals.join(', ') : '',
+                facilities: Array.isArray(uni.facilities) ? uni.facilities.join(', ') : '',
+                highlights: Array.isArray(uni.highlights) ? uni.highlights.join(', ') : '',
+                minFee: uni.minFee ? String(uni.minFee) : '',
+                maxFee: uni.maxFee ? String(uni.maxFee) : '',
                 featured: Boolean(uni.featured),
-                isActive: uni.isActive !== undefined ? Boolean(uni.isActive) : true
+                ranking: uni.ranking ? String(uni.ranking) : '',
+                isActive: uni.isActive !== false
             };
 
             setForm(formData);
-            setOriginalData(formData); // Store original for reset
+            setOriginalData(formData);
 
         } catch (err) {
             console.error('Error fetching university:', err);
@@ -113,7 +113,7 @@ const UniversityForm = () => {
                 localStorage.removeItem('user');
                 navigate('/admin/login');
             } else {
-                setError('Failed to load university data. Please try again.');
+                setError('Failed to load university data');
             }
         } finally {
             setFetchingData(false);
@@ -141,21 +141,19 @@ const UniversityForm = () => {
                 [name]: type === 'checkbox' ? checked : value
             };
 
-            // Auto-generate slug from name (only if slug is empty or matches previous auto-generated)
+            // Auto-generate slug from name for new entries
             if (name === 'name' && !isEditMode) {
-                const newSlug = value
+                newForm.slug = value
                     .toLowerCase()
                     .replace(/[^a-z0-9\s-]/g, '')
                     .replace(/\s+/g, '-')
                     .replace(/-+/g, '-')
                     .trim();
-                newForm.slug = newSlug;
             }
 
             return newForm;
         });
 
-        // Clear errors when user starts typing
         if (error) setError('');
         if (success) setSuccess('');
     };
@@ -169,81 +167,37 @@ const UniversityForm = () => {
             setError('University name must be at least 3 characters');
             return false;
         }
-        if (!form.slug || !form.slug.trim()) {
-            setError('Slug is required');
+        if (!form.location || !form.location.trim()) {
+            setError('Location is required');
             return false;
         }
-        if (!/^[a-z0-9-]+$/.test(form.slug.trim())) {
-            setError('Slug can only contain lowercase letters, numbers, and hyphens');
-            return false;
-        }
-        if (!form.city || !form.city.trim()) {
-            setError('City is required');
-            return false;
-        }
-        if (form.email && form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-            setError('Please enter a valid email address');
+        if (!form.description || !form.description.trim()) {
+            setError('Description is required');
             return false;
         }
         return true;
     };
 
+    // Prepare data matching your model schema
     const prepareDataForSubmit = () => {
         const data = {
             name: form.name.trim(),
-            slug: form.slug.trim().toLowerCase(),
-            type: form.type || 'Private',
-            city: form.city.trim(),
-            ugcApproved: Boolean(form.ugcApproved),
-            aicteApproved: Boolean(form.aicteApproved),
+            slug: form.slug?.trim().toLowerCase() || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            description: form.description.trim(),
+            location: form.location.trim(),
             featured: Boolean(form.featured),
             isActive: Boolean(form.isActive)
         };
 
         // Optional string fields
-        if (form.state && form.state.trim()) {
-            data.state = form.state.trim();
-        }
-
-        if (form.location && form.location.trim()) {
-            data.location = form.location.trim();
-        } else if (form.city && form.state) {
-            data.location = `${form.city.trim()}, ${form.state.trim()}`;
-        } else {
-            data.location = form.city.trim();
-        }
-
-        if (form.description && form.description.trim()) {
-            data.description = form.description.trim();
-        }
-
-        if (form.rating && form.rating.trim()) {
-            data.rating = form.rating.trim();
-        }
-
-        if (form.naacGrade) {
-            data.naacGrade = form.naacGrade;
-        }
-
-        if (form.logo && form.logo.trim()) {
-            data.logo = form.logo.trim();
-        }
-
-        if (form.bannerImage && form.bannerImage.trim()) {
-            data.bannerImage = form.bannerImage.trim();
-        }
-
-        if (form.website && form.website.trim()) {
-            data.website = form.website.trim();
-        }
-
-        if (form.email && form.email.trim()) {
-            data.email = form.email.trim();
-        }
-
-        if (form.phone && form.phone.trim()) {
-            data.phone = form.phone.trim();
-        }
+        if (form.shortName?.trim()) data.shortName = form.shortName.trim();
+        if (form.logo?.trim()) data.logo = form.logo.trim();
+        if (form.banner?.trim()) data.banner = form.banner.trim();
+        if (form.address?.trim()) data.address = form.address.trim();
+        if (form.website?.trim()) data.website = form.website.trim();
+        if (form.email?.trim()) data.email = form.email.trim();
+        if (form.phone?.trim()) data.phone = form.phone.trim();
+        if (form.rating) data.rating = form.rating;
 
         // Number fields
         if (form.establishedYear) {
@@ -252,39 +206,27 @@ const UniversityForm = () => {
                 data.establishedYear = year;
             }
         }
-
         if (form.minFee) {
-            const fee = parseInt(form.minFee, 10);
-            if (!isNaN(fee) && fee >= 0) {
-                data.minFee = fee;
-            }
+            data.minFee = parseInt(form.minFee, 10) || 0;
         }
-
         if (form.maxFee) {
-            const fee = parseInt(form.maxFee, 10);
-            if (!isNaN(fee) && fee >= 0) {
-                data.maxFee = fee;
-            }
+            data.maxFee = parseInt(form.maxFee, 10) || 0;
+        }
+        if (form.ranking) {
+            const rank = parseInt(form.ranking, 10);
+            if (!isNaN(rank)) data.ranking = rank;
         }
 
-        // Array fields
-        if (form.highlights && form.highlights.trim()) {
-            data.highlights = form.highlights
-                .split(',')
-                .map(s => s.trim())
-                .filter(Boolean);
-        } else {
-            data.highlights = [];
-        }
+        // Array fields - split by comma
+        const toArray = (str) => {
+            if (!str || !str.trim()) return [];
+            return str.split(',').map(s => s.trim()).filter(Boolean);
+        };
 
-        if (form.facilities && form.facilities.trim()) {
-            data.facilities = form.facilities
-                .split(',')
-                .map(s => s.trim())
-                .filter(Boolean);
-        } else {
-            data.facilities = [];
-        }
+        data.accreditations = toArray(form.accreditations);
+        data.approvals = toArray(form.approvals);
+        data.facilities = toArray(form.facilities);
+        data.highlights = toArray(form.highlights);
 
         return data;
     };
@@ -309,7 +251,7 @@ const UniversityForm = () => {
             }
 
             const universityData = prepareDataForSubmit();
-            console.log('Submitting data:', universityData);
+            console.log('Submitting data:', JSON.stringify(universityData, null, 2));
 
             const config = {
                 headers: {
@@ -327,8 +269,6 @@ const UniversityForm = () => {
                 );
                 console.log('Update response:', response.data);
                 setSuccess('University updated successfully! Redirecting...');
-                
-                // Update original data after successful save
                 setOriginalData({ ...form });
             } else {
                 response = await axios.post(
@@ -348,15 +288,12 @@ const UniversityForm = () => {
 
             if (err.response?.status === 401) {
                 handleLogout();
-            } else if (err.response?.status === 409 || err.response?.data?.message?.includes('duplicate')) {
-                setError('A university with this slug already exists. Please use a different slug.');
+            } else if (err.response?.status === 409) {
+                setError('A university with this slug already exists');
             } else if (err.response?.status === 400) {
-                const errorMessage = err.response?.data?.message ||
-                    err.response?.data?.error ||
-                    'Invalid data. Please check all required fields.';
-                setError(errorMessage);
+                setError(err.response?.data?.message || 'Invalid data. Please check required fields.');
             } else {
-                setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} university. Please try again.`);
+                setError(err.response?.data?.message || 'Failed to save university');
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } finally {
@@ -366,7 +303,7 @@ const UniversityForm = () => {
 
     const handleReset = () => {
         const confirmMsg = isEditMode
-            ? 'Reset all changes? This will restore the original data.'
+            ? 'Reset all changes to original values?'
             : 'Clear all fields?';
 
         if (window.confirm(confirmMsg)) {
@@ -380,7 +317,7 @@ const UniversityForm = () => {
         }
     };
 
-    // Loading state for edit mode
+    // Loading state
     if (fetchingData) {
         return (
             <div style={styles.wrapper}>
@@ -389,20 +326,11 @@ const UniversityForm = () => {
                         <i className="fa-solid fa-graduation-cap" style={styles.sidebarLogo}></i>
                         <span style={styles.sidebarTitle}>EduFolio</span>
                     </div>
-                    <nav style={styles.sidebarNav}>
-                        <Link to="/admin/dashboard" style={styles.navItem}>
-                            <i className="fa-solid fa-chart-pie"></i>
-                            <span>Overview</span>
-                        </Link>
-                    </nav>
                 </aside>
                 <main style={styles.main}>
                     <div style={styles.loadingContainer}>
-                        <div style={styles.loadingSpinner}>
-                            <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '2.5rem', color: '#FF6B35' }}></i>
-                        </div>
-                        <h2 style={{ color: '#334155', marginTop: '20px' }}>Loading University Data...</h2>
-                        <p style={{ color: '#64748B' }}>Please wait while we fetch the details.</p>
+                        <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '2.5rem', color: '#FF6B35' }}></i>
+                        <h2 style={{ color: '#334155', marginTop: '20px' }}>Loading...</h2>
                     </div>
                 </main>
             </div>
@@ -431,10 +359,6 @@ const UniversityForm = () => {
                         <i className="fa-solid fa-graduation-cap"></i>
                         <span>Programs</span>
                     </Link>
-                    <Link to="/admin/dashboard" style={styles.navItem}>
-                        <i className="fa-solid fa-envelope"></i>
-                        <span>Enquiries</span>
-                    </Link>
                 </nav>
 
                 <div style={styles.sidebarFooter}>
@@ -454,126 +378,78 @@ const UniversityForm = () => {
                 <div style={styles.container}>
                     {/* Header */}
                     <div style={styles.header}>
-                        <div style={styles.headerLeft}>
+                        <div>
                             <h1 style={styles.title}>
-                                <i
-                                    className={`fa-solid ${isEditMode ? 'fa-pen-to-square' : 'fa-plus-circle'}`}
-                                    style={styles.titleIcon}
-                                ></i>
-                                {isEditMode ? 'Edit University' : 'Add New University'}
+                                <i className={`fa-solid ${isEditMode ? 'fa-pen-to-square' : 'fa-plus-circle'}`} style={{ color: '#FF6B35' }}></i>
+                                {isEditMode ? ' Edit University' : ' Add New University'}
                             </h1>
                             <p style={styles.subtitle}>
-                                {isEditMode
-                                    ? 'Update the university information below'
-                                    : 'Fill in the details to add a new university'
-                                }
+                                {isEditMode ? `Editing: ${form.name}` : 'Fill in the details below'}
                             </p>
-                            {isEditMode && form.name && (
-                                <div style={styles.editBadge}>
-                                    <i className="fa-solid fa-building-columns"></i>
-                                    Editing: {form.name}
-                                </div>
-                            )}
                         </div>
-                        <button
-                            type="button"
-                            style={styles.backBtn}
-                            onClick={() => navigate('/admin/dashboard')}
-                        >
-                            <i className="fa-solid fa-arrow-left"></i> Back to Dashboard
+                        <button style={styles.backBtn} onClick={() => navigate('/admin/dashboard')}>
+                            <i className="fa-solid fa-arrow-left"></i> Back
                         </button>
                     </div>
 
                     {/* Alerts */}
                     {error && (
                         <div style={styles.errorAlert}>
-                            <div style={styles.alertContent}>
-                                <i className="fa-solid fa-exclamation-circle"></i>
-                                <span>{error}</span>
-                            </div>
-                            <button type="button" style={styles.alertClose} onClick={() => setError('')}>
-                                <i className="fa-solid fa-times"></i>
-                            </button>
+                            <span><i className="fa-solid fa-exclamation-circle"></i> {error}</span>
+                            <button onClick={() => setError('')} style={styles.alertClose}>×</button>
                         </div>
                     )}
-
                     {success && (
                         <div style={styles.successAlert}>
-                            <div style={styles.alertContent}>
-                                <i className="fa-solid fa-check-circle"></i>
-                                <span>{success}</span>
-                            </div>
+                            <i className="fa-solid fa-check-circle"></i> {success}
                         </div>
                     )}
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} style={styles.form}>
 
-                        {/* Section 1: Basic Information */}
+                        {/* Basic Info */}
                         <div style={styles.section}>
-                            <div style={styles.sectionHeader}>
-                                <div style={styles.sectionIcon}>
-                                    <i className="fa-solid fa-info-circle"></i>
-                                </div>
-                                <div>
-                                    <h2 style={styles.sectionTitle}>Basic Information</h2>
-                                    <p style={styles.sectionDesc}>Enter the basic details of the university</p>
-                                </div>
-                            </div>
-
+                            <h3 style={styles.sectionTitle}>
+                                <i className="fa-solid fa-info-circle" style={{ color: '#FF6B35' }}></i> Basic Information
+                            </h3>
                             <div style={styles.grid}>
                                 <div style={styles.inputGroup}>
-                                    <label style={styles.label}>
-                                        University Name <span style={styles.required}>*</span>
-                                    </label>
+                                    <label style={styles.label}>Name <span style={styles.required}>*</span></label>
                                     <input
-                                        type="text"
                                         name="name"
                                         value={form.name}
                                         onChange={handleChange}
-                                        placeholder="e.g., Amity University Online"
+                                        placeholder="University name"
                                         style={styles.input}
-                                        autoComplete="off"
                                     />
                                 </div>
-
                                 <div style={styles.inputGroup}>
-                                    <label style={styles.label}>
-                                        Slug <span style={styles.required}>*</span>
-                                    </label>
+                                    <label style={styles.label}>Slug</label>
                                     <input
-                                        type="text"
                                         name="slug"
                                         value={form.slug}
                                         onChange={handleChange}
-                                        placeholder="e.g., amity-university-online"
+                                        placeholder="university-slug"
                                         style={styles.input}
-                                        autoComplete="off"
                                     />
-                                    <small style={styles.hint}>
-                                        URL: /universities/{form.slug || 'your-slug'}
-                                    </small>
+                                    <small style={styles.hint}>/universities/{form.slug || 'slug'}</small>
                                 </div>
-
                                 <div style={styles.inputGroup}>
-                                    <label style={styles.label}>University Type</label>
-                                    <select
-                                        name="type"
-                                        value={form.type}
+                                    <label style={styles.label}>Short Name</label>
+                                    <input
+                                        name="shortName"
+                                        value={form.shortName}
                                         onChange={handleChange}
-                                        style={styles.select}
-                                    >
-                                        {universityTypes.map(type => (
-                                            <option key={type} value={type}>{type}</option>
-                                        ))}
-                                    </select>
+                                        placeholder="e.g., AU"
+                                        style={styles.input}
+                                    />
                                 </div>
-
                                 <div style={styles.inputGroup}>
                                     <label style={styles.label}>Established Year</label>
                                     <input
-                                        type="number"
                                         name="establishedYear"
+                                        type="number"
                                         value={form.establishedYear}
                                         onChange={handleChange}
                                         placeholder="e.g., 2005"
@@ -585,217 +461,148 @@ const UniversityForm = () => {
                             </div>
                         </div>
 
-                        {/* Section 2: Ratings & Approvals */}
+                        {/* Location */}
                         <div style={styles.section}>
-                            <div style={styles.sectionHeader}>
-                                <div style={styles.sectionIcon}>
-                                    <i className="fa-solid fa-award"></i>
-                                </div>
-                                <div>
-                                    <h2 style={styles.sectionTitle}>Ratings & Approvals</h2>
-                                    <p style={styles.sectionDesc}>Add accreditation and approval details</p>
-                                </div>
-                            </div>
-
+                            <h3 style={styles.sectionTitle}>
+                                <i className="fa-solid fa-location-dot" style={{ color: '#FF6B35' }}></i> Location
+                            </h3>
                             <div style={styles.grid}>
                                 <div style={styles.inputGroup}>
-                                    <label style={styles.label}>Rating / Ranking</label>
+                                    <label style={styles.label}>Location <span style={styles.required}>*</span></label>
                                     <input
-                                        type="text"
-                                        name="rating"
-                                        value={form.rating}
-                                        onChange={handleChange}
-                                        placeholder="e.g., NIRF Rank 25"
-                                        style={styles.input}
-                                    />
-                                </div>
-
-                                <div style={styles.inputGroup}>
-                                    <label style={styles.label}>NAAC Grade</label>
-                                    <select
-                                        name="naacGrade"
-                                        value={form.naacGrade}
-                                        onChange={handleChange}
-                                        style={styles.select}
-                                    >
-                                        <option value="">Select Grade</option>
-                                        {naacGrades.map(grade => (
-                                            <option key={grade} value={grade}>{grade}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div style={styles.checkboxRow}>
-                                <label style={styles.checkboxLabel}>
-                                    <input
-                                        type="checkbox"
-                                        name="ugcApproved"
-                                        checked={form.ugcApproved}
-                                        onChange={handleChange}
-                                        style={styles.checkboxInput}
-                                    />
-                                    <span style={{
-                                        ...styles.checkboxCustom,
-                                        background: form.ugcApproved ? '#FF6B35' : '#fff',
-                                        borderColor: form.ugcApproved ? '#FF6B35' : '#E2E8F0'
-                                    }}>
-                                        {form.ugcApproved && <i className="fa-solid fa-check" style={{ color: '#fff', fontSize: '0.7rem' }}></i>}
-                                    </span>
-                                    <span>UGC Approved</span>
-                                </label>
-
-                                <label style={styles.checkboxLabel}>
-                                    <input
-                                        type="checkbox"
-                                        name="aicteApproved"
-                                        checked={form.aicteApproved}
-                                        onChange={handleChange}
-                                        style={styles.checkboxInput}
-                                    />
-                                    <span style={{
-                                        ...styles.checkboxCustom,
-                                        background: form.aicteApproved ? '#FF6B35' : '#fff',
-                                        borderColor: form.aicteApproved ? '#FF6B35' : '#E2E8F0'
-                                    }}>
-                                        {form.aicteApproved && <i className="fa-solid fa-check" style={{ color: '#fff', fontSize: '0.7rem' }}></i>}
-                                    </span>
-                                    <span>AICTE Approved</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        {/* Section 3: Location */}
-                        <div style={styles.section}>
-                            <div style={styles.sectionHeader}>
-                                <div style={styles.sectionIcon}>
-                                    <i className="fa-solid fa-location-dot"></i>
-                                </div>
-                                <div>
-                                    <h2 style={styles.sectionTitle}>Location</h2>
-                                    <p style={styles.sectionDesc}>Specify the university location</p>
-                                </div>
-                            </div>
-
-                            <div style={styles.grid}>
-                                <div style={styles.inputGroup}>
-                                    <label style={styles.label}>
-                                        City <span style={styles.required}>*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="city"
-                                        value={form.city}
-                                        onChange={handleChange}
-                                        placeholder="e.g., Noida"
-                                        style={styles.input}
-                                    />
-                                </div>
-
-                                <div style={styles.inputGroup}>
-                                    <label style={styles.label}>State</label>
-                                    <input
-                                        type="text"
-                                        name="state"
-                                        value={form.state}
-                                        onChange={handleChange}
-                                        placeholder="e.g., Uttar Pradesh"
-                                        style={styles.input}
-                                    />
-                                </div>
-
-                                <div style={{ ...styles.inputGroup, gridColumn: '1 / -1' }}>
-                                    <label style={styles.label}>Full Location / Address</label>
-                                    <input
-                                        type="text"
                                         name="location"
                                         value={form.location}
                                         onChange={handleChange}
-                                        placeholder="e.g., Sector 125, Noida, Uttar Pradesh 201313"
+                                        placeholder="City, State"
+                                        style={styles.input}
+                                    />
+                                </div>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Full Address</label>
+                                    <input
+                                        name="address"
+                                        value={form.address}
+                                        onChange={handleChange}
+                                        placeholder="Complete address"
                                         style={styles.input}
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Section 4: Fee Structure */}
+                        {/* Description */}
                         <div style={styles.section}>
-                            <div style={styles.sectionHeader}>
-                                <div style={styles.sectionIcon}>
-                                    <i className="fa-solid fa-indian-rupee-sign"></i>
-                                </div>
-                                <div>
-                                    <h2 style={styles.sectionTitle}>Fee Structure</h2>
-                                    <p style={styles.sectionDesc}>Set the fee range for programs</p>
-                                </div>
-                            </div>
-
-                            <div style={styles.grid}>
-                                <div style={styles.inputGroup}>
-                                    <label style={styles.label}>Minimum Fee (₹)</label>
-                                    <input
-                                        type="number"
-                                        name="minFee"
-                                        value={form.minFee}
-                                        onChange={handleChange}
-                                        placeholder="e.g., 50000"
-                                        style={styles.input}
-                                        min="0"
-                                    />
-                                    {form.minFee && (
-                                        <small style={styles.hint}>
-                                            ₹{Number(form.minFee).toLocaleString('en-IN')}
-                                        </small>
-                                    )}
-                                </div>
-
-                                <div style={styles.inputGroup}>
-                                    <label style={styles.label}>Maximum Fee (₹)</label>
-                                    <input
-                                        type="number"
-                                        name="maxFee"
-                                        value={form.maxFee}
-                                        onChange={handleChange}
-                                        placeholder="e.g., 500000"
-                                        style={styles.input}
-                                        min="0"
-                                    />
-                                    {form.maxFee && (
-                                        <small style={styles.hint}>
-                                            ₹{Number(form.maxFee).toLocaleString('en-IN')}
-                                        </small>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Section 5: Description */}
-                        <div style={styles.section}>
-                            <div style={styles.sectionHeader}>
-                                <div style={styles.sectionIcon}>
-                                    <i className="fa-solid fa-file-lines"></i>
-                                </div>
-                                <div>
-                                    <h2 style={styles.sectionTitle}>Description</h2>
-                                    <p style={styles.sectionDesc}>Provide detailed information about the university</p>
-                                </div>
-                            </div>
-
+                            <h3 style={styles.sectionTitle}>
+                                <i className="fa-solid fa-file-lines" style={{ color: '#FF6B35' }}></i> Description
+                            </h3>
                             <div style={styles.inputGroup}>
-                                <label style={styles.label}>About University</label>
+                                <label style={styles.label}>About <span style={styles.required}>*</span></label>
                                 <textarea
                                     name="description"
                                     value={form.description}
                                     onChange={handleChange}
-                                    placeholder="Write a detailed description about the university..."
+                                    placeholder="About the university..."
                                     style={styles.textarea}
                                     rows="4"
-                                ></textarea>
-                                <small style={styles.hint}>
-                                    {form.description.length} characters
-                                </small>
+                                />
+                                <small style={styles.hint}>{form.description.length} characters</small>
                             </div>
+                        </div>
 
+                        {/* Ratings & Approvals */}
+                        <div style={styles.section}>
+                            <h3 style={styles.sectionTitle}>
+                                <i className="fa-solid fa-award" style={{ color: '#FF6B35' }}></i> Ratings & Approvals
+                            </h3>
+                            <div style={styles.grid}>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>NAAC Rating</label>
+                                    <select
+                                        name="rating"
+                                        value={form.rating}
+                                        onChange={handleChange}
+                                        style={styles.select}
+                                    >
+                                        {ratingOptions.map(r => (
+                                            <option key={r} value={r}>{r}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>NIRF Ranking</label>
+                                    <input
+                                        name="ranking"
+                                        type="number"
+                                        value={form.ranking}
+                                        onChange={handleChange}
+                                        placeholder="e.g., 25"
+                                        style={styles.input}
+                                        min="1"
+                                    />
+                                </div>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Accreditations (comma separated)</label>
+                                    <input
+                                        name="accreditations"
+                                        value={form.accreditations}
+                                        onChange={handleChange}
+                                        placeholder="NAAC, NBA, AACSB"
+                                        style={styles.input}
+                                    />
+                                </div>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Approvals (comma separated)</label>
+                                    <input
+                                        name="approvals"
+                                        value={form.approvals}
+                                        onChange={handleChange}
+                                        placeholder="UGC, AICTE, BCI"
+                                        style={styles.input}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Fee Structure */}
+                        <div style={styles.section}>
+                            <h3 style={styles.sectionTitle}>
+                                <i className="fa-solid fa-indian-rupee-sign" style={{ color: '#FF6B35' }}></i> Fee Structure
+                            </h3>
+                            <div style={styles.grid}>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Minimum Fee (₹)</label>
+                                    <input
+                                        name="minFee"
+                                        type="number"
+                                        value={form.minFee}
+                                        onChange={handleChange}
+                                        placeholder="50000"
+                                        style={styles.input}
+                                        min="0"
+                                    />
+                                    {form.minFee && <small style={styles.hint}>₹{Number(form.minFee).toLocaleString('en-IN')}</small>}
+                                </div>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Maximum Fee (₹)</label>
+                                    <input
+                                        name="maxFee"
+                                        type="number"
+                                        value={form.maxFee}
+                                        onChange={handleChange}
+                                        placeholder="500000"
+                                        style={styles.input}
+                                        min="0"
+                                    />
+                                    {form.maxFee && <small style={styles.hint}>₹{Number(form.maxFee).toLocaleString('en-IN')}</small>}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Features */}
+                        <div style={styles.section}>
+                            <h3 style={styles.sectionTitle}>
+                                <i className="fa-solid fa-star" style={{ color: '#FF6B35' }}></i> Features
+                            </h3>
                             <div style={styles.grid}>
                                 <div style={styles.inputGroup}>
                                     <label style={styles.label}>Highlights (comma separated)</label>
@@ -803,12 +610,11 @@ const UniversityForm = () => {
                                         name="highlights"
                                         value={form.highlights}
                                         onChange={handleChange}
-                                        placeholder="100% Placement, Industry Partnerships, Flexible Learning"
-                                        style={styles.textarea}
+                                        placeholder="100% Placement, Industry Tie-ups, Flexible Learning"
+                                        style={{ ...styles.textarea, minHeight: '60px' }}
                                         rows="2"
-                                    ></textarea>
+                                    />
                                 </div>
-
                                 <div style={styles.inputGroup}>
                                     <label style={styles.label}>Facilities (comma separated)</label>
                                     <textarea
@@ -816,48 +622,36 @@ const UniversityForm = () => {
                                         value={form.facilities}
                                         onChange={handleChange}
                                         placeholder="Digital Library, Online Labs, Career Services"
-                                        style={styles.textarea}
+                                        style={{ ...styles.textarea, minHeight: '60px' }}
                                         rows="2"
-                                    ></textarea>
+                                    />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Section 6: Media - URL Based */}
+                        {/* Media */}
                         <div style={styles.section}>
-                            <div style={styles.sectionHeader}>
-                                <div style={styles.sectionIcon}>
-                                    <i className="fa-solid fa-image"></i>
-                                </div>
-                                <div>
-                                    <h2 style={styles.sectionTitle}>Media (Image URLs)</h2>
-                                    <p style={styles.sectionDesc}>Paste image URLs from hosting services</p>
-                                </div>
-                            </div>
-
+                            <h3 style={styles.sectionTitle}>
+                                <i className="fa-solid fa-image" style={{ color: '#FF6B35' }}></i> Media
+                            </h3>
                             <div style={styles.grid}>
                                 <div style={styles.inputGroup}>
                                     <label style={styles.label}>Logo URL</label>
                                     <input
-                                        type="url"
                                         name="logo"
+                                        type="url"
                                         value={form.logo}
                                         onChange={handleChange}
-                                        placeholder="https://example.com/logo.png"
+                                        placeholder="https://..."
                                         style={styles.input}
                                     />
                                     {form.logo && (
-                                        <div style={styles.previewBox}>
+                                        <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             <img
                                                 src={form.logo}
-                                                alt="Logo Preview"
-                                                style={styles.logoPreview}
-                                                onError={(e) => {
-                                                    e.target.style.display = 'none';
-                                                }}
-                                                onLoad={(e) => {
-                                                    e.target.style.display = 'block';
-                                                }}
+                                                alt="Logo"
+                                                style={{ width: '50px', height: '50px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #E2E8F0' }}
+                                                onError={(e) => e.target.style.display = 'none'}
                                             />
                                             <button
                                                 type="button"
@@ -869,33 +663,27 @@ const UniversityForm = () => {
                                         </div>
                                     )}
                                 </div>
-
                                 <div style={styles.inputGroup}>
                                     <label style={styles.label}>Banner URL</label>
                                     <input
+                                        name="banner"
                                         type="url"
-                                        name="bannerImage"
-                                        value={form.bannerImage}
+                                        value={form.banner}
                                         onChange={handleChange}
-                                        placeholder="https://example.com/banner.jpg"
+                                        placeholder="https://..."
                                         style={styles.input}
                                     />
-                                    {form.bannerImage && (
-                                        <div style={styles.previewBox}>
+                                    {form.banner && (
+                                        <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             <img
-                                                src={form.bannerImage}
-                                                alt="Banner Preview"
-                                                style={styles.bannerPreview}
-                                                onError={(e) => {
-                                                    e.target.style.display = 'none';
-                                                }}
-                                                onLoad={(e) => {
-                                                    e.target.style.display = 'block';
-                                                }}
+                                                src={form.banner}
+                                                alt="Banner"
+                                                style={{ width: '100px', height: '40px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #E2E8F0' }}
+                                                onError={(e) => e.target.style.display = 'none'}
                                             />
                                             <button
                                                 type="button"
-                                                onClick={() => setForm(prev => ({ ...prev, bannerImage: '' }))}
+                                                onClick={() => setForm(prev => ({ ...prev, banner: '' }))}
                                                 style={styles.clearBtn}
                                             >
                                                 <i className="fa-solid fa-times"></i>
@@ -904,58 +692,41 @@ const UniversityForm = () => {
                                     )}
                                 </div>
                             </div>
-
-                            <div style={styles.tipBox}>
-                                <i className="fa-solid fa-lightbulb" style={{ color: '#F59E0B' }}></i>
-                                <span>Use image hosting: </span>
-                                <a href="https://imgur.com/upload" target="_blank" rel="noreferrer" style={styles.tipLink}>Imgur</a>
-                                <a href="https://unsplash.com" target="_blank" rel="noreferrer" style={styles.tipLink}>Unsplash</a>
-                                <a href="https://cloudinary.com" target="_blank" rel="noreferrer" style={styles.tipLink}>Cloudinary</a>
-                            </div>
                         </div>
 
-                        {/* Section 7: Contact Information */}
+                        {/* Contact */}
                         <div style={styles.section}>
-                            <div style={styles.sectionHeader}>
-                                <div style={styles.sectionIcon}>
-                                    <i className="fa-solid fa-address-book"></i>
-                                </div>
-                                <div>
-                                    <h2 style={styles.sectionTitle}>Contact Information</h2>
-                                    <p style={styles.sectionDesc}>Add contact details</p>
-                                </div>
-                            </div>
-
+                            <h3 style={styles.sectionTitle}>
+                                <i className="fa-solid fa-address-book" style={{ color: '#FF6B35' }}></i> Contact
+                            </h3>
                             <div style={styles.grid}>
                                 <div style={styles.inputGroup}>
                                     <label style={styles.label}>Website</label>
                                     <input
-                                        type="url"
                                         name="website"
+                                        type="url"
                                         value={form.website}
                                         onChange={handleChange}
                                         placeholder="https://www.university.edu"
                                         style={styles.input}
                                     />
                                 </div>
-
                                 <div style={styles.inputGroup}>
                                     <label style={styles.label}>Email</label>
                                     <input
-                                        type="email"
                                         name="email"
+                                        type="email"
                                         value={form.email}
                                         onChange={handleChange}
-                                        placeholder="admissions@university.edu"
+                                        placeholder="info@university.edu"
                                         style={styles.input}
                                     />
                                 </div>
-
                                 <div style={styles.inputGroup}>
                                     <label style={styles.label}>Phone</label>
                                     <input
-                                        type="tel"
                                         name="phone"
+                                        type="tel"
                                         value={form.phone}
                                         onChange={handleChange}
                                         placeholder="+91 1234567890"
@@ -965,22 +736,16 @@ const UniversityForm = () => {
                             </div>
                         </div>
 
-                        {/* Section 8: Settings */}
+                        {/* Settings */}
                         <div style={styles.section}>
-                            <div style={styles.sectionHeader}>
-                                <div style={styles.sectionIcon}>
-                                    <i className="fa-solid fa-cog"></i>
-                                </div>
-                                <div>
-                                    <h2 style={styles.sectionTitle}>Settings</h2>
-                                    <p style={styles.sectionDesc}>Configure visibility</p>
-                                </div>
-                            </div>
-
+                            <h3 style={styles.sectionTitle}>
+                                <i className="fa-solid fa-cog" style={{ color: '#FF6B35' }}></i> Settings
+                            </h3>
                             <div style={styles.settingsGrid}>
                                 <label style={{
                                     ...styles.settingCard,
-                                    ...(form.featured ? styles.settingCardActive : {})
+                                    background: form.featured ? '#FFF7ED' : '#F8FAFC',
+                                    border: form.featured ? '2px solid #FF6B35' : '2px solid transparent'
                                 }}>
                                     <input
                                         type="checkbox"
@@ -998,13 +763,14 @@ const UniversityForm = () => {
                                     </div>
                                     <div>
                                         <strong>Featured</strong>
-                                        <small style={{ display: 'block', color: '#64748B', marginTop: '2px' }}>Show on homepage</small>
+                                        <small style={{ display: 'block', color: '#64748B' }}>Show on homepage</small>
                                     </div>
                                 </label>
 
                                 <label style={{
                                     ...styles.settingCard,
-                                    ...(form.isActive ? styles.settingCardActive : {})
+                                    background: form.isActive ? '#D1FAE5' : '#F8FAFC',
+                                    border: form.isActive ? '2px solid #16A34A' : '2px solid transparent'
                                 }}>
                                     <input
                                         type="checkbox"
@@ -1022,45 +788,38 @@ const UniversityForm = () => {
                                     </div>
                                     <div>
                                         <strong>Active</strong>
-                                        <small style={{ display: 'block', color: '#64748B', marginTop: '2px' }}>Visible to users</small>
+                                        <small style={{ display: 'block', color: '#64748B' }}>Visible to users</small>
                                     </div>
                                 </label>
                             </div>
                         </div>
 
-                        {/* Form Actions */}
+                        {/* Actions */}
                         <div style={styles.actions}>
-                            <button type="button" style={styles.resetBtn} onClick={handleReset}>
-                                <i className="fa-solid fa-rotate-left"></i>
-                                {isEditMode ? 'Reset Changes' : 'Clear Form'}
+                            <button type="button" onClick={handleReset} style={styles.resetBtn}>
+                                <i className="fa-solid fa-rotate-left"></i> {isEditMode ? 'Reset' : 'Clear'}
                             </button>
                             <div style={styles.actionRight}>
                                 <button
                                     type="button"
-                                    style={styles.cancelBtn}
                                     onClick={() => navigate('/admin/dashboard')}
+                                    style={styles.cancelBtn}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
+                                    disabled={loading}
                                     style={{
                                         ...styles.submitBtn,
                                         opacity: loading ? 0.7 : 1,
                                         cursor: loading ? 'not-allowed' : 'pointer'
                                     }}
-                                    disabled={loading}
                                 >
                                     {loading ? (
-                                        <>
-                                            <i className="fa-solid fa-spinner fa-spin"></i>
-                                            {isEditMode ? 'Updating...' : 'Creating...'}
-                                        </>
+                                        <><i className="fa-solid fa-spinner fa-spin"></i> {isEditMode ? 'Updating...' : 'Creating...'}</>
                                     ) : (
-                                        <>
-                                            <i className={`fa-solid ${isEditMode ? 'fa-save' : 'fa-plus'}`}></i>
-                                            {isEditMode ? 'Update University' : 'Create University'}
-                                        </>
+                                        <><i className={`fa-solid ${isEditMode ? 'fa-save' : 'fa-plus'}`}></i> {isEditMode ? 'Update' : 'Create'}</>
                                     )}
                                 </button>
                             </div>
@@ -1073,471 +832,47 @@ const UniversityForm = () => {
 };
 
 const styles = {
-    wrapper: {
-        display: 'flex',
-        minHeight: '100vh',
-        background: '#F8FAFC',
-        fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif"
-    },
-    sidebar: {
-        width: '260px',
-        background: '#0F172A',
-        padding: '25px 20px',
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        bottom: 0,
-        zIndex: 100
-    },
-    sidebarHeader: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        marginBottom: '40px',
-        paddingBottom: '20px',
-        borderBottom: '1px solid rgba(255,255,255,0.1)'
-    },
-    sidebarLogo: {
-        fontSize: '1.8rem',
-        color: '#FF6B35'
-    },
-    sidebarTitle: {
-        color: '#fff',
-        fontSize: '1.4rem',
-        fontWeight: '700'
-    },
-    sidebarNav: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-        flex: 1
-    },
-    navItem: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '14px 18px',
-        color: '#94A3B8',
-        fontSize: '0.95rem',
-        borderRadius: '10px',
-        textDecoration: 'none',
-        transition: 'all 0.2s'
-    },
-    navItemActive: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '14px 18px',
-        background: 'rgba(255, 107, 53, 0.15)',
-        color: '#FF6B35',
-        fontSize: '0.95rem',
-        fontWeight: '600',
-        borderRadius: '10px',
-        textDecoration: 'none'
-    },
-    sidebarFooter: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px',
-        paddingTop: '20px',
-        borderTop: '1px solid rgba(255,255,255,0.1)'
-    },
-    viewSiteLink: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        padding: '12px 18px',
-        color: '#94A3B8',
-        textDecoration: 'none',
-        fontSize: '0.9rem'
-    },
-    logoutBtn: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        padding: '12px 18px',
-        background: 'rgba(220, 38, 38, 0.15)',
-        border: 'none',
-        color: '#F87171',
-        fontSize: '0.9rem',
-        borderRadius: '10px',
-        cursor: 'pointer',
-        fontFamily: 'inherit'
-    },
-    main: {
-        flex: 1,
-        marginLeft: '260px',
-        padding: '30px'
-    },
-    loadingContainer: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '60vh',
-        background: '#fff',
-        borderRadius: '20px',
-        padding: '60px'
-    },
-    loadingSpinner: {
-        width: '80px',
-        height: '80px',
-        borderRadius: '50%',
-        background: '#FFF7ED',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    container: {
-        maxWidth: '900px',
-        margin: '0 auto'
-    },
-    header: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: '25px',
-        flexWrap: 'wrap',
-        gap: '15px'
-    },
-    headerLeft: {},
-    title: {
-        color: '#0F172A',
-        fontSize: '1.6rem',
-        fontWeight: '700',
-        marginBottom: '6px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px'
-    },
-    titleIcon: {
-        color: '#FF6B35'
-    },
-    subtitle: {
-        color: '#64748B',
-        fontSize: '0.9rem',
-        margin: 0
-    },
-    editBadge: {
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '8px',
-        marginTop: '10px',
-        padding: '6px 14px',
-        background: '#FFF7ED',
-        color: '#EA580C',
-        borderRadius: '20px',
-        fontSize: '0.85rem',
-        fontWeight: '600'
-    },
-    backBtn: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '10px 20px',
-        background: '#F1F5F9',
-        color: '#334155',
-        border: 'none',
-        borderRadius: '10px',
-        cursor: 'pointer',
-        fontWeight: '600',
-        fontSize: '0.9rem',
-        fontFamily: 'inherit'
-    },
-    errorAlert: {
-        background: '#FEE2E2',
-        border: '1px solid #FCA5A5',
-        color: '#DC2626',
-        padding: '14px 18px',
-        borderRadius: '10px',
-        marginBottom: '20px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-    },
-    successAlert: {
-        background: '#D1FAE5',
-        border: '1px solid #6EE7B7',
-        color: '#059669',
-        padding: '14px 18px',
-        borderRadius: '10px',
-        marginBottom: '20px'
-    },
-    alertContent: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        fontSize: '0.9rem',
-        fontWeight: '500'
-    },
-    alertClose: {
-        background: 'none',
-        border: 'none',
-        color: '#DC2626',
-        cursor: 'pointer',
-        fontSize: '1rem',
-        padding: '5px'
-    },
-    form: {
-        background: '#fff',
-        borderRadius: '16px',
-        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.06)',
-        overflow: 'hidden'
-    },
-    section: {
-        padding: '25px',
-        borderBottom: '1px solid #E2E8F0'
-    },
-    sectionHeader: {
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '12px',
-        marginBottom: '20px'
-    },
-    sectionIcon: {
-        width: '40px',
-        height: '40px',
-        borderRadius: '10px',
-        background: 'linear-gradient(135deg, #FF6B35, #FF8B5C)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#fff',
-        fontSize: '1rem',
-        flexShrink: 0
-    },
-    sectionTitle: {
-        color: '#0F172A',
-        fontSize: '1.05rem',
-        fontWeight: '700',
-        marginBottom: '3px',
-        margin: 0
-    },
-    sectionDesc: {
-        color: '#64748B',
-        fontSize: '0.85rem',
-        margin: 0
-    },
-    grid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '16px'
-    },
-    inputGroup: {
-        marginBottom: '5px'
-    },
-    label: {
-        display: 'block',
-        color: '#334155',
-        fontSize: '0.85rem',
-        fontWeight: '600',
-        marginBottom: '8px'
-    },
-    required: {
-        color: '#DC2626'
-    },
-    input: {
-        width: '100%',
-        padding: '12px 14px',
-        border: '2px solid #E2E8F0',
-        borderRadius: '10px',
-        fontSize: '0.9rem',
-        boxSizing: 'border-box',
-        outline: 'none',
-        fontFamily: 'inherit',
-        transition: 'border-color 0.2s'
-    },
-    select: {
-        width: '100%',
-        padding: '12px 14px',
-        border: '2px solid #E2E8F0',
-        borderRadius: '10px',
-        fontSize: '0.9rem',
-        boxSizing: 'border-box',
-        background: '#fff',
-        cursor: 'pointer',
-        fontFamily: 'inherit'
-    },
-    textarea: {
-        width: '100%',
-        padding: '12px 14px',
-        border: '2px solid #E2E8F0',
-        borderRadius: '10px',
-        fontSize: '0.9rem',
-        boxSizing: 'border-box',
-        resize: 'vertical',
-        fontFamily: 'inherit',
-        minHeight: '80px'
-    },
-    hint: {
-        display: 'block',
-        color: '#64748B',
-        fontSize: '0.75rem',
-        marginTop: '6px'
-    },
-    checkboxRow: {
-        display: 'flex',
-        gap: '25px',
-        marginTop: '15px'
-    },
-    checkboxLabel: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        cursor: 'pointer',
-        fontSize: '0.9rem',
-        color: '#334155'
-    },
-    checkboxInput: {
-        display: 'none'
-    },
-    checkboxCustom: {
-        width: '20px',
-        height: '20px',
-        borderRadius: '5px',
-        border: '2px solid #E2E8F0',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'all 0.2s'
-    },
-    previewBox: {
-        marginTop: '10px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px'
-    },
-    logoPreview: {
-        width: '60px',
-        height: '60px',
-        objectFit: 'contain',
-        borderRadius: '8px',
-        border: '1px solid #E2E8F0',
-        background: '#F8FAFC'
-    },
-    bannerPreview: {
-        width: '150px',
-        height: '50px',
-        objectFit: 'cover',
-        borderRadius: '8px',
-        border: '1px solid #E2E8F0'
-    },
-    clearBtn: {
-        width: '28px',
-        height: '28px',
-        borderRadius: '50%',
-        background: '#FEE2E2',
-        color: '#DC2626',
-        border: 'none',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '0.8rem'
-    },
-    tipBox: {
-        marginTop: '15px',
-        padding: '12px',
-        background: '#FFFBEB',
-        borderRadius: '8px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        fontSize: '0.85rem',
-        color: '#92400E',
-        flexWrap: 'wrap'
-    },
-    tipLink: {
-        color: '#0284C7',
-        textDecoration: 'none',
-        padding: '2px 8px',
-        background: '#E0F2FE',
-        borderRadius: '4px',
-        fontSize: '0.8rem'
-    },
-    settingsGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '12px'
-    },
-    settingCard: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '16px',
-        background: '#F8FAFC',
-        borderRadius: '12px',
-        cursor: 'pointer',
-        border: '2px solid transparent',
-        transition: 'all 0.2s'
-    },
-    settingCardActive: {
-        background: '#FFF7ED',
-        borderColor: '#FF6B35'
-    },
-    settingIcon: {
-        width: '40px',
-        height: '40px',
-        borderRadius: '10px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '1rem',
-        flexShrink: 0
-    },
-    actions: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '20px 25px',
-        background: '#F8FAFC'
-    },
-    actionRight: {
-        display: 'flex',
-        gap: '10px'
-    },
-    resetBtn: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '12px 20px',
-        background: '#fff',
-        color: '#64748B',
-        border: '2px solid #E2E8F0',
-        borderRadius: '10px',
-        cursor: 'pointer',
-        fontWeight: '600',
-        fontSize: '0.9rem',
-        fontFamily: 'inherit'
-    },
-    cancelBtn: {
-        padding: '12px 24px',
-        background: '#fff',
-        color: '#64748B',
-        border: '2px solid #E2E8F0',
-        borderRadius: '10px',
-        cursor: 'pointer',
-        fontWeight: '600',
-        fontSize: '0.9rem',
-        fontFamily: 'inherit'
-    },
-    submitBtn: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '12px 28px',
-        background: 'linear-gradient(135deg, #FF6B35, #FF8B5C)',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '10px',
-        cursor: 'pointer',
-        fontWeight: '600',
-        fontSize: '0.9rem',
-        fontFamily: 'inherit',
-        boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)'
-    }
+    wrapper: { display: 'flex', minHeight: '100vh', background: '#F8FAFC', fontFamily: "'Poppins', sans-serif" },
+    sidebar: { width: '250px', background: '#0F172A', padding: '20px', display: 'flex', flexDirection: 'column', position: 'fixed', top: 0, left: 0, bottom: 0 },
+    sidebarHeader: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '30px', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)' },
+    sidebarLogo: { fontSize: '1.5rem', color: '#FF6B35' },
+    sidebarTitle: { color: '#fff', fontSize: '1.2rem', fontWeight: '700' },
+    sidebarNav: { display: 'flex', flexDirection: 'column', gap: '5px', flex: 1 },
+    navItem: { display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', color: '#94A3B8', fontSize: '0.9rem', borderRadius: '8px', textDecoration: 'none' },
+    navItemActive: { display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', background: 'rgba(255,107,53,0.15)', color: '#FF6B35', fontSize: '0.9rem', fontWeight: '600', borderRadius: '8px' },
+    sidebarFooter: { paddingTop: '15px', borderTop: '1px solid rgba(255,255,255,0.1)' },
+    viewSiteLink: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', color: '#94A3B8', textDecoration: 'none', fontSize: '0.85rem' },
+    logoutBtn: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 12px', marginTop: '8px', background: 'rgba(220,38,38,0.15)', border: 'none', color: '#F87171', fontSize: '0.85rem', borderRadius: '8px', cursor: 'pointer' },
+    main: { flex: 1, marginLeft: '250px', padding: '25px' },
+    loadingContainer: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' },
+    container: { maxWidth: '800px', margin: '0 auto' },
+    header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' },
+    title: { color: '#0F172A', fontSize: '1.4rem', fontWeight: '700', margin: 0 },
+    subtitle: { color: '#64748B', fontSize: '0.85rem', margin: '5px 0 0' },
+    backBtn: { display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', background: '#F1F5F9', color: '#334155', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' },
+    errorAlert: { background: '#FEE2E2', color: '#DC2626', padding: '12px 16px', borderRadius: '8px', marginBottom: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' },
+    successAlert: { background: '#D1FAE5', color: '#059669', padding: '12px 16px', borderRadius: '8px', marginBottom: '15px', fontSize: '0.9rem' },
+    alertClose: { background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '1.2rem' },
+    form: { background: '#fff', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', overflow: 'hidden' },
+    section: { padding: '20px', borderBottom: '1px solid #E2E8F0' },
+    sectionTitle: { display: 'flex', alignItems: 'center', gap: '10px', color: '#0F172A', fontSize: '1rem', fontWeight: '600', margin: '0 0 15px' },
+    grid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' },
+    inputGroup: { marginBottom: '5px' },
+    label: { display: 'block', color: '#334155', fontSize: '0.85rem', fontWeight: '600', marginBottom: '6px' },
+    required: { color: '#DC2626' },
+    input: { width: '100%', padding: '10px 12px', border: '2px solid #E2E8F0', borderRadius: '8px', fontSize: '0.9rem', boxSizing: 'border-box', outline: 'none' },
+    select: { width: '100%', padding: '10px 12px', border: '2px solid #E2E8F0', borderRadius: '8px', fontSize: '0.9rem', boxSizing: 'border-box', background: '#fff', cursor: 'pointer' },
+    textarea: { width: '100%', padding: '10px 12px', border: '2px solid #E2E8F0', borderRadius: '8px', fontSize: '0.9rem', boxSizing: 'border-box', resize: 'vertical', minHeight: '80px', fontFamily: 'inherit' },
+    hint: { display: 'block', color: '#64748B', fontSize: '0.75rem', marginTop: '4px' },
+    clearBtn: { width: '28px', height: '28px', borderRadius: '50%', background: '#FEE2E2', color: '#DC2626', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem' },
+    settingsGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' },
+    settingCard: { display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: '#F8FAFC', borderRadius: '10px', cursor: 'pointer', transition: 'all 0.2s' },
+    settingIcon: { width: '38px', height: '38px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' },
+    actions: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', background: '#F8FAFC' },
+    actionRight: { display: 'flex', gap: '10px' },
+    resetBtn: { display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', background: '#fff', color: '#64748B', border: '2px solid #E2E8F0', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' },
+    cancelBtn: { padding: '10px 18px', background: '#fff', color: '#64748B', border: '2px solid #E2E8F0', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' },
+    submitBtn: { display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 22px', background: 'linear-gradient(135deg, #FF6B35, #FF8B5C)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.9rem', boxShadow: '0 4px 12px rgba(255,107,53,0.3)' }
 };
 
 export default UniversityForm;
