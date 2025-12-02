@@ -862,7 +862,7 @@ const Footer = () => {
                 {/* Bottom Bar */}
                 <div className="footer-bottom">
                     <p className="footer-copyright">
-                        © {currentYear} <span className="footer-copyright-brand">Edufolio</span>. All rights reserved. Made with <i className="fa-solid fa-heart footer-copyright-heart"></i> in India
+                        © {currentYear} <span className="footer-copyright-brand">Edufolio</span>. All rights reserved. Made By <i className="fa-solid fa-heart footer-copyright-heart"></i> IITS RPS
                     </p>
                     <div className="footer-bottom-links">
                         <Link to="/privacy" className="footer-bottom-link">Privacy Policy</Link>
