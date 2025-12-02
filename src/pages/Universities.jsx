@@ -1366,8 +1366,7 @@ const Universities = () => {
 
                             <div className="floating-image floating-image-2">
                                 <img 
-                                    src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=180&h=130&fit=crop" 
-                                    alt="Students studying"
+                                    src="https://images.unsplash.com/photo-1525921429624-479b6a26d84d?q=180&h=130&fit=crop"
                                     className="floating-img"
                                 />
                             </div>
