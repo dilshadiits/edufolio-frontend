@@ -71,6 +71,13 @@ const Dashboard = () => {
         fetchData(token);
     };
 
+    const getAuthConfig = () => {
+        const token = localStorage.getItem('token');
+        return {
+            headers: { Authorization: `Bearer ${token}` }
+        };
+    };
+
     const fetchData = async (token) => {
         try {
             setLoading(true);
@@ -78,17 +85,29 @@ const Dashboard = () => {
                 headers: { Authorization: `Bearer ${token}` }
             };
 
-            const [statsRes, uniRes, progRes, enqRes] = await Promise.all([
-                axios.get(`${API_BASE}/admin/stats`, config),
-                axios.get(`${API_BASE}/admin/universities`, config),
-                axios.get(`${API_BASE}/admin/programs`, config),
-                axios.get(`${API_BASE}/admin/enquiries`, config)
+            // Fetch all data in parallel, handle errors individually
+            const [uniRes, progRes, enqRes] = await Promise.all([
+                axios.get(`${API_BASE}/admin/universities`, config).catch(() => ({ data: [] })),
+                axios.get(`${API_BASE}/admin/programs`, config).catch(() => ({ data: [] })),
+                axios.get(`${API_BASE}/admin/enquiries`, config).catch(() => ({ data: [] }))
             ]);
 
-            setStats(statsRes.data);
-            setUniversities(uniRes.data);
-            setPrograms(progRes.data);
-            setEnquiries(enqRes.data);
+            const universitiesData = uniRes.data || [];
+            const programsData = progRes.data || [];
+            const enquiriesData = enqRes.data || [];
+
+            setUniversities(universitiesData);
+            setPrograms(programsData);
+            setEnquiries(enquiriesData);
+
+            // Calculate stats
+            setStats({
+                universities: universitiesData.length,
+                programs: programsData.length,
+                enquiries: enquiriesData.length,
+                newEnquiries: enquiriesData.filter(e => e.status === 'New').length
+            });
+
         } catch (err) {
             console.error('Error fetching data:', err);
             if (err.response?.status === 401) {
@@ -136,43 +155,91 @@ const Dashboard = () => {
         }
     };
 
+    // Toggle Status using general PUT endpoint
     const handleToggleStatus = async (type, id, currentStatus) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.put(`${API_BASE}/admin/${type}/${id}/toggle`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            showToast(`Status updated to ${currentStatus ? 'Inactive' : 'Active'}`, 'success');
-            fetchData(token);
+            await axios.put(
+                `${API_BASE}/admin/${type}/${id}`,
+                { isActive: !currentStatus },
+                getAuthConfig()
+            );
+
+            // Update local state immediately
+            if (type === 'universities') {
+                setUniversities(prev =>
+                    prev.map(item =>
+                        item._id === id ? { ...item, isActive: !currentStatus } : item
+                    )
+                );
+            } else if (type === 'programs') {
+                setPrograms(prev =>
+                    prev.map(item =>
+                        item._id === id ? { ...item, isActive: !currentStatus } : item
+                    )
+                );
+            }
+
+            showToast(`Status updated to ${!currentStatus ? 'Active' : 'Inactive'}`, 'success');
         } catch (err) {
-            console.error('Toggle error:', err);
+            console.error('Toggle status error:', err);
             showToast('Failed to update status', 'error');
         }
     };
 
+    // Toggle Featured using general PUT endpoint
     const handleToggleFeatured = async (type, id, currentFeatured) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.put(`${API_BASE}/admin/${type}/${id}/featured`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            showToast(`${currentFeatured ? 'Removed from' : 'Added to'} featured`, 'success');
-            fetchData(token);
+            await axios.put(
+                `${API_BASE}/admin/${type}/${id}`,
+                { featured: !currentFeatured },
+                getAuthConfig()
+            );
+
+            // Update local state immediately
+            if (type === 'universities') {
+                setUniversities(prev =>
+                    prev.map(item =>
+                        item._id === id ? { ...item, featured: !currentFeatured } : item
+                    )
+                );
+            } else if (type === 'programs') {
+                setPrograms(prev =>
+                    prev.map(item =>
+                        item._id === id ? { ...item, featured: !currentFeatured } : item
+                    )
+                );
+            }
+
+            showToast(`${!currentFeatured ? 'Added to' : 'Removed from'} featured`, 'success');
         } catch (err) {
             console.error('Toggle featured error:', err);
             showToast('Failed to update featured status', 'error');
         }
     };
 
+    // Update enquiry status
     const updateEnquiryStatus = async (id, status) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.put(`${API_BASE}/admin/enquiries/${id}/status`,
+            await axios.put(
+                `${API_BASE}/admin/enquiries/${id}`,
                 { status },
-                { headers: { Authorization: `Bearer ${token}` } }
+                getAuthConfig()
             );
+
+            // Update local state
+            setEnquiries(prev =>
+                prev.map(item =>
+                    item._id === id ? { ...item, status } : item
+                )
+            );
+
+            // Update new enquiries count
+            const newCount = enquiries.filter(e => 
+                e._id === id ? status === 'New' : e.status === 'New'
+            ).length;
+            setStats(prev => ({ ...prev, newEnquiries: newCount }));
+
             showToast('Enquiry status updated', 'success');
-            fetchData(token);
         } catch (err) {
             console.error('Update status error:', err);
             showToast('Failed to update status', 'error');
@@ -185,8 +252,9 @@ const Dashboard = () => {
 
         if (searchTerm) {
             filtered = filtered.filter(uni =>
-                uni.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                uni.location?.toLowerCase().includes(searchTerm.toLowerCase())
+                uni.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                uni.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                uni.city?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
@@ -204,7 +272,7 @@ const Dashboard = () => {
         } else if (sortBy === 'oldest') {
             filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         } else if (sortBy === 'name') {
-            filtered.sort((a, b) => a.name.localeCompare(b.name));
+            filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         }
 
         return filtered;
@@ -215,7 +283,7 @@ const Dashboard = () => {
 
         if (searchTerm) {
             filtered = filtered.filter(prog =>
-                prog.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                prog.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 prog.universityId?.name?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
@@ -238,11 +306,11 @@ const Dashboard = () => {
         } else if (sortBy === 'oldest') {
             filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         } else if (sortBy === 'name') {
-            filtered.sort((a, b) => a.name.localeCompare(b.name));
+            filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         } else if (sortBy === 'fee-low') {
-            filtered.sort((a, b) => a.fee - b.fee);
+            filtered.sort((a, b) => (a.fee || 0) - (b.fee || 0));
         } else if (sortBy === 'fee-high') {
-            filtered.sort((a, b) => b.fee - a.fee);
+            filtered.sort((a, b) => (b.fee || 0) - (a.fee || 0));
         }
 
         return filtered;
@@ -253,9 +321,9 @@ const Dashboard = () => {
 
         if (searchTerm) {
             filtered = filtered.filter(enq =>
-                enq.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                enq.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                enq.phone.includes(searchTerm)
+                enq.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                enq.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                enq.phone?.includes(searchTerm)
             );
         }
 
@@ -280,6 +348,15 @@ const Dashboard = () => {
         setFilterCategory('');
         setFilterStatus('');
         setSortBy('newest');
+    };
+
+    // Format fee display
+    const formatFee = (fee) => {
+        if (!fee) return '-';
+        if (fee >= 100000) {
+            return `₹${(fee / 100000).toFixed(1)}L`;
+        }
+        return `₹${(fee / 1000).toFixed(0)}K`;
     };
 
     if (loading) {
@@ -482,7 +559,7 @@ const Dashboard = () => {
                                     style={styles.statCard}
                                     onClick={() => {
                                         handleTabChange('enquiries');
-                                        setFilterStatus('New');
+                                        setTimeout(() => setFilterStatus('New'), 100);
                                     }}
                                 >
                                     <div style={{ ...styles.statIcon, background: '#F3E8FF', color: '#9333EA' }}>
@@ -530,61 +607,74 @@ const Dashboard = () => {
                                 </div>
                             </div>
 
-                            {/* Recent Enquiries */}
+                            {/* Recent Universities */}
                             <div style={styles.card}>
                                 <div style={styles.cardHeader}>
                                     <h2 style={styles.cardTitle}>
-                                        <i className="fa-solid fa-clock" style={{ marginRight: '10px', color: '#FF6B35' }}></i>
-                                        Recent Enquiries
+                                        <i className="fa-solid fa-building-columns" style={{ marginRight: '10px', color: '#FF6B35' }}></i>
+                                        Recent Universities
                                     </h2>
                                     <button
                                         style={styles.viewAllBtn}
-                                        onClick={() => handleTabChange('enquiries')}
+                                        onClick={() => handleTabChange('universities')}
                                     >
                                         View All <i className="fa-solid fa-arrow-right"></i>
                                     </button>
                                 </div>
                                 <div style={styles.tableWrapper}>
-                                    <table style={styles.table}>
-                                        <thead>
-                                            <tr>
-                                                <th style={styles.th}>Name</th>
-                                                <th style={styles.th}>Email</th>
-                                                <th style={styles.th}>Phone</th>
-                                                <th style={styles.th}>Status</th>
-                                                <th style={styles.th}>Date</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {enquiries.slice(0, 5).map(enq => (
-                                                <tr key={enq._id} style={styles.tableRow}>
-                                                    <td style={styles.td}>
-                                                        <span style={styles.enquiryName}>{enq.name}</span>
-                                                    </td>
-                                                    <td style={styles.td}>{enq.email}</td>
-                                                    <td style={styles.td}>{enq.phone}</td>
-                                                    <td style={styles.td}>
-                                                        <span style={{
-                                                            ...styles.statusBadge,
-                                                            background: enq.status === 'New' ? '#FEF3C7' : enq.status === 'Contacted' ? '#DBEAFE' : '#DCFCE7',
-                                                            color: enq.status === 'New' ? '#D97706' : enq.status === 'Contacted' ? '#3B82F6' : '#16A34A'
-                                                        }}>
-                                                            {enq.status}
-                                                        </span>
-                                                    </td>
-                                                    <td style={styles.td}>
-                                                        {new Date(enq.createdAt).toLocaleDateString('en-IN', {
-                                                            day: 'numeric',
-                                                            month: 'short',
-                                                            year: 'numeric'
-                                                        })}
-                                                    </td>
+                                    {universities.length > 0 ? (
+                                        <table style={styles.table}>
+                                            <thead>
+                                                <tr>
+                                                    <th style={styles.th}>University</th>
+                                                    <th style={styles.th}>Location</th>
+                                                    <th style={styles.th}>Status</th>
+                                                    <th style={styles.th}>Actions</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                    {enquiries.length === 0 && (
-                                        <p style={styles.noData}>No enquiries yet</p>
+                                            </thead>
+                                            <tbody>
+                                                {universities.slice(0, 5).map(uni => (
+                                                    <tr key={uni._id} style={styles.tableRow}>
+                                                        <td style={styles.td}>
+                                                            <div style={styles.uniCell}>
+                                                                <img
+                                                                    src={uni.logo || 'https://via.placeholder.com/40?text=U'}
+                                                                    alt={uni.name}
+                                                                    style={styles.uniLogo}
+                                                                    onError={(e) => e.target.src = 'https://via.placeholder.com/40?text=U'}
+                                                                />
+                                                                <div>
+                                                                    <span style={styles.uniName}>{uni.name}</span>
+                                                                    <span style={styles.uniType}>{uni.type || 'University'}</span>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td style={styles.td}>
+                                                            {uni.city}{uni.state ? `, ${uni.state}` : ''}
+                                                        </td>
+                                                        <td style={styles.td}>
+                                                            <span style={{
+                                                                ...styles.statusBadge,
+                                                                background: uni.isActive ? '#DCFCE7' : '#FEE2E2',
+                                                                color: uni.isActive ? '#16A34A' : '#DC2626'
+                                                            }}>
+                                                                {uni.isActive ? 'Active' : 'Inactive'}
+                                                            </span>
+                                                        </td>
+                                                        <td style={styles.td}>
+                                                            <Link
+                                                                to={`/admin/universities/edit/${uni._id}`}
+                                                                style={styles.editBtn}
+                                                            >
+                                                                <i className="fa-solid fa-pen"></i>
+                                                            </Link>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    ) : (
+                                        <p style={styles.noData}>No universities yet</p>
                                     )}
                                 </div>
                             </div>
@@ -646,7 +736,7 @@ const Dashboard = () => {
                                         <tr>
                                             <th style={styles.th}>University</th>
                                             <th style={styles.th}>Location</th>
-                                            <th style={styles.th}>Rating</th>
+                                            <th style={styles.th}>Fee Range</th>
                                             <th style={styles.th}>Featured</th>
                                             <th style={styles.th}>Status</th>
                                             <th style={styles.th}>Actions</th>
@@ -672,14 +762,12 @@ const Dashboard = () => {
                                                 <td style={styles.td}>
                                                     <span style={styles.locationText}>
                                                         <i className="fa-solid fa-location-dot" style={{ marginRight: '6px', color: '#94A3B8' }}></i>
-                                                        {uni.location || 'N/A'}
+                                                        {uni.city || uni.location || 'N/A'}
                                                     </span>
                                                 </td>
                                                 <td style={styles.td}>
-                                                    <span style={styles.ratingBadge}>
-                                                        <i className="fa-solid fa-star" style={{ marginRight: '4px' }}></i>
-                                                        {uni.rating || 'N/A'}
-                                                    </span>
+                                                    {uni.minFee ? formatFee(uni.minFee) : '-'}
+                                                    {uni.maxFee ? ` - ${formatFee(uni.maxFee)}` : ''}
                                                 </td>
                                                 <td style={styles.td}>
                                                     <button
@@ -691,7 +779,7 @@ const Dashboard = () => {
                                                         onClick={() => handleToggleFeatured('universities', uni._id, uni.featured)}
                                                         title={uni.featured ? 'Remove from featured' : 'Add to featured'}
                                                     >
-                                                        <i className={`fa-solid fa-star`}></i>
+                                                        <i className="fa-solid fa-star"></i>
                                                     </button>
                                                 </td>
                                                 <td style={styles.td}>
@@ -709,6 +797,15 @@ const Dashboard = () => {
                                                 </td>
                                                 <td style={styles.td}>
                                                     <div style={styles.actions}>
+                                                        <a
+                                                            href={`/universities/${uni.slug}`}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            style={styles.viewBtn}
+                                                            title="View"
+                                                        >
+                                                            <i className="fa-solid fa-eye"></i>
+                                                        </a>
                                                         <Link
                                                             to={`/admin/universities/edit/${uni._id}`}
                                                             style={styles.editBtn}
@@ -815,7 +912,6 @@ const Dashboard = () => {
                                 </select>
                             </div>
 
-                            {/* Results count */}
                             <div style={styles.resultsInfo}>
                                 Showing {getFilteredPrograms().length} of {programs.length} programs
                             </div>
@@ -840,7 +936,6 @@ const Dashboard = () => {
                                                     <div>
                                                         <span style={styles.progName}>{prog.name}</span>
                                                         <span style={styles.progLevel}>
-                                                            <i className="fa-solid fa-clock" style={{ marginRight: '4px' }}></i>
                                                             {prog.duration} • {prog.mode}
                                                         </span>
                                                     </div>
@@ -855,7 +950,7 @@ const Dashboard = () => {
                                                 </td>
                                                 <td style={styles.td}>
                                                     <span style={styles.feeText}>
-                                                        ₹{Number(prog.fee).toLocaleString('en-IN')}
+                                                        {formatFee(prog.fee)}
                                                     </span>
                                                     <span style={styles.feePeriod}>{prog.feePeriod}</span>
                                                 </td>
@@ -867,9 +962,8 @@ const Dashboard = () => {
                                                             color: prog.featured ? '#D97706' : '#94A3B8'
                                                         }}
                                                         onClick={() => handleToggleFeatured('programs', prog._id, prog.featured)}
-                                                        title={prog.featured ? 'Remove from featured' : 'Add to featured'}
                                                     >
-                                                        <i className={`fa-solid fa-star`}></i>
+                                                        <i className="fa-solid fa-star"></i>
                                                     </button>
                                                 </td>
                                                 <td style={styles.td}>
@@ -890,14 +984,12 @@ const Dashboard = () => {
                                                         <Link
                                                             to={`/admin/programs/edit/${prog._id}`}
                                                             style={styles.editBtn}
-                                                            title="Edit"
                                                         >
                                                             <i className="fa-solid fa-pen"></i>
                                                         </Link>
                                                         <button
                                                             style={styles.deleteBtn}
                                                             onClick={() => openDeleteModal('programs', prog._id, prog.name)}
-                                                            title="Delete"
                                                         >
                                                             <i className="fa-solid fa-trash"></i>
                                                         </button>
@@ -984,7 +1076,6 @@ const Dashboard = () => {
                                 </select>
                             </div>
 
-                            {/* Results count */}
                             <div style={styles.resultsInfo}>
                                 Showing {getFilteredEnquiries().length} of {enquiries.length} enquiries
                             </div>
@@ -995,7 +1086,7 @@ const Dashboard = () => {
                                         <tr>
                                             <th style={styles.th}>Name</th>
                                             <th style={styles.th}>Contact</th>
-                                            <th style={styles.th}>Program/University</th>
+                                            <th style={styles.th}>Interest</th>
                                             <th style={styles.th}>Message</th>
                                             <th style={styles.th}>Status</th>
                                             <th style={styles.th}>Date</th>
@@ -1022,17 +1113,17 @@ const Dashboard = () => {
                                                 </td>
                                                 <td style={styles.td}>
                                                     <span style={styles.enquiryProgram}>
-                                                        {enq.programId?.name || enq.universityId?.name || 'General Enquiry'}
+                                                        {enq.programId?.name || enq.universityId?.name || enq.interest || 'General'}
                                                     </span>
                                                 </td>
                                                 <td style={styles.td}>
                                                     <span style={styles.messagePreview} title={enq.message}>
-                                                        {enq.message ? (enq.message.length > 50 ? enq.message.substring(0, 50) + '...' : enq.message) : '-'}
+                                                        {enq.message ? (enq.message.length > 40 ? enq.message.substring(0, 40) + '...' : enq.message) : '-'}
                                                     </span>
                                                 </td>
                                                 <td style={styles.td}>
                                                     <select
-                                                        value={enq.status}
+                                                        value={enq.status || 'New'}
                                                         onChange={(e) => updateEnquiryStatus(enq._id, e.target.value)}
                                                         style={{
                                                             ...styles.statusSelect,
@@ -1060,8 +1151,7 @@ const Dashboard = () => {
                                                     <span style={styles.dateText}>
                                                         {new Date(enq.createdAt).toLocaleDateString('en-IN', {
                                                             day: 'numeric',
-                                                            month: 'short',
-                                                            year: 'numeric'
+                                                            month: 'short'
                                                         })}
                                                     </span>
                                                     <span style={styles.timeText}>
@@ -1074,7 +1164,7 @@ const Dashboard = () => {
                                                 <td style={styles.td}>
                                                     <div style={styles.actions}>
                                                         <a
-                                                            href={`https://wa.me/${enq.phone.replace(/\D/g, '')}`}
+                                                            href={`https://wa.me/${(enq.phone || '').replace(/\D/g, '')}`}
                                                             target="_blank"
                                                             rel="noreferrer"
                                                             style={styles.whatsappBtn}
@@ -1135,7 +1225,8 @@ const styles = {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#F8FAFC'
+        background: '#F8FAFC',
+        fontFamily: "'Poppins', sans-serif"
     },
     loadingSpinner: {
         width: '80px',
@@ -1161,8 +1252,8 @@ const styles = {
         fontWeight: '600',
         boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
         zIndex: 1000,
-        animation: 'slideIn 0.3s ease',
-        border: '1px solid'
+        border: '1px solid',
+        fontFamily: "'Poppins', sans-serif"
     },
 
     // Modal
@@ -1186,7 +1277,8 @@ const styles = {
         maxWidth: '400px',
         width: '90%',
         textAlign: 'center',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+        fontFamily: "'Poppins', sans-serif"
     },
     modalIcon: {
         width: '70px',
@@ -1225,7 +1317,8 @@ const styles = {
         borderRadius: '10px',
         fontSize: '0.95rem',
         fontWeight: '600',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        fontFamily: 'inherit'
     },
     modalDeleteBtn: {
         padding: '12px 28px',
@@ -1238,14 +1331,16 @@ const styles = {
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px'
+        gap: '8px',
+        fontFamily: 'inherit'
     },
 
     // Layout
     wrapper: {
         display: 'flex',
         minHeight: '100vh',
-        background: '#F8FAFC'
+        background: '#F8FAFC',
+        fontFamily: "'Poppins', sans-serif"
     },
     sidebar: {
         width: '260px',
@@ -1295,7 +1390,7 @@ const styles = {
         borderRadius: '10px',
         cursor: 'pointer',
         textAlign: 'left',
-        transition: 'all 0.2s ease'
+        fontFamily: 'inherit'
     },
     navItemActive: {
         display: 'flex',
@@ -1309,7 +1404,8 @@ const styles = {
         fontWeight: '600',
         borderRadius: '10px',
         cursor: 'pointer',
-        textAlign: 'left'
+        textAlign: 'left',
+        fontFamily: 'inherit'
     },
     badge: {
         marginLeft: 'auto',
@@ -1356,7 +1452,8 @@ const styles = {
         color: '#F87171',
         fontSize: '0.9rem',
         borderRadius: '10px',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        fontFamily: 'inherit'
     },
     main: {
         flex: 1,
@@ -1379,7 +1476,8 @@ const styles = {
     },
     pageSubtitle: {
         color: '#64748B',
-        fontSize: '0.95rem'
+        fontSize: '0.95rem',
+        margin: 0
     },
     headerActions: {},
     addBtn: {
@@ -1413,7 +1511,6 @@ const styles = {
         gap: '20px',
         boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
         cursor: 'pointer',
-        transition: 'all 0.2s ease',
         position: 'relative'
     },
     statIcon: {
@@ -1472,7 +1569,7 @@ const styles = {
         boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
         cursor: 'pointer',
         border: 'none',
-        transition: 'all 0.2s ease'
+        fontFamily: 'inherit'
     },
     quickActionIcon: {
         width: '50px',
@@ -1489,7 +1586,8 @@ const styles = {
         background: '#fff',
         borderRadius: '16px',
         overflow: 'hidden',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
+        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+        marginBottom: '20px'
     },
     cardHeader: {
         display: 'flex',
@@ -1503,7 +1601,8 @@ const styles = {
         fontSize: '1.1rem',
         fontWeight: '600',
         display: 'flex',
-        alignItems: 'center'
+        alignItems: 'center',
+        margin: 0
     },
     viewAllBtn: {
         display: 'flex',
@@ -1514,7 +1613,8 @@ const styles = {
         border: 'none',
         fontWeight: '600',
         fontSize: '0.9rem',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        fontFamily: 'inherit'
     },
 
     // Filters
@@ -1544,7 +1644,8 @@ const styles = {
         borderRadius: '10px',
         fontSize: '0.9rem',
         outline: 'none',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        fontFamily: 'inherit'
     },
     clearSearch: {
         position: 'absolute',
@@ -1564,7 +1665,8 @@ const styles = {
         outline: 'none',
         cursor: 'pointer',
         background: '#fff',
-        minWidth: '150px'
+        minWidth: '150px',
+        fontFamily: 'inherit'
     },
     resultsInfo: {
         padding: '12px 25px',
@@ -1597,9 +1699,7 @@ const styles = {
         color: '#334155',
         fontSize: '0.9rem'
     },
-    tableRow: {
-        transition: 'background 0.2s ease'
-    },
+    tableRow: {},
 
     // University cell
     uniCell: {
@@ -1635,16 +1735,6 @@ const styles = {
         display: 'flex',
         alignItems: 'center'
     },
-    ratingBadge: {
-        display: 'inline-flex',
-        alignItems: 'center',
-        background: '#FEF3C7',
-        color: '#D97706',
-        padding: '6px 12px',
-        borderRadius: '8px',
-        fontSize: '0.85rem',
-        fontWeight: '600'
-    },
 
     // Program cell
     progName: {
@@ -1654,8 +1744,7 @@ const styles = {
         marginBottom: '4px'
     },
     progLevel: {
-        display: 'flex',
-        alignItems: 'center',
+        display: 'block',
         color: '#94A3B8',
         fontSize: '0.8rem'
     },
@@ -1689,8 +1778,7 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
-        fontSize: '0.9rem',
-        transition: 'all 0.2s ease'
+        fontSize: '0.9rem'
     },
     statusToggle: {
         padding: '6px 12px',
@@ -1701,11 +1789,23 @@ const styles = {
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
-        transition: 'all 0.2s ease'
+        fontFamily: 'inherit'
     },
     actions: {
         display: 'flex',
         gap: '8px'
+    },
+    viewBtn: {
+        width: '36px',
+        height: '36px',
+        borderRadius: '8px',
+        background: '#DCFCE7',
+        color: '#16A34A',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textDecoration: 'none',
+        fontSize: '0.9rem'
     },
     editBtn: {
         width: '36px',
@@ -1718,7 +1818,8 @@ const styles = {
         justifyContent: 'center',
         textDecoration: 'none',
         fontSize: '0.9rem',
-        transition: 'all 0.2s ease'
+        border: 'none',
+        cursor: 'pointer'
     },
     deleteBtn: {
         width: '36px',
@@ -1731,8 +1832,7 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
-        fontSize: '0.9rem',
-        transition: 'all 0.2s ease'
+        fontSize: '0.9rem'
     },
     whatsappBtn: {
         width: '36px',
@@ -1787,7 +1887,14 @@ const styles = {
         fontSize: '0.8rem',
         fontWeight: '600',
         cursor: 'pointer',
-        outline: 'none'
+        outline: 'none',
+        fontFamily: 'inherit'
+    },
+    statusBadge: {
+        padding: '6px 12px',
+        borderRadius: '8px',
+        fontSize: '0.8rem',
+        fontWeight: '600'
     },
     dateText: {
         display: 'block',
@@ -1797,12 +1904,6 @@ const styles = {
         display: 'block',
         color: '#94A3B8',
         fontSize: '0.8rem'
-    },
-    statusBadge: {
-        padding: '6px 12px',
-        borderRadius: '8px',
-        fontSize: '0.8rem',
-        fontWeight: '600'
     },
 
     // Empty & No Results
@@ -1814,7 +1915,8 @@ const styles = {
     emptyIcon: {
         fontSize: '4rem',
         color: '#CBD5E1',
-        marginBottom: '20px'
+        marginBottom: '20px',
+        display: 'block'
     },
     noResults: {
         padding: '60px 20px',
@@ -1824,7 +1926,8 @@ const styles = {
     noResultsIcon: {
         fontSize: '3rem',
         color: '#CBD5E1',
-        marginBottom: '15px'
+        marginBottom: '15px',
+        display: 'block'
     },
     clearFiltersBtn: {
         marginTop: '15px',
@@ -1835,7 +1938,8 @@ const styles = {
         borderRadius: '8px',
         fontSize: '0.9rem',
         fontWeight: '600',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        fontFamily: 'inherit'
     },
     noData: {
         padding: '40px 20px',
