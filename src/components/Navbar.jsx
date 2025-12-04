@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import logoWhite from '../assets/images/white.png';
@@ -10,18 +10,9 @@ const Navbar = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Handle scroll with throttle for performance
     useEffect(() => {
-        let ticking = false;
-        
         const handleScroll = () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    setIsScrolled(window.scrollY > 50);
-                    ticking = false;
-                });
-                ticking = true;
-            }
+            setIsScrolled(window.scrollY > 50);
         };
 
         const handleResize = () => {
@@ -30,7 +21,7 @@ const Navbar = () => {
             }
         };
 
-        window.addEventListener('scroll', handleScroll, { passive: true });
+        window.addEventListener('scroll', handleScroll);
         window.addEventListener('resize', handleResize);
         handleScroll();
 
@@ -40,84 +31,57 @@ const Navbar = () => {
         };
     }, []);
 
-    // Lock body scroll when mobile menu is open - IMPROVED with menu-open class
+    // Lock body scroll when mobile menu is open - IMPROVED
     useEffect(() => {
         if (isMobileMenuOpen) {
+            // Save current scroll position
             const scrollY = window.scrollY;
-            document.body.classList.add('menu-open');
             document.body.style.position = 'fixed';
             document.body.style.top = `-${scrollY}px`;
             document.body.style.left = '0';
             document.body.style.right = '0';
             document.body.style.overflow = 'hidden';
-            document.body.style.width = '100%';
         } else {
+            // Restore scroll position
             const scrollY = document.body.style.top;
-            document.body.classList.remove('menu-open');
             document.body.style.position = '';
             document.body.style.top = '';
             document.body.style.left = '';
             document.body.style.right = '';
             document.body.style.overflow = '';
-            document.body.style.width = '';
-            if (scrollY) {
-                window.scrollTo(0, parseInt(scrollY || '0') * -1);
-            }
+            window.scrollTo(0, parseInt(scrollY || '0') * -1);
         }
         
         return () => {
-            document.body.classList.remove('menu-open');
             document.body.style.position = '';
             document.body.style.top = '';
             document.body.style.left = '';
             document.body.style.right = '';
             document.body.style.overflow = '';
-            document.body.style.width = '';
         };
     }, [isMobileMenuOpen]);
 
-    // Handle escape key to close menu
-    useEffect(() => {
-        const handleEscape = (e) => {
-            if (e.key === 'Escape' && isMobileMenuOpen) {
-                setIsMobileMenuOpen(false);
-            }
-        };
-
-        document.addEventListener('keydown', handleEscape);
-        return () => document.removeEventListener('keydown', handleEscape);
-    }, [isMobileMenuOpen]);
-
-    // Close menu and scroll to top on route change
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' });
         setIsMobileMenuOpen(false);
     }, [location.pathname]);
 
     const navLinks = [
-        { name: 'Home', path: '/', icon: 'fa-home', description: 'Back to homepage' },
-        { name: 'Programs', path: '/programs', icon: 'fa-graduation-cap', description: 'Explore our programs' },
-        { name: 'Universities', path: '/universities', icon: 'fa-building-columns', description: 'Partner universities' },
-        { name: 'About', path: '/about', icon: 'fa-info-circle', description: 'Learn about us' },
-        { name: 'Contact', path: '/contact', icon: 'fa-envelope', description: 'Get in touch' }
+        { name: 'Home', path: '/', icon: 'fa-home' },
+        { name: 'Programs', path: '/programs', icon: 'fa-graduation-cap' },
+        { name: 'Universities', path: '/universities', icon: 'fa-building-columns' },
+        { name: 'About', path: '/about', icon: 'fa-info-circle' },
+        { name: 'Contact', path: '/contact', icon: 'fa-envelope' }
     ];
 
-    const isActive = useCallback((path) => location.pathname === path, [location.pathname]);
+    const isActive = (path) => location.pathname === path;
 
-    const handleNavClick = useCallback((e, path) => {
+    const handleNavClick = (e, path) => {
         e.preventDefault();
         window.scrollTo({ top: 0, behavior: 'instant' });
         navigate(path);
         setIsMobileMenuOpen(false);
-    }, [navigate]);
-
-    const toggleMobileMenu = useCallback(() => {
-        setIsMobileMenuOpen(prev => !prev);
-    }, []);
-
-    const closeMobileMenu = useCallback(() => {
-        setIsMobileMenuOpen(false);
-    }, []);
+    };
 
     const showBlackLogo = isScrolled || isMobileMenuOpen;
     const navbarClass = `navbar ${isScrolled ? 'scrolled' : ''} ${isMobileMenuOpen ? 'menu-open' : ''}`;
@@ -125,27 +89,6 @@ const Navbar = () => {
     return (
         <>
             <style>{`
-                /* ==================== CSS VARIABLES ==================== */
-                :root {
-                    --nav-height: 70px;
-                    --nav-height-tablet: 65px;
-                    --nav-height-mobile: 60px;
-                    --nav-light-blue: #0099D6;
-                    --nav-dark-blue: #00529D;
-                    --nav-maroon: #8B2346;
-                    --nav-dark-maroon: #6B1D3A;
-                    --nav-pink: #C4567A;
-                    --nav-white: #FFFFFF;
-                    --nav-light-gray: #F5F7FA;
-                    --nav-gray: #64748B;
-                    --nav-text-dark: #2D1B4E;
-                    --nav-transition: 0.3s ease;
-                    --nav-radius: 10px;
-                    --nav-radius-lg: 12px;
-                    --nav-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-                    --nav-shadow-strong: 0 6px 25px rgba(139, 35, 70, 0.45);
-                }
-
                 /* ==================== NAVBAR BASE ==================== */
                 .navbar,
                 .navbar *,
@@ -163,6 +106,20 @@ const Navbar = () => {
                 }
 
                 .navbar {
+                    --nav-height: 70px;
+                    --nav-light-blue: #0099D6;
+                    --nav-dark-blue: #00529D;
+                    --nav-maroon: #8B2346;
+                    --nav-dark-maroon: #6B1D3A;
+                    --nav-pink: #C4567A;
+                    --nav-white: #FFFFFF;
+                    --nav-light-gray: #F5F7FA;
+                    --nav-gray: #64748B;
+                    --nav-text-dark: #2D1B4E;
+                    --nav-transition: 0.3s ease;
+                    --nav-radius: 10px;
+                    --nav-radius-lg: 12px;
+
                     position: fixed;
                     top: 0;
                     left: 0;
@@ -174,15 +131,12 @@ const Navbar = () => {
                     transition: background 0.3s ease, box-shadow 0.3s ease;
                     background: transparent;
                     width: 100%;
-                    /* iOS safe area support */
-                    padding-left: env(safe-area-inset-left);
-                    padding-right: env(safe-area-inset-right);
                 }
 
                 .navbar.scrolled,
                 .navbar.menu-open {
                     background: var(--nav-white);
-                    box-shadow: var(--nav-shadow);
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
                 }
 
                 .navbar-container {
@@ -206,7 +160,6 @@ const Navbar = () => {
                     height: var(--nav-height);
                     position: relative;
                     z-index: 10;
-                    -webkit-tap-highlight-color: transparent;
                 }
 
                 .navbar-logo-img {
@@ -215,15 +168,11 @@ const Navbar = () => {
                     max-width: 180px;
                     object-fit: contain;
                     display: block;
-                    transition: transform 0.3s ease, opacity 0.3s ease;
+                    transition: transform 0.3s ease;
                 }
 
                 .navbar-logo:hover .navbar-logo-img {
                     transform: scale(1.02);
-                }
-
-                .navbar-logo:active .navbar-logo-img {
-                    transform: scale(0.98);
                 }
 
                 /* ==================== NAV LINKS ==================== */
@@ -252,13 +201,11 @@ const Navbar = () => {
                     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
                     white-space: nowrap;
                     background: transparent;
-                    -webkit-tap-highlight-color: transparent;
                 }
 
                 .nav-link .nav-icon {
                     font-size: 0.85rem;
                     opacity: 0.85;
-                    transition: opacity 0.3s ease, transform 0.3s ease;
                 }
 
                 .navbar.scrolled .nav-link {
@@ -268,10 +215,6 @@ const Navbar = () => {
 
                 .nav-link:hover {
                     background: rgba(255, 255, 255, 0.15);
-                }
-
-                .nav-link:hover .nav-icon {
-                    transform: scale(1.1);
                 }
 
                 .navbar.scrolled .nav-link:hover {
@@ -315,7 +258,6 @@ const Navbar = () => {
                     color: var(--nav-white);
                     background: rgba(255, 255, 255, 0.1);
                     white-space: nowrap;
-                    -webkit-tap-highlight-color: transparent;
                 }
 
                 .navbar.scrolled .login-btn {
@@ -330,14 +272,6 @@ const Navbar = () => {
                     border-color: var(--nav-dark-blue);
                     transform: translateY(-2px);
                     box-shadow: 0 4px 15px rgba(0, 82, 157, 0.3);
-                }
-
-                .login-btn i {
-                    transition: transform 0.3s ease;
-                }
-
-                .login-btn:hover i {
-                    transform: scale(1.1);
                 }
 
                 .cta-btn {
@@ -357,7 +291,6 @@ const Navbar = () => {
                     overflow: hidden;
                     white-space: nowrap;
                     border: none;
-                    -webkit-tap-highlight-color: transparent;
                 }
 
                 .cta-btn::before {
@@ -377,15 +310,7 @@ const Navbar = () => {
 
                 .cta-btn:hover {
                     transform: translateY(-2px);
-                    box-shadow: var(--nav-shadow-strong);
-                }
-
-                .cta-btn i {
-                    transition: transform 0.3s ease;
-                }
-
-                .cta-btn:hover i {
-                    transform: translateX(3px);
+                    box-shadow: 0 6px 25px rgba(139, 35, 70, 0.45);
                 }
 
                 /* ==================== MOBILE MENU BUTTON ==================== */
@@ -395,8 +320,8 @@ const Navbar = () => {
                     border: none;
                     cursor: pointer;
                     padding: 10px;
-                    width: 48px;
-                    height: 48px;
+                    width: 44px;
+                    height: 44px;
                     border-radius: var(--nav-radius);
                     transition: all 0.2s ease;
                     align-items: center;
@@ -404,7 +329,6 @@ const Navbar = () => {
                     flex-shrink: 0;
                     position: relative;
                     z-index: 10001;
-                    -webkit-tap-highlight-color: transparent;
                 }
 
                 .mobile-menu-btn.menu-open {
@@ -412,18 +336,14 @@ const Navbar = () => {
                 }
 
                 .mobile-menu-btn i {
-                    font-size: 1.4rem;
+                    font-size: 1.3rem;
                     color: var(--nav-white);
-                    transition: color 0.3s ease, transform 0.3s ease;
+                    transition: color 0.3s ease;
                 }
 
                 .navbar.scrolled .mobile-menu-btn i,
                 .navbar.menu-open .mobile-menu-btn i {
                     color: var(--nav-maroon);
-                }
-
-                .mobile-menu-btn:active i {
-                    transform: scale(0.9);
                 }
 
                 /* ==================== MOBILE MENU OVERLAY ==================== */
@@ -438,8 +358,6 @@ const Navbar = () => {
                     opacity: 0;
                     visibility: hidden;
                     transition: opacity 0.3s ease, visibility 0.3s ease;
-                    -webkit-backdrop-filter: blur(2px);
-                    backdrop-filter: blur(2px);
                 }
 
                 .mobile-menu-overlay.active {
@@ -447,7 +365,7 @@ const Navbar = () => {
                     visibility: visible;
                 }
 
-                /* ==================== MOBILE MENU ==================== */
+                /* ==================== MOBILE MENU - FIXED ==================== */
                 .mobile-menu {
                     position: fixed;
                     top: 0;
@@ -456,12 +374,12 @@ const Navbar = () => {
                     bottom: 0;
                     width: 100%;
                     height: 100vh;
-                    height: 100dvh;
-                    background: var(--nav-white);
-                    padding-top: calc(var(--nav-height) + 10px);
-                    padding-left: max(20px, env(safe-area-inset-left));
-                    padding-right: max(20px, env(safe-area-inset-right));
-                    padding-bottom: max(25px, env(safe-area-inset-bottom));
+                    height: 100dvh; /* Dynamic viewport height for mobile */
+                    background: #FFFFFF;
+                    padding-top: 75px; /* Space for navbar */
+                    padding-left: 20px;
+                    padding-right: 20px;
+                    padding-bottom: 25px;
                     display: flex;
                     flex-direction: column;
                     gap: 5px;
@@ -473,13 +391,11 @@ const Navbar = () => {
                     transform: translateY(-100%);
                     opacity: 0;
                     visibility: hidden;
-                    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), 
-                                opacity 0.35s ease, 
-                                visibility 0.35s ease;
+                    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+                    /* iOS Safari fix */
                     -webkit-transform: translateY(-100%);
                     -webkit-backface-visibility: hidden;
                     backface-visibility: hidden;
-                    will-change: transform, opacity;
                 }
 
                 .mobile-menu.active {
@@ -491,7 +407,7 @@ const Navbar = () => {
 
                 .mobile-menu-header {
                     padding: 10px 0 15px;
-                    border-bottom: 1px solid var(--nav-light-gray);
+                    border-bottom: 1px solid #F5F7FA;
                     margin-bottom: 10px;
                     display: flex;
                     align-items: center;
@@ -506,7 +422,7 @@ const Navbar = () => {
                 }
 
                 .mobile-menu-tagline {
-                    color: var(--nav-light-blue);
+                    color: #0099D6;
                     font-size: 0.9rem;
                     font-weight: 600;
                     font-style: italic;
@@ -517,29 +433,27 @@ const Navbar = () => {
                     font-size: 1rem;
                     font-weight: 500;
                     padding: 14px 16px;
-                    border-radius: var(--nav-radius);
+                    border-radius: 10px;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                     transition: all 0.2s ease;
-                    color: var(--nav-text-dark);
+                    color: #2D1B4E;
                     background: transparent;
                     border-left: 3px solid transparent;
                     flex-shrink: 0;
-                    -webkit-tap-highlight-color: transparent;
                 }
 
                 .mobile-nav-link:hover,
                 .mobile-nav-link:active {
-                    background: var(--nav-light-gray);
+                    background: #F5F7FA;
                 }
 
                 .mobile-nav-link.active {
-                    color: var(--nav-white);
-                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
+                    color: #FFFFFF;
+                    background: linear-gradient(135deg, #8B2346 0%, #C4567A 100%);
                     border-left-color: transparent;
-                    border-radius: var(--nav-radius);
-                    box-shadow: 0 4px 15px rgba(139, 35, 70, 0.2);
+                    border-radius: 10px;
                 }
 
                 .mobile-nav-link-content {
@@ -549,57 +463,30 @@ const Navbar = () => {
                 }
 
                 .mobile-nav-icon {
-                    width: 36px;
-                    height: 36px;
+                    width: 32px;
+                    height: 32px;
                     border-radius: 8px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     background: rgba(0, 82, 157, 0.1);
-                    color: var(--nav-dark-blue);
-                    font-size: 0.9rem;
+                    color: #00529D;
+                    font-size: 0.85rem;
                     flex-shrink: 0;
-                    transition: all 0.3s ease;
-                }
-
-                .mobile-nav-link:hover .mobile-nav-icon {
-                    transform: scale(1.05);
                 }
 
                 .mobile-nav-link.active .mobile-nav-icon {
                     background: rgba(255, 255, 255, 0.2);
-                    color: var(--nav-white);
-                }
-
-                .mobile-nav-text {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 2px;
-                }
-
-                .mobile-nav-text-main {
-                    font-weight: 600;
-                    font-size: 1rem;
-                }
-
-                .mobile-nav-text-sub {
-                    font-size: 0.75rem;
-                    opacity: 0.7;
-                    font-weight: 400;
+                    color: #FFFFFF;
                 }
 
                 .mobile-nav-link .chevron {
                     font-size: 0.75rem;
-                    color: var(--nav-maroon);
-                    transition: transform 0.3s ease;
-                }
-
-                .mobile-nav-link:hover .chevron {
-                    transform: translateX(3px);
+                    color: #8B2346;
                 }
 
                 .mobile-nav-link.active .chevron {
-                    color: var(--nav-white);
+                    color: #FFFFFF;
                 }
 
                 /* ==================== MOBILE BUTTONS ==================== */
@@ -609,7 +496,7 @@ const Navbar = () => {
                     gap: 10px;
                     margin-top: auto;
                     padding-top: 15px;
-                    border-top: 1px solid var(--nav-light-gray);
+                    border-top: 1px solid #F5F7FA;
                     flex-shrink: 0;
                 }
 
@@ -620,30 +507,20 @@ const Navbar = () => {
                     gap: 10px;
                     padding: 14px 24px;
                     background: rgba(0, 82, 157, 0.1);
-                    color: var(--nav-dark-blue);
-                    border: 2px solid var(--nav-dark-blue);
-                    border-radius: var(--nav-radius-lg);
+                    color: #00529D;
+                    border: 2px solid #00529D;
+                    border-radius: 12px;
                     text-decoration: none;
                     font-weight: 600;
                     font-size: 0.95rem;
                     transition: all 0.3s ease;
-                    min-height: 52px;
-                    -webkit-tap-highlight-color: transparent;
+                    min-height: 50px;
                 }
 
                 .mobile-login-btn:hover,
                 .mobile-login-btn:active {
-                    background: var(--nav-dark-blue);
-                    color: var(--nav-white);
-                }
-
-                .mobile-login-btn i {
-                    font-size: 1rem;
-                    transition: transform 0.3s ease;
-                }
-
-                .mobile-login-btn:active i {
-                    transform: scale(1.1);
+                    background: #00529D;
+                    color: #FFFFFF;
                 }
 
                 .mobile-cta-btn {
@@ -652,167 +529,52 @@ const Navbar = () => {
                     justify-content: center;
                     gap: 10px;
                     padding: 16px 24px;
-                    background: linear-gradient(135deg, var(--nav-maroon) 0%, var(--nav-pink) 100%);
-                    color: var(--nav-white);
-                    border-radius: var(--nav-radius-lg);
+                    background: linear-gradient(135deg, #8B2346 0%, #C4567A 100%);
+                    color: #FFFFFF;
+                    border-radius: 12px;
                     text-decoration: none;
                     font-weight: 600;
                     font-size: 0.95rem;
                     box-shadow: 0 4px 15px rgba(139, 35, 70, 0.3);
                     transition: all 0.3s ease;
                     border: none;
-                    min-height: 54px;
-                    -webkit-tap-highlight-color: transparent;
-                    position: relative;
-                    overflow: hidden;
-                }
-
-                .mobile-cta-btn::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: -100%;
-                    width: 100%;
-                    height: 100%;
-                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-                    transition: left 0.5s ease;
-                }
-
-                .mobile-cta-btn:active::before {
-                    left: 100%;
+                    min-height: 50px;
                 }
 
                 .mobile-cta-btn:active {
                     transform: scale(0.98);
-                    opacity: 0.95;
-                }
-
-                .mobile-cta-btn i {
-                    font-size: 1rem;
-                    transition: transform 0.3s ease;
-                }
-
-                .mobile-cta-btn:active i {
-                    transform: translateX(3px);
+                    opacity: 0.9;
                 }
 
                 /* ==================== MOBILE CONTACT ==================== */
                 .mobile-contact {
                     display: flex;
                     flex-direction: column;
-                    gap: 8px;
+                    gap: 10px;
                     margin-top: 15px;
                     padding-top: 15px;
-                    border-top: 1px solid var(--nav-light-gray);
+                    border-top: 1px solid #F5F7FA;
                     flex-shrink: 0;
-                }
-
-                .mobile-contact-title {
-                    font-size: 0.75rem;
-                    font-weight: 600;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                    color: var(--nav-gray);
-                    margin-bottom: 5px;
                 }
 
                 .mobile-contact-link {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
-                    color: var(--nav-gray);
+                    gap: 10px;
+                    color: #64748B;
                     text-decoration: none;
                     font-size: 0.9rem;
-                    padding: 10px 0;
-                    transition: all 0.3s ease;
-                    -webkit-tap-highlight-color: transparent;
+                    padding: 8px 0;
+                    transition: color 0.3s ease;
                 }
 
-                .mobile-contact-link:hover,
-                .mobile-contact-link:active {
-                    color: var(--nav-maroon);
+                .mobile-contact-link:hover {
+                    color: #8B2346;
                 }
 
-                .mobile-contact-icon {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 8px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background: var(--nav-light-gray);
-                    color: var(--nav-maroon);
-                    font-size: 0.85rem;
-                    flex-shrink: 0;
-                    transition: all 0.3s ease;
-                }
-
-                .mobile-contact-link:hover .mobile-contact-icon,
-                .mobile-contact-link:active .mobile-contact-icon {
-                    background: var(--nav-maroon);
-                    color: var(--nav-white);
-                }
-
-                /* ==================== SOCIAL LINKS ==================== */
-                .mobile-social {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 12px;
-                    margin-top: 15px;
-                    padding-top: 15px;
-                    border-top: 1px solid var(--nav-light-gray);
-                    flex-shrink: 0;
-                }
-
-                .mobile-social-link {
-                    width: 42px;
-                    height: 42px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background: var(--nav-light-gray);
-                    color: var(--nav-text-dark);
-                    text-decoration: none;
-                    font-size: 1rem;
-                    transition: all 0.3s ease;
-                    -webkit-tap-highlight-color: transparent;
-                }
-
-                .mobile-social-link:hover,
-                .mobile-social-link:active {
-                    transform: translateY(-2px);
-                }
-
-                .mobile-social-link.facebook:hover,
-                .mobile-social-link.facebook:active {
-                    background: #1877F2;
-                    color: var(--nav-white);
-                }
-
-                .mobile-social-link.twitter:hover,
-                .mobile-social-link.twitter:active {
-                    background: #1DA1F2;
-                    color: var(--nav-white);
-                }
-
-                .mobile-social-link.instagram:hover,
-                .mobile-social-link.instagram:active {
-                    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-                    color: var(--nav-white);
-                }
-
-                .mobile-social-link.linkedin:hover,
-                .mobile-social-link.linkedin:active {
-                    background: #0A66C2;
-                    color: var(--nav-white);
-                }
-
-                .mobile-social-link.youtube:hover,
-                .mobile-social-link.youtube:active {
-                    background: #FF0000;
-                    color: var(--nav-white);
+                .mobile-contact-link i {
+                    width: 20px;
+                    text-align: center;
                 }
 
                 /* ==================== RESPONSIVE ==================== */
@@ -859,16 +621,8 @@ const Navbar = () => {
                 }
 
                 @media screen and (max-width: 768px) {
-                    :root {
-                        --nav-height: var(--nav-height-tablet);
-                    }
-
                     .navbar {
-                        height: var(--nav-height-tablet);
-                    }
-
-                    .navbar-container {
-                        height: var(--nav-height-tablet);
+                        --nav-height: 65px;
                     }
 
                     .nav-links,
@@ -881,95 +635,49 @@ const Navbar = () => {
                     }
 
                     .navbar-logo-img {
-                        height: 40px;
-                        max-width: 150px;
+                        height: 38px;
                     }
 
                     .mobile-menu {
-                        padding-top: calc(var(--nav-height-tablet) + 10px);
+                        padding-top: 70px;
                     }
                 }
 
                 @media screen and (max-width: 480px) {
-                    :root {
-                        --nav-height: var(--nav-height-mobile);
-                    }
-
                     .navbar {
-                        height: var(--nav-height-mobile);
+                        --nav-height: 60px;
                     }
 
                     .navbar-container {
                         padding: 0 15px;
-                        height: var(--nav-height-mobile);
                     }
 
                     .navbar-logo-img {
-                        height: 34px;
-                        max-width: 130px;
+                        height: 32px;
                     }
 
                     .mobile-menu {
-                        padding: calc(var(--nav-height-mobile) + 5px) 15px 20px;
-                        padding-bottom: max(20px, env(safe-area-inset-bottom));
-                    }
-
-                    .mobile-menu-header {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 5px;
+                        padding: 65px 15px 20px;
                     }
 
                     .mobile-menu-logo {
-                        height: 28px;
+                        height: 25px;
                     }
 
                     .mobile-nav-link {
                         padding: 12px 14px;
                     }
 
-                    .mobile-nav-icon {
-                        width: 32px;
-                        height: 32px;
-                    }
-
                     .mobile-login-btn,
                     .mobile-cta-btn {
                         padding: 14px 20px;
-                        min-height: 50px;
-                    }
-
-                    .mobile-social-link {
-                        width: 38px;
-                        height: 38px;
-                        font-size: 0.9rem;
-                    }
-                }
-
-                @media screen and (max-width: 360px) {
-                    .navbar-container {
-                        padding: 0 12px;
-                    }
-
-                    .mobile-menu {
-                        padding: calc(var(--nav-height-mobile) + 5px) 12px 15px;
-                    }
-
-                    .mobile-nav-link {
-                        padding: 10px 12px;
-                        font-size: 0.95rem;
-                    }
-
-                    .mobile-menu-tagline {
-                        font-size: 0.8rem;
                     }
                 }
 
                 /* ==================== TOUCH & ACCESSIBILITY ==================== */
                 @media (hover: none) and (pointer: coarse) {
                     .login-btn:hover,
-                    .cta-btn:hover,
-                    .nav-link:hover {
+                    .cta-btn:hover {
                         transform: none;
                     }
 
@@ -982,9 +690,7 @@ const Navbar = () => {
                     .mobile-menu-btn,
                     .mobile-nav-link,
                     .mobile-login-btn,
-                    .mobile-cta-btn,
-                    .mobile-contact-link,
-                    .mobile-social-link {
+                    .mobile-cta-btn {
                         min-height: 48px;
                     }
                 }
@@ -995,93 +701,49 @@ const Navbar = () => {
                     .login-btn,
                     .cta-btn,
                     .mobile-menu,
-                    .mobile-menu-overlay,
-                    .cta-btn::before,
-                    .mobile-cta-btn::before {
-                        animation: none !important;
-                        transition-duration: 0.01ms !important;
+                    .cta-btn::before {
+                        animation: none;
+                        transition-duration: 0.01ms;
                     }
                 }
 
-                /* ==================== FOCUS STYLES ==================== */
-                .nav-link:focus-visible,
-                .login-btn:focus-visible,
-                .cta-btn:focus-visible,
-                .mobile-nav-link:focus-visible,
-                .mobile-login-btn:focus-visible,
-                .mobile-cta-btn:focus-visible,
-                .mobile-menu-btn:focus-visible,
-                .navbar-logo:focus-visible,
-                .mobile-contact-link:focus-visible,
-                .mobile-social-link:focus-visible {
-                    outline: 3px solid var(--nav-light-blue);
+                /* Focus styles */
+                .nav-link:focus,
+                .login-btn:focus,
+                .cta-btn:focus,
+                .mobile-nav-link:focus,
+                .mobile-login-btn:focus,
+                .mobile-cta-btn:focus,
+                .mobile-menu-btn:focus,
+                .navbar-logo:focus {
+                    outline: 3px solid #0099D6;
                     outline-offset: 2px;
-                }
-
-                /* Remove outline for mouse users */
-                .nav-link:focus:not(:focus-visible),
-                .login-btn:focus:not(:focus-visible),
-                .cta-btn:focus:not(:focus-visible),
-                .mobile-nav-link:focus:not(:focus-visible),
-                .mobile-login-btn:focus:not(:focus-visible),
-                .mobile-cta-btn:focus:not(:focus-visible),
-                .mobile-menu-btn:focus:not(:focus-visible),
-                .navbar-logo:focus:not(:focus-visible),
-                .mobile-contact-link:focus:not(:focus-visible),
-                .mobile-social-link:focus:not(:focus-visible) {
-                    outline: none;
-                }
-
-                /* ==================== HIGH CONTRAST MODE ==================== */
-                @media (prefers-contrast: high) {
-                    .navbar.scrolled,
-                    .navbar.menu-open {
-                        border-bottom: 2px solid var(--nav-text-dark);
-                    }
-
-                    .nav-link.active,
-                    .mobile-nav-link.active {
-                        border: 2px solid var(--nav-white);
-                    }
-
-                    .mobile-menu {
-                        border: 2px solid var(--nav-text-dark);
-                    }
-                }
-
-                /* ==================== DARK MODE SUPPORT (Optional) ==================== */
-                @media (prefers-color-scheme: dark) {
-                    /* Add dark mode styles here if needed */
                 }
             `}</style>
 
-            <nav className={navbarClass} role="navigation" aria-label="Main navigation">
+            <nav className={navbarClass}>
                 <div className="navbar-container">
                     <a 
                         href="/" 
                         className="navbar-logo"
                         onClick={(e) => handleNavClick(e, '/')}
-                        aria-label="EduFolio - Go to homepage"
                     >
                         <img 
                             src={showBlackLogo ? logoBlack : logoWhite} 
-                            alt="EduFolio Logo" 
+                            alt="EduFolio" 
                             className="navbar-logo-img"
-                            loading="eager"
                         />
                     </a>
 
-                    <div className="nav-links" role="menubar">
+                    <div className="nav-links">
                         {navLinks.map((link) => (
                             <a
                                 key={link.path}
                                 href={link.path}
                                 className={`nav-link ${isActive(link.path) ? 'active' : ''}`}
                                 onClick={(e) => handleNavClick(e, link.path)}
-                                role="menuitem"
-                                aria-current={isActive(link.path) ? 'page' : undefined}
                             >
-                                <i className={`fa-solid ${link.icon} nav-icon`} aria-hidden="true"></i>
+                                <i className={`fa-solid ${link.icon} nav-icon`}></i>
                                 <span className="nav-text">{link.name}</span>
                             </a>
                         ))}
@@ -1092,30 +754,27 @@ const Navbar = () => {
                             href="/admin/login" 
                             className="login-btn"
                             onClick={(e) => handleNavClick(e, '/admin/login')}
-                            aria-label="Login to dashboard"
                         >
-                            <i className="fa-solid fa-user" aria-hidden="true"></i>
+                            <i className="fa-solid fa-user"></i>
                             <span className="btn-text">Login</span>
                         </a>
                         <a 
                             href="/contact" 
                             className="cta-btn"
                             onClick={(e) => handleNavClick(e, '/contact')}
-                            aria-label="Get started - Contact us"
                         >
-                            <i className="fa-solid fa-paper-plane" aria-hidden="true"></i>
+                            <i className="fa-solid fa-paper-plane"></i>
                             <span className="btn-text">Get Started</span>
                         </a>
                     </div>
 
                     <button
                         className={`mobile-menu-btn ${isMobileMenuOpen ? 'menu-open' : ''}`}
-                        onClick={toggleMobileMenu}
-                        aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        aria-label="Toggle menu"
                         aria-expanded={isMobileMenuOpen}
-                        aria-controls="mobile-menu"
                     >
-                        <i className={`fa-solid ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`} aria-hidden="true"></i>
+                        <i className={`fa-solid ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
                     </button>
                 </div>
             </nav>
@@ -1123,18 +782,11 @@ const Navbar = () => {
             {/* Mobile Menu Overlay */}
             <div 
                 className={`mobile-menu-overlay ${isMobileMenuOpen ? 'active' : ''}`}
-                onClick={closeMobileMenu}
-                aria-hidden="true"
+                onClick={() => setIsMobileMenuOpen(false)}
             />
 
-            {/* Mobile Menu */}
-            <div 
-                id="mobile-menu"
-                className={`mobile-menu ${isMobileMenuOpen ? 'active' : ''}`}
-                role="dialog"
-                aria-modal="true"
-                aria-label="Mobile navigation menu"
-            >
+            {/* Mobile Menu - Always rendered, visibility controlled by CSS */}
+            <div className={`mobile-menu ${isMobileMenuOpen ? 'active' : ''}`}>
                 <div className="mobile-menu-header">
                     <img 
                         src={logoBlack} 
@@ -1144,29 +796,22 @@ const Navbar = () => {
                     <span className="mobile-menu-tagline">learn. grow. succeed.</span>
                 </div>
 
-                <nav role="navigation" aria-label="Mobile navigation">
-                    {navLinks.map((link, index) => (
-                        <a
-                            key={link.path}
-                            href={link.path}
-                            className={`mobile-nav-link ${isActive(link.path) ? 'active' : ''}`}
-                            onClick={(e) => handleNavClick(e, link.path)}
-                            aria-current={isActive(link.path) ? 'page' : undefined}
-                            style={{ animationDelay: `${index * 50}ms` }}
-                        >
-                            <div className="mobile-nav-link-content">
-                                <div className="mobile-nav-icon">
-                                    <i className={`fa-solid ${link.icon}`} aria-hidden="true"></i>
-                                </div>
-                                <div className="mobile-nav-text">
-                                    <span className="mobile-nav-text-main">{link.name}</span>
-                                    <span className="mobile-nav-text-sub">{link.description}</span>
-                                </div>
+                {navLinks.map((link) => (
+                    <a
+                        key={link.path}
+                        href={link.path}
+                        className={`mobile-nav-link ${isActive(link.path) ? 'active' : ''}`}
+                        onClick={(e) => handleNavClick(e, link.path)}
+                    >
+                        <div className="mobile-nav-link-content">
+                            <div className="mobile-nav-icon">
+                                <i className={`fa-solid ${link.icon}`}></i>
                             </div>
-                            <i className="fa-solid fa-chevron-right chevron" aria-hidden="true"></i>
-                        </a>
-                    ))}
-                </nav>
+                            <span>{link.name}</span>
+                        </div>
+                        <i className="fa-solid fa-chevron-right chevron"></i>
+                    </a>
+                ))}
                 
                 <div className="mobile-buttons">
                     <a 
@@ -1174,7 +819,7 @@ const Navbar = () => {
                         className="mobile-login-btn"
                         onClick={(e) => handleNavClick(e, '/admin/login')}
                     >
-                        <i className="fa-solid fa-user" aria-hidden="true"></i>
+                        <i className="fa-solid fa-user"></i>
                         Login to Dashboard
                     </a>
                     <a 
@@ -1182,78 +827,19 @@ const Navbar = () => {
                         className="mobile-cta-btn"
                         onClick={(e) => handleNavClick(e, '/contact')}
                     >
-                        <i className="fa-solid fa-paper-plane" aria-hidden="true"></i>
+                        <i className="fa-solid fa-paper-plane"></i>
                         Get Started Free
                     </a>
                 </div>
 
                 <div className="mobile-contact">
-                    <span className="mobile-contact-title">Contact Us</span>
                     <a href="tel:+919876543210" className="mobile-contact-link">
-                        <div className="mobile-contact-icon">
-                            <i className="fa-solid fa-phone" aria-hidden="true"></i>
-                        </div>
-                        <span>+91 98765 43210</span>
+                        <i className="fa-solid fa-phone"></i>
+                        +91 98765 43210
                     </a>
                     <a href="mailto:info@edufolio.com" className="mobile-contact-link">
-                        <div className="mobile-contact-icon">
-                            <i className="fa-solid fa-envelope" aria-hidden="true"></i>
-                        </div>
-                        <span>info@edufolio.com</span>
-                    </a>
-                    <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="mobile-contact-link">
-                        <div className="mobile-contact-icon">
-                            <i className="fa-solid fa-location-dot" aria-hidden="true"></i>
-                        </div>
-                        <span>Mumbai, India</span>
-                    </a>
-                </div>
-
-                <div className="mobile-social">
-                    <a 
-                        href="https://facebook.com" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="mobile-social-link facebook"
-                        aria-label="Follow us on Facebook"
-                    >
-                        <i className="fa-brands fa-facebook-f" aria-hidden="true"></i>
-                    </a>
-                    <a 
-                        href="https://twitter.com" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="mobile-social-link twitter"
-                        aria-label="Follow us on Twitter"
-                    >
-                        <i className="fa-brands fa-twitter" aria-hidden="true"></i>
-                    </a>
-                    <a 
-                        href="https://instagram.com" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="mobile-social-link instagram"
-                        aria-label="Follow us on Instagram"
-                    >
-                        <i className="fa-brands fa-instagram" aria-hidden="true"></i>
-                    </a>
-                    <a 
-                        href="https://linkedin.com" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="mobile-social-link linkedin"
-                        aria-label="Follow us on LinkedIn"
-                    >
-                        <i className="fa-brands fa-linkedin-in" aria-hidden="true"></i>
-                    </a>
-                    <a 
-                        href="https://youtube.com" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="mobile-social-link youtube"
-                        aria-label="Subscribe on YouTube"
-                    >
-                        <i className="fa-brands fa-youtube" aria-hidden="true"></i>
+                        <i className="fa-solid fa-envelope"></i>
+                        info@edufolio.com
                     </a>
                 </div>
             </div>
