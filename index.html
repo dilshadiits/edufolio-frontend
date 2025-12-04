@@ -12,7 +12,7 @@
     <!-- Mobile App Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="EduFolio" />
     
     <!-- Theme Color for Browser UI -->
@@ -22,77 +22,104 @@
     <!-- SEO Meta Tags -->
     <meta name="description" content="EduFolio - Your gateway to quality online education. Explore programs and universities worldwide." />
     <meta name="keywords" content="education, online learning, universities, programs, courses" />
+    <meta name="author" content="EduFolio" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="EduFolio - Online Education Platform" />
+    <meta property="og:description" content="Your gateway to quality online education. Explore programs and universities worldwide." />
+    <meta property="og:site_name" content="EduFolio" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EduFolio - Online Education Platform" />
+    <meta name="twitter:description" content="Your gateway to quality online education." />
     
     <title>EduFolio - Online Education Platform</title>
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
     
     <!-- Google Fonts - Preconnect for faster loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     
-    <!-- Google Fonts - Inter (existing) + Poppins (for navbar) -->
+    <!-- Google Fonts - Inter + Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     
-    <!-- Critical CSS for preventing layout shift -->
+    <!-- Critical CSS -->
     <style>
-      /* Prevent FOUC (Flash of Unstyled Content) */
+      /* ==================== CSS RESET & BASE ==================== */
+      *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
       html {
         scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
       }
       
       body {
-        margin: 0;
-        padding: 0;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
         overflow-x: hidden;
+        min-height: 100vh;
+        min-height: 100dvh;
+        background-color: #ffffff;
+        color: #1a1a2e;
+        line-height: 1.6;
       }
-      
-      /* Reserve space for fixed navbar to prevent layout shift */
-      body {
-        padding-top: 70px;
-      }
-      
-      @media screen and (max-width: 768px) {
+
+      /* ==================== TRANSPARENT NAVBAR SUPPORT ==================== */
+      /* 
+       * NO padding-top on body!
+       * Hero sections should have their own padding-top to account for navbar.
+       * This allows the transparent navbar to overlay the hero content.
+       */
+
+      /* iOS safe area support for body */
+      @supports (padding: env(safe-area-inset-left)) {
         body {
-          padding-top: 65px;
+          padding-left: env(safe-area-inset-left);
+          padding-right: env(safe-area-inset-right);
         }
       }
       
-      @media screen and (max-width: 480px) {
-        body {
-          padding-top: 60px;
-        }
-      }
-      
-      /* iOS safe area support */
-      body {
-        padding-left: env(safe-area-inset-left);
-        padding-right: env(safe-area-inset-right);
-      }
-      
-      /* Prevent pull-to-refresh on mobile when menu is open */
+      /* ==================== MOBILE MENU OPEN STATE ==================== */
       body.menu-open {
+        overflow: hidden !important;
         overscroll-behavior: none;
+        touch-action: none;
+        position: fixed;
+        width: 100%;
+        height: 100%;
       }
-      
-      /* Loading state */
+
+      /* ==================== LOADING STATE ==================== */
+      #root {
+        min-height: 100vh;
+        min-height: 100dvh;
+      }
+
       #root:empty {
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: calc(100vh - 70px);
+        background: linear-gradient(135deg, #1a1a2e 0%, #2d1b4e 50%, #8B2346 100%);
       }
       
-      #root:empty::after {
+      #root:empty::before {
         content: '';
-        width: 40px;
-        height: 40px;
-        border: 3px solid #F5F7FA;
-        border-top-color: #8B2346;
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        border-top-color: #ffffff;
         border-radius: 50%;
         animation: spinner 0.8s linear infinite;
       }
@@ -102,20 +129,210 @@
           transform: rotate(360deg);
         }
       }
-      
-      /* Ensure tap highlight is visible on mobile */
+
+      /* ==================== SCROLLBAR STYLING ==================== */
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #8B2346, #C4567A);
+        border-radius: 5px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #6B1D3A, #8B2346);
+      }
+
+      /* Firefox scrollbar */
       * {
-        -webkit-tap-highlight-color: rgba(139, 35, 70, 0.1);
+        scrollbar-width: thin;
+        scrollbar-color: #8B2346 #f1f1f1;
       }
       
-      /* Better touch scrolling */
+      /* ==================== TOUCH & SELECTION ==================== */
       * {
+        -webkit-tap-highlight-color: rgba(139, 35, 70, 0.15);
         -webkit-overflow-scrolling: touch;
+      }
+
+      ::selection {
+        background-color: rgba(139, 35, 70, 0.3);
+        color: #1a1a2e;
+      }
+
+      ::-moz-selection {
+        background-color: rgba(139, 35, 70, 0.3);
+        color: #1a1a2e;
+      }
+
+      /* ==================== LINK DEFAULTS ==================== */
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      /* ==================== IMAGE DEFAULTS ==================== */
+      img, picture, video, canvas, svg {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      /* ==================== FORM DEFAULTS ==================== */
+      input, button, textarea, select {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+        border: none;
+        background: none;
+      }
+
+      /* ==================== ACCESSIBILITY ==================== */
+      /* Skip to main content link (for screen readers) */
+      .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: #8B2346;
+        color: #ffffff;
+        padding: 8px 16px;
+        z-index: 100000;
+        text-decoration: none;
+        font-weight: 600;
+        border-radius: 0 0 8px 0;
+        transition: top 0.3s ease;
+      }
+
+      .skip-link:focus {
+        top: 0;
+      }
+
+      /* Focus visible for keyboard navigation */
+      :focus-visible {
+        outline: 3px solid #0099D6;
+        outline-offset: 2px;
+      }
+
+      :focus:not(:focus-visible) {
+        outline: none;
+      }
+
+      /* ==================== REDUCED MOTION ==================== */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        #root:empty::before {
+          animation: none;
+          border-color: #ffffff;
+        }
+      }
+
+      /* ==================== PRINT STYLES ==================== */
+      @media print {
+        body {
+          background: #ffffff !important;
+          color: #000000 !important;
+        }
+
+        .navbar,
+        .mobile-menu,
+        .mobile-menu-overlay {
+          display: none !important;
+        }
+      }
+
+      /* ==================== UTILITY CLASSES ==================== */
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      /* ==================== HERO SECTION HELPER ==================== */
+      /* 
+       * Add this class to your hero/first section to make it 
+       * start from the top and go behind the transparent navbar
+       */
+      .hero-section {
+        padding-top: 70px; /* Space for navbar */
+        min-height: 100vh;
+        min-height: 100dvh;
+      }
+
+      @media screen and (max-width: 768px) {
+        .hero-section {
+          padding-top: 65px;
+        }
+      }
+
+      @media screen and (max-width: 480px) {
+        .hero-section {
+          padding-top: 60px;
+        }
+      }
+
+      /* 
+       * Use this for pages WITHOUT a full-height hero
+       * (like About, Contact pages where content starts immediately)
+       */
+      .page-content {
+        padding-top: 90px; /* navbar height + extra spacing */
+      }
+
+      @media screen and (max-width: 768px) {
+        .page-content {
+          padding-top: 85px;
+        }
+      }
+
+      @media screen and (max-width: 480px) {
+        .page-content {
+          padding-top: 80px;
+        }
       }
     </style>
   </head>
   <body>
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
     <div id="root"></div>
+    
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Prevent FOUC on slow connections -->
+    <noscript>
+      <style>
+        #root:empty::before {
+          display: none;
+        }
+        #root:empty::after {
+          content: 'Please enable JavaScript to view this website.';
+          color: #ffffff;
+          font-size: 1.2rem;
+          text-align: center;
+          padding: 20px;
+        }
+      </style>
+    </noscript>
   </body>
 </html>
