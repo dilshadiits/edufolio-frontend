@@ -13,9 +13,18 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
     const [showEnrollModal, setShowEnrollModal] = useState(false);
     const [selectedProgram, setSelectedProgram] = useState(null);
+    const [activeTestimonial, setActiveTestimonial] = useState(0);
 
     useEffect(() => {
         fetchData();
+    }, []);
+
+    // Auto-rotate testimonials
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
+        }, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const fetchData = async () => {
@@ -39,30 +48,30 @@ const Home = () => {
     };
 
     const stats = [
-        { number: '50+', label: 'Partner Universities', icon: 'fa-building-columns' },
-        { number: '200+', label: 'Programs', icon: 'fa-graduation-cap' },
-        { number: '15000+', label: 'Students Enrolled', icon: 'fa-users' },
-        { number: '95%', label: 'Placement Rate', icon: 'fa-briefcase' }
+        { number: '50+', label: 'Partner Universities', icon: 'fa-solid fa-building-columns' },
+        { number: '200+', label: 'Programs', icon: 'fa-solid fa-graduation-cap' },
+        { number: '15000+', label: 'Students Enrolled', icon: 'fa-solid fa-users' },
+        { number: '95%', label: 'Placement Rate', icon: 'fa-solid fa-briefcase' }
     ];
 
     const features = [
         {
-            icon: 'fa-certificate',
+            icon: 'fa-solid fa-certificate',
             title: 'UGC Approved',
             description: 'All programs are approved by UGC-DEB and recognized nationwide'
         },
         {
-            icon: 'fa-laptop',
+            icon: 'fa-solid fa-laptop',
             title: '100% Online',
             description: 'Study from anywhere with flexible online learning'
         },
         {
-            icon: 'fa-wallet',
+            icon: 'fa-solid fa-wallet',
             title: 'Affordable Fees',
             description: 'Quality education at competitive prices with EMI options'
         },
         {
-            icon: 'fa-headset',
+            icon: 'fa-solid fa-headset',
             title: '24/7 Support',
             description: 'Dedicated student support throughout your journey'
         }
@@ -74,38 +83,75 @@ const Home = () => {
             program: 'MBA - Finance',
             university: 'Amity University',
             image: 'https://randomuser.me/api/portraits/men/32.jpg',
-            text: 'The online MBA program helped me advance my career while working full-time. The flexibility and quality of education exceeded my expectations.'
+            text: 'The online MBA program helped me advance my career while working full-time. The flexibility and quality of education exceeded my expectations.',
+            rating: 5
         },
         {
             name: 'Priya Patel',
             program: 'MCA',
             university: 'LPU Online',
             image: 'https://randomuser.me/api/portraits/women/44.jpg',
-            text: 'Excellent curriculum and supportive faculty. I landed my dream job at a top tech company right after completing my degree.'
+            text: 'Excellent curriculum and supportive faculty. I landed my dream job at a top tech company right after completing my degree.',
+            rating: 5
         },
         {
             name: 'Amit Kumar',
             program: 'BBA',
             university: 'Manipal University',
             image: 'https://randomuser.me/api/portraits/men/67.jpg',
-            text: 'The practical approach to learning and industry-relevant projects made all the difference. Highly recommend Edufolio!'
+            text: 'The practical approach to learning and industry-relevant projects made all the difference. Highly recommend Edufolio!',
+            rating: 5
         }
     ];
 
     const whyFeatures = [
         {
+            icon: 'fa-solid fa-user-tie',
             title: 'Expert Counseling',
             description: 'Free guidance from education experts'
         },
         {
+            icon: 'fa-solid fa-file-signature',
             title: 'Easy Application',
             description: 'Simple enrollment process with full support'
         },
         {
+            icon: 'fa-solid fa-piggy-bank',
             title: 'Scholarship Support',
             description: 'Help with scholarships and financial aid'
         }
     ];
+
+    const partners = [
+        { name: 'Amity University', logo: 'https://placehold.co/120x60?text=Amity' },
+        { name: 'LPU', logo: 'https://placehold.co/120x60?text=LPU' },
+        { name: 'Manipal', logo: 'https://placehold.co/120x60?text=Manipal' },
+        { name: 'NMIMS', logo: 'https://placehold.co/120x60?text=NMIMS' },
+        { name: 'Jain University', logo: 'https://placehold.co/120x60?text=Jain' },
+        { name: 'DY Patil', logo: 'https://placehold.co/120x60?text=DYPatil' }
+    ];
+
+    // Skeleton Loading Components
+    const ProgramSkeleton = () => (
+        <div className="program-card skeleton-card">
+            <div className="skeleton skeleton-badge"></div>
+            <div className="skeleton skeleton-header"></div>
+            <div className="skeleton skeleton-title"></div>
+            <div className="skeleton skeleton-text"></div>
+            <div className="skeleton skeleton-meta"></div>
+            <div className="skeleton skeleton-fee"></div>
+            <div className="skeleton skeleton-buttons"></div>
+        </div>
+    );
+
+    const UniversitySkeleton = () => (
+        <div className="university-card skeleton-card">
+            <div className="skeleton skeleton-logo"></div>
+            <div className="skeleton skeleton-name"></div>
+            <div className="skeleton skeleton-location"></div>
+            <div className="skeleton skeleton-rating"></div>
+        </div>
+    );
 
     return (
         <>
@@ -128,6 +174,8 @@ const Home = () => {
                     --text-dark: #2D1B4E;
                     --text-light: #FFFFFF;
                     --text-muted: #94A3B8;
+                    --success: #10B981;
+                    --warning: #F59E0B;
                     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
                     --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.1);
                     --shadow-lg: 0 15px 40px rgba(0, 0, 0, 0.15);
@@ -159,6 +207,89 @@ const Home = () => {
                     padding: 0 var(--container-padding);
                     position: relative;
                     z-index: 1;
+                }
+
+                /* ==================== SKELETON LOADING ==================== */
+                .skeleton {
+                    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                    background-size: 200% 100%;
+                    animation: shimmer 1.5s infinite;
+                    border-radius: var(--radius-sm);
+                }
+
+                @keyframes shimmer {
+                    0% { background-position: 200% 0; }
+                    100% { background-position: -200% 0; }
+                }
+
+                .skeleton-card {
+                    pointer-events: none;
+                }
+
+                .skeleton-badge {
+                    width: 80px;
+                    height: 24px;
+                    margin-bottom: 15px;
+                }
+
+                .skeleton-header {
+                    width: 60%;
+                    height: 20px;
+                    margin-bottom: 12px;
+                }
+
+                .skeleton-title {
+                    width: 90%;
+                    height: 24px;
+                    margin-bottom: 10px;
+                }
+
+                .skeleton-text {
+                    width: 70%;
+                    height: 16px;
+                    margin-bottom: 15px;
+                }
+
+                .skeleton-meta {
+                    width: 50%;
+                    height: 16px;
+                    margin-bottom: 15px;
+                }
+
+                .skeleton-fee {
+                    width: 100%;
+                    height: 60px;
+                    margin-bottom: 15px;
+                }
+
+                .skeleton-buttons {
+                    width: 100%;
+                    height: 44px;
+                }
+
+                .skeleton-logo {
+                    width: 90px;
+                    height: 90px;
+                    border-radius: var(--radius-xl);
+                    margin: 0 auto 20px;
+                }
+
+                .skeleton-name {
+                    width: 80%;
+                    height: 20px;
+                    margin: 0 auto 10px;
+                }
+
+                .skeleton-location {
+                    width: 60%;
+                    height: 16px;
+                    margin: 0 auto 12px;
+                }
+
+                .skeleton-rating {
+                    width: 100px;
+                    height: 28px;
+                    margin: 0 auto;
                 }
 
                 /* ==================== HERO SECTION ==================== */
@@ -198,6 +329,18 @@ const Home = () => {
 
                 .hero-content {
                     max-width: 600px;
+                    animation: fadeInUp 0.8s ease-out;
+                }
+
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
                 }
 
                 .hero-badge {
@@ -213,6 +356,12 @@ const Home = () => {
                     margin-bottom: 25px;
                     backdrop-filter: blur(10px);
                     -webkit-backdrop-filter: blur(10px);
+                    animation: pulse-glow 2s ease-in-out infinite;
+                }
+
+                @keyframes pulse-glow {
+                    0%, 100% { box-shadow: 0 0 0 0 rgba(0, 153, 214, 0.4); }
+                    50% { box-shadow: 0 0 20px 5px rgba(0, 153, 214, 0.2); }
                 }
 
                 .hero-title {
@@ -225,6 +374,19 @@ const Home = () => {
 
                 .hero-title .highlight {
                     color: var(--light-blue);
+                    position: relative;
+                }
+
+                .hero-title .highlight::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 5px;
+                    left: 0;
+                    width: 100%;
+                    height: 8px;
+                    background: rgba(0, 153, 214, 0.3);
+                    border-radius: 4px;
+                    z-index: -1;
                 }
 
                 .hero-subtitle {
@@ -246,6 +408,23 @@ const Home = () => {
                     font-size: 1.1rem;
                     font-weight: 600;
                     font-style: italic;
+                    opacity: 0;
+                    animation: fadeInLeft 0.5s ease-out forwards;
+                }
+
+                .tagline-item:nth-child(1) { animation-delay: 0.3s; }
+                .tagline-item:nth-child(2) { animation-delay: 0.5s; }
+                .tagline-item:nth-child(3) { animation-delay: 0.7s; }
+
+                @keyframes fadeInLeft {
+                    from {
+                        opacity: 0;
+                        transform: translateX(-20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
                 }
 
                 .hero-buttons {
@@ -269,12 +448,29 @@ const Home = () => {
                     transition: all var(--transition-normal);
                     cursor: pointer;
                     border: none;
+                    position: relative;
+                    overflow: hidden;
                 }
 
                 .primary-btn {
                     background: var(--light-blue);
                     color: var(--white);
                     box-shadow: 0 4px 20px rgba(0, 153, 214, 0.4);
+                }
+
+                .primary-btn::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                    transition: left 0.5s;
+                }
+
+                .primary-btn:hover::before {
+                    left: 100%;
                 }
 
                 .primary-btn:hover {
@@ -308,6 +504,15 @@ const Home = () => {
                     color: rgba(255, 255, 255, 0.8);
                     font-size: 0.85rem;
                     font-weight: 500;
+                    padding: 8px 16px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 20px;
+                    transition: all var(--transition-normal);
+                }
+
+                .trust-badge:hover {
+                    background: rgba(255, 255, 255, 0.15);
+                    transform: translateY(-2px);
                 }
 
                 .trust-badge i {
@@ -318,6 +523,18 @@ const Home = () => {
                 .hero-images {
                     position: relative;
                     height: 550px;
+                    animation: fadeInRight 0.8s ease-out 0.3s backwards;
+                }
+
+                @keyframes fadeInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
                 }
 
                 .main-image-container {
@@ -337,6 +554,11 @@ const Home = () => {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
+                    transition: transform 0.5s ease;
+                }
+
+                .main-image-container:hover .main-image {
+                    transform: scale(1.05);
                 }
 
                 .main-image-overlay {
@@ -502,6 +724,11 @@ const Home = () => {
                     text-align: center;
                     flex: 1;
                     min-width: 120px;
+                    transition: transform var(--transition-normal);
+                }
+
+                .stat-item:hover {
+                    transform: translateY(-5px);
                 }
 
                 .stat-icon-wrapper {
@@ -530,6 +757,44 @@ const Home = () => {
                     font-size: clamp(0.75rem, 1.5vw, 0.9rem);
                 }
 
+                /* ==================== PARTNERS SECTION ==================== */
+                .partners-section {
+                    padding: 40px var(--container-padding);
+                    background: var(--white);
+                    border-bottom: 1px solid var(--light-gray);
+                }
+
+                .partners-label {
+                    text-align: center;
+                    color: var(--gray);
+                    font-size: 0.9rem;
+                    font-weight: 500;
+                    margin-bottom: 25px;
+                }
+
+                .partners-grid {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 40px;
+                    flex-wrap: wrap;
+                    max-width: var(--container-max);
+                    margin: 0 auto;
+                }
+
+                .partner-logo {
+                    opacity: 0.6;
+                    filter: grayscale(100%);
+                    transition: all var(--transition-normal);
+                    height: 40px;
+                    object-fit: contain;
+                }
+
+                .partner-logo:hover {
+                    opacity: 1;
+                    filter: grayscale(0%);
+                }
+
                 /* ==================== FEATURES SECTION ==================== */
                 .features-section {
                     padding: 80px var(--container-padding);
@@ -551,6 +816,24 @@ const Home = () => {
                     transition: all var(--transition-normal);
                     border: 1px solid var(--light-gray);
                     background: var(--white);
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .feature-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 4px;
+                    background: linear-gradient(90deg, var(--maroon), var(--pink));
+                    transform: scaleX(0);
+                    transition: transform var(--transition-normal);
+                }
+
+                .feature-card:hover::before {
+                    transform: scaleX(1);
                 }
 
                 .feature-card:hover {
@@ -569,6 +852,13 @@ const Home = () => {
                     margin: 0 auto 20px;
                     font-size: 1.5rem;
                     color: var(--maroon);
+                    transition: all var(--transition-normal);
+                }
+
+                .feature-card:hover .feature-icon {
+                    transform: scale(1.1) rotate(5deg);
+                    background: linear-gradient(135deg, var(--maroon), var(--pink));
+                    color: var(--white);
                 }
 
                 .feature-title {
@@ -946,6 +1236,7 @@ const Home = () => {
                     justify-content: center;
                     margin: 0 auto 20px;
                     box-shadow: var(--shadow-sm);
+                    overflow: hidden;
                 }
 
                 .logo-img {
@@ -1035,11 +1326,20 @@ const Home = () => {
                 .why-feature {
                     display: flex;
                     gap: 15px;
+                    padding: 15px;
+                    background: var(--white);
+                    border-radius: var(--radius-md);
+                    transition: all var(--transition-normal);
+                }
+
+                .why-feature:hover {
+                    transform: translateX(10px);
+                    box-shadow: var(--shadow-sm);
                 }
 
                 .why-feature-icon {
-                    width: 40px;
-                    height: 40px;
+                    width: 45px;
+                    height: 45px;
                     border-radius: var(--radius-sm);
                     background: rgba(0, 153, 214, 0.2);
                     color: var(--dark-blue);
@@ -1047,6 +1347,7 @@ const Home = () => {
                     align-items: center;
                     justify-content: center;
                     flex-shrink: 0;
+                    font-size: 1.1rem;
                 }
 
                 .why-feature-title {
@@ -1067,6 +1368,19 @@ const Home = () => {
                     border-radius: var(--radius-2xl);
                     padding: 40px 30px;
                     text-align: center;
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .why-card::before {
+                    content: '';
+                    position: absolute;
+                    top: -50%;
+                    right: -50%;
+                    width: 100%;
+                    height: 100%;
+                    background: radial-gradient(circle, rgba(0, 153, 214, 0.2) 0%, transparent 70%);
+                    pointer-events: none;
                 }
 
                 .why-card-icon {
@@ -1080,6 +1394,8 @@ const Home = () => {
                     justify-content: center;
                     margin: 0 auto 20px;
                     font-size: 1.5rem;
+                    position: relative;
+                    z-index: 1;
                 }
 
                 .why-card-title {
@@ -1087,12 +1403,16 @@ const Home = () => {
                     font-size: 1.3rem;
                     font-weight: 700;
                     margin-bottom: 10px;
+                    position: relative;
+                    z-index: 1;
                 }
 
                 .why-card-desc {
                     color: rgba(255, 255, 255, 0.8);
                     font-size: 0.95rem;
                     margin-bottom: 25px;
+                    position: relative;
+                    z-index: 1;
                 }
 
                 .why-card-btn {
@@ -1107,6 +1427,8 @@ const Home = () => {
                     font-weight: 600;
                     font-size: 0.95rem;
                     transition: all var(--transition-normal);
+                    position: relative;
+                    z-index: 1;
                 }
 
                 .why-card-btn:hover {
@@ -1132,11 +1454,28 @@ const Home = () => {
                     padding: 30px;
                     border: 1px solid var(--light-gray);
                     transition: all var(--transition-normal);
+                    position: relative;
+                }
+
+                .testimonial-card.active {
+                    border-color: var(--maroon);
+                    box-shadow: var(--shadow-md);
                 }
 
                 .testimonial-card:hover {
                     transform: translateY(-5px);
                     box-shadow: var(--shadow-md);
+                }
+
+                .testimonial-rating {
+                    display: flex;
+                    gap: 3px;
+                    margin-bottom: 15px;
+                }
+
+                .testimonial-rating i {
+                    color: #F59E0B;
+                    font-size: 0.9rem;
                 }
 
                 .testimonial-quote {
@@ -1183,6 +1522,29 @@ const Home = () => {
                     color: var(--gray);
                     font-size: 0.8rem;
                     margin: 0;
+                }
+
+                .testimonials-dots {
+                    display: flex;
+                    justify-content: center;
+                    gap: 10px;
+                    margin-top: 30px;
+                }
+
+                .dot {
+                    width: 10px;
+                    height: 10px;
+                    border-radius: var(--radius-full);
+                    background: var(--light-gray);
+                    border: none;
+                    cursor: pointer;
+                    transition: all var(--transition-normal);
+                }
+
+                .dot.active {
+                    background: var(--maroon);
+                    width: 30px;
+                    border-radius: 5px;
                 }
 
                 /* ==================== CTA SECTION ==================== */
@@ -1348,6 +1710,12 @@ const Home = () => {
                     .testimonials-grid {
                         grid-template-columns: repeat(2, 1fr);
                     }
+
+                    .testimonials-grid .testimonial-card:nth-child(3) {
+                        grid-column: span 2;
+                        max-width: 50%;
+                        margin: 0 auto;
+                    }
                     
                     .why-content {
                         grid-template-columns: 1fr;
@@ -1454,6 +1822,18 @@ const Home = () => {
                     .stat-label {
                         font-size: 0.75rem;
                     }
+
+                    .partners-section {
+                        padding: 30px 16px;
+                    }
+
+                    .partners-grid {
+                        gap: 25px;
+                    }
+
+                    .partner-logo {
+                        height: 30px;
+                    }
                     
                     .features-section,
                     .programs-section,
@@ -1559,6 +1939,11 @@ const Home = () => {
                         grid-template-columns: 1fr;
                         gap: 20px;
                     }
+
+                    .testimonials-grid .testimonial-card:nth-child(3) {
+                        grid-column: span 1;
+                        max-width: 100%;
+                    }
                     
                     .testimonial-card {
                         padding: 25px 20px;
@@ -1660,7 +2045,8 @@ const Home = () => {
                     .view-all-btn:hover,
                     .enroll-now-btn:hover,
                     .cta-btn:hover,
-                    .why-card-btn:hover {
+                    .why-card-btn:hover,
+                    .why-feature:hover {
                         transform: none;
                         box-shadow: none;
                     }
@@ -1757,7 +2143,7 @@ const Home = () => {
 
                             <div className="trust-badges">
                                 <div className="trust-badge">
-                                    <i className="fa-solid fa-shield-check"></i>
+                                    <i className="fa-solid fa-shield-halved"></i>
                                     <span>UGC-DEB Approved</span>
                                 </div>
                                 <div className="trust-badge">
@@ -1777,6 +2163,7 @@ const Home = () => {
                                     src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&h=700&fit=crop" 
                                     alt="Students studying online"
                                     className="main-image"
+                                    loading="eager"
                                 />
                                 <div className="main-image-overlay"></div>
                             </div>
@@ -1786,6 +2173,7 @@ const Home = () => {
                                     src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=300&h=200&fit=crop" 
                                     alt="Team collaboration"
                                     className="floating-img"
+                                    loading="lazy"
                                 />
                             </div>
 
@@ -1794,6 +2182,7 @@ const Home = () => {
                                     src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=300&h=200&fit=crop" 
                                     alt="Online learning"
                                     className="floating-img"
+                                    loading="lazy"
                                 />
                             </div>
 
@@ -1828,13 +2217,29 @@ const Home = () => {
                             {stats.map((stat, index) => (
                                 <div key={index} className="stat-item">
                                     <div className="stat-icon-wrapper">
-                                        <i className={`fa-solid ${stat.icon}`}></i>
+                                        <i className={stat.icon}></i>
                                     </div>
                                     <span className="stat-number">{stat.number}</span>
                                     <span className="stat-label">{stat.label}</span>
                                 </div>
                             ))}
                         </div>
+                    </div>
+                </section>
+
+                {/* Partners Section */}
+                <section className="partners-section">
+                    <p className="partners-label">Trusted by India's Leading Universities</p>
+                    <div className="partners-grid">
+                        {partners.map((partner, index) => (
+                            <img 
+                                key={index}
+                                src={partner.logo} 
+                                alt={partner.name}
+                                className="partner-logo"
+                                loading="lazy"
+                            />
+                        ))}
                     </div>
                 </section>
 
@@ -1845,7 +2250,7 @@ const Home = () => {
                             {features.map((feature, index) => (
                                 <div key={index} className="feature-card">
                                     <div className="feature-icon">
-                                        <i className={`fa-solid ${feature.icon}`}></i>
+                                        <i className={feature.icon}></i>
                                     </div>
                                     <h3 className="feature-title">{feature.title}</h3>
                                     <p className="feature-desc">{feature.description}</p>
@@ -1870,9 +2275,10 @@ const Home = () => {
                         </div>
 
                         {loading ? (
-                            <div className="loading">
-                                <div className="spinner"></div>
-                                <span>Loading programs...</span>
+                            <div className="programs-grid">
+                                {[...Array(6)].map((_, i) => (
+                                    <ProgramSkeleton key={i} />
+                                ))}
                             </div>
                         ) : programs.length > 0 ? (
                             <div className="programs-grid">
@@ -1968,9 +2374,10 @@ const Home = () => {
                         </div>
 
                         {loading ? (
-                            <div className="loading light">
-                                <div className="spinner light"></div>
-                                <span>Loading universities...</span>
+                            <div className="universities-grid">
+                                {[...Array(4)].map((_, i) => (
+                                    <UniversitySkeleton key={i} />
+                                ))}
                             </div>
                         ) : universities.length > 0 ? (
                             <div className="universities-grid">
@@ -1988,6 +2395,7 @@ const Home = () => {
                                                 src={university.logo || 'https://placehold.co/100x100?text=Logo'}
                                                 alt={university.name}
                                                 className="logo-img"
+                                                loading="lazy"
                                                 onError={(e) => {
                                                     e.target.src = 'https://placehold.co/100x100?text=Logo';
                                                 }}
@@ -2049,7 +2457,7 @@ const Home = () => {
                                     {whyFeatures.map((feature, index) => (
                                         <div key={index} className="why-feature">
                                             <div className="why-feature-icon">
-                                                <i className="fa-solid fa-check"></i>
+                                                <i className={feature.icon}></i>
                                             </div>
                                             <div className="why-feature-content">
                                                 <h4 className="why-feature-title">{feature.title}</h4>
@@ -2095,16 +2503,22 @@ const Home = () => {
 
                         <div className="testimonials-grid">
                             {testimonials.map((testimonial, index) => (
-                                <div key={index} className="testimonial-card">
-                                    <div className="testimonial-quote">
-                                        <i className="fa-solid fa-quote-left"></i>
+                                <div 
+                                    key={index} 
+                                    className={`testimonial-card ${index === activeTestimonial ? 'active' : ''}`}
+                                >
+                                    <div className="testimonial-rating">
+                                        {[...Array(testimonial.rating)].map((_, i) => (
+                                            <i key={i} className="fa-solid fa-star"></i>
+                                        ))}
                                     </div>
-                                    <p className="testimonial-text">{testimonial.text}</p>
+                                    <p className="testimonial-text">"{testimonial.text}"</p>
                                     <div className="testimonial-author">
                                         <img
                                             src={testimonial.image}
                                             alt={testimonial.name}
                                             className="testimonial-image"
+                                            loading="lazy"
                                         />
                                         <div className="testimonial-info">
                                             <h4 className="testimonial-name">{testimonial.name}</h4>
@@ -2113,6 +2527,17 @@ const Home = () => {
                                         </div>
                                     </div>
                                 </div>
+                            ))}
+                        </div>
+
+                        <div className="testimonials-dots">
+                            {testimonials.map((_, index) => (
+                                <button
+                                    key={index}
+                                    className={`dot ${index === activeTestimonial ? 'active' : ''}`}
+                                    onClick={() => setActiveTestimonial(index)}
+                                    aria-label={`View testimonial ${index + 1}`}
+                                />
                             ))}
                         </div>
                     </div>
