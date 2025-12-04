@@ -124,11 +124,11 @@ const Home = () => {
 
     const partners = [
         { name: 'Amity University', logo: 'https://placehold.co/120x60?text=Amity' },
-        { name: 'LPU', logo: 'https://placehold.co/120x60?text=LPU' },
+        { name: 'GLA', logo: 'https://placehold.co/120x60?text=GLA' },
         { name: 'Manipal', logo: 'https://placehold.co/120x60?text=Manipal' },
-        { name: 'NMIMS', logo: 'https://placehold.co/120x60?text=NMIMS' },
+        { name: 'Andhra University', logo: 'https://placehold.co/120x60?text=Andhra' },
         { name: 'Jain University', logo: 'https://placehold.co/120x60?text=Jain' },
-        { name: 'DY Patil', logo: 'https://placehold.co/120x60?text=DYPatil' }
+        { name: 'Aligarh Muslim University', logo: 'https://placehold.co/120x60?text=AMU' }
     ];
 
     // Skeleton Loading Components
